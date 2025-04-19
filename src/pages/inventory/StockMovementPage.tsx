@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StockMovement } from "../../types/inventory";
 import { inventoryService } from "./inventoryService";
+import Loader from "../../components/common/Loader";
 
 const StockMovementPage: React.FC = () => {
   const [movements, setMovements] = useState<StockMovement[]>([]);
@@ -36,8 +37,8 @@ const StockMovementPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="flex justify-center items-center h-64">
+        <Loader size="lg" />
       </div>
     );
   }

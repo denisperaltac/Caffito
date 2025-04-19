@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
-import axiosInstance from "../../services/axiosInstance";
+import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 
 interface FacturaRenglon {

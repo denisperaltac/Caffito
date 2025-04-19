@@ -1,4 +1,4 @@
-# ERP Supermercado
+# Caffito Supermercado
 
 Este es un sistema de gestión para supermercados desarrollado con React, TypeScript, Vite y Tailwind CSS.
 

@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { Caja } from "../../services/cajaService";
+import Loader from "../common/Loader";
 
 interface CashierTableProps {
   cajas: Caja[];
@@ -117,14 +118,12 @@ const CashierTable: React.FC<CashierTableProps> = ({
                   className="flex items-center justify-center"
                 >
                   {caja.enproceso ? (
-                    <span className="text-yellow-500 hover:text-yellow-600 cursor-help">
-                      <span className="animate-spin">
-                        <FaSpinner />
-                      </span>
+                    <span className="cursor-help">
+                      <Loader size="md" />
                     </span>
                   ) : (
                     <span className="text-green-500 hover:text-green-600 cursor-help">
-                      <FaCheckCircle />
+                      <FaCheckCircle size={20} />
                     </span>
                   )}
                 </div>

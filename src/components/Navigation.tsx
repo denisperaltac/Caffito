@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import NavigationMenu from "./NavigationMenu";
+import logo from "../assets/LogoCaffito.png";
 
 const Navigation: React.FC = () => {
   return (
@@ -10,7 +11,7 @@ const Navigation: React.FC = () => {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="text-white font-bold">
-                ERP Supermercado
+                <img src={logo} alt="Logo" className="w-24 h-16" />
               </Link>
             </div>
             <div className="hidden md:block">

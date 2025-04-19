@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { cajaService, Caja } from "../../services/cajaService";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import axiosInstance from "../../services/axiosInstance";
+import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 import CashierDetailsModal from "../../components/cash/CashierDetailsModal";
 import CashierMovementsModal from "../../components/cash/CashierMovementsModal";
 import CashierTable from "../../components/cash/CashierTable";
+import Loader from "../../components/common/Loader";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -172,7 +173,7 @@ const CashierClosuresPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <Loader size="lg" />
       </div>
     );
   }

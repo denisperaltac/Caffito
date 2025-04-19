@@ -5,13 +5,13 @@ import {
   Factura,
   Promocion,
   Pago,
-  FacturaRenglon,
 } from "../types/configuration";
-import axiosInstance from "./axiosInstance";
 import { API_URL } from "../constants/api";
+import axiosInstance from "../config/axiosConfig";
+import { printService } from "./printService";
 
 // Mock data
-const mockProductos: Producto[] = [
+const mockProductos: any = [
   {
     id: "1",
     nombre: "Coca Cola 2L",
@@ -42,36 +42,6 @@ const mockCategorias: Categoria[] = [
   { id: "1", nombre: "Bebidas" },
   { id: "2", nombre: "Panadería" },
   { id: "3", nombre: "Lácteos" },
-];
-
-const mockClientes: Cliente[] = [
-  {
-    id: "1",
-    nombre: "Juan",
-    apellido: "Pérez",
-    activo: true,
-  },
-  {
-    id: "2",
-    nombre: "María",
-    apellido: "Gómez",
-    activo: true,
-  },
-];
-
-const mockPromociones: Promocion[] = [
-  {
-    id: "1",
-    nombre: "2x1 en Bebidas",
-    porcentaje: 0.5,
-    monto: 0,
-  },
-  {
-    id: "2",
-    nombre: "Descuento 20%",
-    porcentaje: 0.2,
-    monto: 0,
-  },
 ];
 
 export const pointOfSaleService = {
@@ -124,12 +94,43 @@ export const pointOfSaleService = {
   },
 
   // Invoice methods
-  createFactura: async (factura: Omit<Factura, "id">): Promise<Factura> => {
-    const newFactura: Factura = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...factura,
-    };
-    return newFactura;
+  createFactura: async (factura: Factura): Promise<Factura> => {
+    try {
+      const facturaPayload = {
+        fechaCreacion: null,
+        total: factura.total,
+        subtotal: factura.subtotal,
+        descuento: factura.descuento,
+        interes: factura.interes,
+        clienteId: factura.clienteId ? factura.clienteId : null,
+        facturaRenglons: factura.facturaRenglons.map((renglon) => ({
+          cantidad: renglon.cantidad,
+          precioVenta: renglon.precioVenta,
+          detalle: renglon.detalle,
+          productoId: parseInt(renglon.productoId),
+          peso: 0,
+        })),
+        pagos: factura.pagos.map((pago) => ({
+          monto: pago.monto,
+          tipoPagoNombre: pago.tipoPagoNombre.padEnd(32, " "),
+          tipoPagoId: pago.tipoPagoId,
+        })),
+        comprobanteId: {
+          nroDocumento: "0",
+          tipoComprobanteId: 1,
+          tipoDocumentoId: 1,
+        },
+      };
+
+      const response = await axiosInstance.post(
+        `${API_URL}/facturas`,
+        facturaPayload
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al crear la factura:", error);
+      throw error;
+    }
   },
 
   updateFactura: async (
@@ -150,7 +151,7 @@ export const pointOfSaleService = {
         tipoDocumentoId: "",
         nroDocumento: "",
       },
-      clienteId: "",
+      clienteId: 1,
       ...factura,
     };
   },
@@ -171,13 +172,18 @@ export const pointOfSaleService = {
         tipoDocumentoId: "",
         nroDocumento: "",
       },
-      clienteId: "",
+      clienteId: 1,
     };
   },
 
   // Print methods
-  imprimirFactura: async (facturaId: string): Promise<void> => {
-    // In a real implementation, this would print the invoice
-    console.log(`Imprimiendo factura ${facturaId}`);
+  imprimirFactura: async (factura: Factura) => {
+    try {
+      await printService.printInvoice(factura);
+      return true;
+    } catch (error) {
+      console.error("Error al imprimir la factura:", error);
+      throw error;
+    }
   },
 };

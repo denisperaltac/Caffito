@@ -1,32 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import axiosInstance from "../../services/axiosInstance";
 import { API_URL } from "../../constants/api";
 import { pointOfSaleService } from "../../services/pointOfSaleService";
 import { formatCurrency } from "../../utils/formatters";
 import {
-  Categoria,
   Cliente,
   Promocion,
   Factura,
   FacturaRenglon,
 } from "../../types/configuration";
-import { FaRegRectangleList } from "react-icons/fa6";
 import { LuImageOff } from "react-icons/lu";
-import {
-  FaTrash,
-  FaMinus,
-  FaPlus,
-  FaSearch,
-  FaMoneyBillWave,
-  FaCreditCard,
-  FaHandHoldingUsd,
-  FaExchangeAlt,
-} from "react-icons/fa";
+import { FaTrash, FaMinus, FaPlus, FaSearch } from "react-icons/fa";
 import { createRoot } from "react-dom/client";
 import Loader from "../../components/common/Loader";
 import PaymentModal from "../../components/pointOfSale/PaymentModal";
 import CancelModal from "../../components/pointOfSale/CancelModal";
 import CustomProductModal from "../../components/pointOfSale/CustomProductModal";
+import axiosInstance from "../../config/axiosConfig";
+import { toast } from "react-hot-toast";
 
 interface Producto {
   id: number;
@@ -67,16 +57,20 @@ interface Producto {
   cambioPrecio: boolean | null;
 }
 
+interface Pago {
+  monto: number;
+  tipoPagoNombre: string;
+  tipoPagoId: number;
+}
+
 const PointOfSalePage: React.FC = () => {
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // State
   const [productos, setProductos] = useState<Producto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [promociones, setPromociones] = useState<Promocion[]>([]);
-  const [selectedCategoria, setSelectedCategoria] = useState<string>("1");
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [isProductSearching, setIsProductSearching] = useState(false);
   const [searchByCode, setSearchByCode] = useState(true);
@@ -97,7 +91,7 @@ const PointOfSalePage: React.FC = () => {
       tipoDocumentoId: "",
       nroDocumento: "",
     },
-    clienteId: "",
+    clienteId: 1,
   });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
@@ -113,13 +107,11 @@ const PointOfSalePage: React.FC = () => {
   const [tipoPagoSeleccionado, setTipoPagoSeleccionado] = useState("");
   const [montoPago, setMontoPago] = useState("");
   const [totalPagado, setTotalPagado] = useState(0);
-  const [pagos, setPagos] = useState<
-    Array<{ tipoPago: string; monto: number }>
-  >([]);
+  const [pagos, setPagos] = useState<Pago[]>([]);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
-  // Calcular el monto restante
-  const montoRestante = factura.total - totalPagado;
-
+  console.log(factura);
   // Efecto para establecer consumidor final cuando se cargan los clientes
   useEffect(() => {
     if (clientes.length > 0) {
@@ -129,7 +121,7 @@ const PointOfSalePage: React.FC = () => {
       if (consumidorFinal) {
         setFactura((prevFactura) => ({
           ...prevFactura,
-          clienteId: consumidorFinal.id.toString(),
+          clienteId: consumidorFinal.id,
         }));
         setClientSearchTerm(
           `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
@@ -146,15 +138,12 @@ const PointOfSalePage: React.FC = () => {
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      const [categoriasData, clientesData, promocionesData, tiposPagoData] =
-        await Promise.all([
-          pointOfSaleService.getCategorias(),
-          pointOfSaleService.getClientes(),
-          pointOfSaleService.getPromociones(),
-          pointOfSaleService.getTiposPago(),
-        ]);
+      const [clientesData, promocionesData, tiposPagoData] = await Promise.all([
+        pointOfSaleService.getClientes(),
+        pointOfSaleService.getPromociones(),
+        pointOfSaleService.getTiposPago(),
+      ]);
 
-      setCategorias(categoriasData);
       setClientes(clientesData);
       setPromociones(promocionesData);
       setTiposPago(tiposPagoData);
@@ -174,7 +163,7 @@ const PointOfSalePage: React.FC = () => {
       const response = await axiosInstance.get<Producto[]>(
         `${API_URL}/productos?page=0&size=9&${
           searchByCode ? "codigoReferencia.contains" : "nombre.contains"
-        }=${termino}&categoriaId.equals=${selectedCategoria}&productoProveedorPuntoVentaId.equals=1&sort=nombre,asc`
+        }=${termino}&productoProveedorPuntoVentaId.equals=1&sort=nombre,asc`
       );
       setProductos(response.data);
     } catch (err) {
@@ -237,7 +226,7 @@ const PointOfSalePage: React.FC = () => {
   };
 
   const selectCliente = (cliente: Cliente) => {
-    setFactura({ ...factura, clienteId: cliente.id.toString() });
+    setFactura({ ...factura, clienteId: cliente.id });
     setClientSearchTerm(`${cliente.nombre.trim()} ${cliente.apellido.trim()}`);
     setShowClientDropdown(false);
   };
@@ -298,69 +287,28 @@ const PointOfSalePage: React.FC = () => {
     });
   };
 
-  const getTipoPagoIcon = (nombre: string) => {
-    switch (nombre.toLowerCase().replace(/\s+/g, "")) {
-      case "efectivo":
-        return (
-          <span className="mr-2">
-            <FaMoneyBillWave />
-          </span>
-        );
-      case "tarjetadebito":
-        return (
-          <span className="mr-2">
-            <FaCreditCard />
-          </span>
-        );
-      case "tarjetacredito":
-        return (
-          <span className="mr-2">
-            <FaExchangeAlt />
-          </span>
-        );
-      case "cuentacorriente":
-        return (
-          <span className="mr-2">
-            <FaRegRectangleList />
-          </span>
-        );
-      default:
-        return (
-          <span className="mr-2">
-            <FaHandHoldingUsd />
-          </span>
-        );
-    }
-  };
-
-  const getTipoPagoColor = (nombre: string) => {
-    switch (nombre.toLowerCase()) {
-      case "efectivo":
-        return "bg-green-500 hover:bg-green-600";
-      case "tarjeta":
-        return "bg-blue-500 hover:bg-blue-600";
-      case "transferencia":
-        return "bg-purple-500 hover:bg-purple-600";
-      default:
-        return "bg-gray-500 hover:bg-gray-600";
-    }
-  };
-
   const agregarPago = () => {
     if (!tipoPagoSeleccionado || !montoPago) return;
 
     const monto = parseFloat(montoPago);
     if (isNaN(monto) || monto <= 0) return;
 
-    const tipoPago = tiposPago.find(
-      (tp) => `${tp.id}` === tipoPagoSeleccionado
+    // Buscar el tipo de pago seleccionado para obtener su nombre
+    const tipoPagoEncontrado = tiposPago.find(
+      (tp) => tp.id === tipoPagoSeleccionado
     );
-    if (!tipoPago) return;
+    if (!tipoPagoEncontrado) return;
 
-    const nuevoPago = {
-      tipoPago: tipoPago.nombre,
+    const nuevoPago: Pago = {
       monto: monto,
+      tipoPagoNombre: tipoPagoEncontrado.nombre.padEnd(32, " "),
+      tipoPagoId: parseInt(tipoPagoSeleccionado),
     };
+
+    setFactura((prevFactura) => ({
+      ...prevFactura,
+      pagos: [...prevFactura.pagos, nuevoPago],
+    }));
 
     setPagos((prevPagos) => [...prevPagos, nuevoPago]);
     setTotalPagado((prevTotal) => prevTotal + monto);
@@ -377,28 +325,45 @@ const PointOfSalePage: React.FC = () => {
   const handleFinalizar = async () => {
     try {
       const nuevaFactura = await pointOfSaleService.createFactura(factura);
-      await pointOfSaleService.imprimirFactura(nuevaFactura.id);
-      setFactura({
-        id: "",
-        facturaRenglons: [],
-        total: 0,
-        subtotal: 0,
-        descuento: 0,
-        interes: 0,
-        pagos: [],
-        comprobanteId: {
-          tipoComprobanteId: "",
-          tipoDocumentoId: "",
-          nroDocumento: "",
-        },
-        clienteId: "",
-      });
+      setFacturaGuardada(nuevaFactura);
       setShowPaymentModal(false);
+      setShowPrintModal(true);
       setTotalPagado(0);
     } catch (err) {
       setError("Error al guardar la factura");
       console.error(err);
     }
+  };
+
+  const handlePrint = async () => {
+    try {
+      await pointOfSaleService.imprimirFactura(factura);
+      toast.success("Factura impresa correctamente");
+    } catch (error) {
+      console.error("Error al imprimir la factura:", error);
+      toast.error("Error al imprimir la factura");
+    }
+  };
+
+  const handleNoPrint = () => {
+    setShowPrintModal(false);
+    setFacturaGuardada(null);
+    // Resetear la factura
+    setFactura({
+      id: "",
+      facturaRenglons: [],
+      total: 0,
+      subtotal: 0,
+      descuento: 0,
+      interes: 0,
+      pagos: [],
+      comprobanteId: {
+        tipoComprobanteId: "",
+        tipoDocumentoId: "",
+        nroDocumento: "",
+      },
+      clienteId: 1,
+    });
   };
 
   const agregarPromocion = (promocion: Promocion) => {
@@ -414,31 +379,6 @@ const PointOfSalePage: React.FC = () => {
       total: factura.subtotal - descuento + factura.interes,
     });
     setShowPromotionModal(false);
-  };
-
-  const guardar = async () => {
-    try {
-      const nuevaFactura = await pointOfSaleService.createFactura(factura);
-      await pointOfSaleService.imprimirFactura(nuevaFactura.id);
-      setFactura({
-        id: "",
-        facturaRenglons: [],
-        total: 0,
-        subtotal: 0,
-        descuento: 0,
-        interes: 0,
-        pagos: [],
-        comprobanteId: {
-          tipoComprobanteId: "",
-          tipoDocumentoId: "",
-          nroDocumento: "",
-        },
-        clienteId: "",
-      });
-    } catch (err) {
-      setError("Error al guardar la factura");
-      console.error(err);
-    }
   };
 
   const handleAddCustomProduct = () => {
@@ -481,10 +421,24 @@ const PointOfSalePage: React.FC = () => {
         tipoDocumentoId: "",
         nroDocumento: "",
       },
-      clienteId: "",
+      clienteId: 1,
     });
     setClientSearchTerm("");
     setShowCancelModal(false);
+
+    // Restaurar el consumidor final después de cancelar
+    const consumidorFinal = clientes.find(
+      (cliente) => cliente.nombre === "CONSUMIDOR FINAL"
+    );
+    if (consumidorFinal) {
+      setFactura((prevFactura) => ({
+        ...prevFactura,
+        clienteId: consumidorFinal.id,
+      }));
+      setClientSearchTerm(
+        `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
+      );
+    }
   };
 
   const renderProductos = () => {
@@ -994,6 +948,34 @@ const PointOfSalePage: React.FC = () => {
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                 >
                   Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Confirmation Modal */}
+      {showPrintModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Factura guardada
+              </h3>
+              <p className="text-gray-600 mb-4">¿Desea imprimir el ticket?</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleNoPrint}
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                >
+                  No
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                >
+                  Sí
                 </button>
               </div>
             </div>

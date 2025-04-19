@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatters";
-import {
-  FaMoneyBillWave,
-  FaCreditCard,
-  FaHandHoldingUsd,
-  FaExchangeAlt,
-} from "react-icons/fa";
+import { FaMoneyBillWave, FaCreditCard, FaExchangeAlt } from "react-icons/fa";
+import { FaRegRectangleList } from "react-icons/fa6";
+import { LuTruck } from "react-icons/lu";
+import { Pago } from "../../types/configuration";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -17,7 +15,7 @@ interface PaymentModalProps {
   setTipoPagoSeleccionado: (tipo: string) => void;
   montoPago: string;
   setMontoPago: (monto: string) => void;
-  pagos: Array<{ tipoPago: string; monto: number }>;
+  pagos: Pago[];
   agregarPago: () => void;
   removePago: (index: number) => void;
   factura: {
@@ -49,23 +47,31 @@ const getTipoPagoIcon = (nombre: string) => {
           <FaExchangeAlt />
         </span>
       );
+    case "cuentacorriente":
+      return (
+        <span className="mr-2">
+          <FaRegRectangleList />
+        </span>
+      );
     default:
       return (
         <span className="mr-2">
-          <FaHandHoldingUsd />
+          <LuTruck />
         </span>
       );
   }
 };
 
 const getTipoPagoColor = (nombre: string) => {
-  switch (nombre.toLowerCase()) {
+  switch (nombre.toLowerCase().replace(/\s+/g, "")) {
     case "efectivo":
       return "bg-green-500 hover:bg-green-600";
-    case "tarjeta":
+    case "tarjetadebito":
       return "bg-blue-500 hover:bg-blue-600";
-    case "transferencia":
+    case "tarjetacredito":
       return "bg-purple-500 hover:bg-purple-600";
+    case "cuentacorriente":
+      return "bg-red-500 hover:bg-red-600";
     default:
       return "bg-gray-500 hover:bg-gray-600";
   }
@@ -86,6 +92,29 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   factura,
   totalPagado,
 }) => {
+  // Efecto para autocompletar el monto con el valor restante
+  useEffect(() => {
+    if (tipoPagoSeleccionado && !montoPago) {
+      const montoRestante = factura.total - totalPagado;
+      setMontoPago(montoRestante.toString());
+    }
+  }, [tipoPagoSeleccionado, factura.total, totalPagado]);
+
+  // Ordenar los tipos de pago según el orden especificado
+  const tiposPagoOrdenados = [...tiposPago].sort((a, b) => {
+    const orden: Record<string, number> = {
+      efectivo: 1,
+      tarjetadebito: 2,
+      tarjetacredito: 3,
+      cuentacorriente: 4,
+      cuentacorrienteproveedor: 5,
+    };
+    return (
+      (orden[a.nombre.toLowerCase().replace(/\s+/g, "")] || 99) -
+      (orden[b.nombre.toLowerCase().replace(/\s+/g, "")] || 99)
+    );
+  });
+
   if (!isOpen) return null;
 
   return (
@@ -96,24 +125,28 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             Pagos
           </h3>
           <div className="mb-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4">
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Tipo Pago
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {tiposPago.map((tipo) => (
+                <div className="grid grid-cols-5 gap-2">
+                  {tiposPagoOrdenados.map((tipo) => (
                     <button
                       key={tipo.id}
                       onClick={() => setTipoPagoSeleccionado(tipo.id)}
-                      className={`flex items-center justify-center px-4 py-2 rounded-lg text-white ${
+                      className={`flex items-center border-2 border-transparent justify-center px-4 py-2 rounded-lg text-white transition-all duration-200 ${
                         tipoPagoSeleccionado === tipo.id
-                          ? getTipoPagoColor(tipo.nombre)
-                          : `${getTipoPagoColor(tipo.nombre)} opacity-70`
+                          ? `${getTipoPagoColor(
+                              tipo.nombre
+                            )} scale-105 shadow-lg border-black`
+                          : `${getTipoPagoColor(
+                              tipo.nombre
+                            )} opacity-70 hover:opacity-100`
                       }`}
                     >
                       {getTipoPagoIcon(tipo.nombre)}
-                      {tipo.nombre}
+                      <span className="text-sm md:text-lg">{tipo.nombre}</span>
                     </button>
                   ))}
                 </div>
@@ -137,12 +170,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 disabled={
                   !tipoPagoSeleccionado ||
                   !montoPago ||
-                  parseFloat(montoPago) <= 0
+                  parseFloat(montoPago) <= 0 ||
+                  parseFloat(montoPago) > factura.total - totalPagado
                 }
                 className={`flex items-center justify-center px-4 py-2 rounded-lg text-white ${
                   !tipoPagoSeleccionado ||
                   !montoPago ||
-                  parseFloat(montoPago) <= 0
+                  parseFloat(montoPago) <= 0 ||
+                  parseFloat(montoPago) > factura.total - totalPagado
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-blue-500 hover:bg-blue-600"
                 }`}
@@ -179,7 +214,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   {pagos.map((pago, index) => (
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {pago.tipoPago}
+                        {pago.tipoPagoNombre.trim()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {formatCurrency(pago.monto)}

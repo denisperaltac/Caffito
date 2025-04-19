@@ -7,10 +7,11 @@ import {
   FaSortUp,
   FaSortDown,
 } from "react-icons/fa";
-import axiosInstance from "../../services/axiosInstance";
+import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 import { Caja } from "../../services/cajaService";
 import InvoiceDetailsModal from "./InvoiceDetailsModal";
+import Loader from "../common/Loader";
 
 interface CajaRenglon {
   id: number;
@@ -241,7 +242,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
         <div className="p-4 overflow-auto max-h-[calc(90vh-12rem)]">
           {loading ? (
             <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <Loader size="lg" />
             </div>
           ) : (
             <>

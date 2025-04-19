@@ -183,10 +183,9 @@ export interface FacturaRenglon {
 }
 
 export interface Pago {
-  id: string;
-  tipoPagoId: string;
-  tipoPagoNombre: string;
   monto: number;
+  tipoPagoNombre: string;
+  tipoPagoId: number;
 }
 
 export interface Factura {
@@ -202,7 +201,7 @@ export interface Factura {
     tipoDocumentoId: string;
     nroDocumento: string;
   };
-  clienteId: string;
+  clienteId: number;
   promocionId?: string;
 }
 

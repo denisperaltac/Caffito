@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Producto } from "../../types/configuration";
 import { productService } from "../../services/productService";
+import Loader from "../../components/common/Loader";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -134,7 +135,7 @@ const StockManagementPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <Loader size="lg" />
       </div>
     );
   }
