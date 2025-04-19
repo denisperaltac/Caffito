@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import NavigationMenu from "../components/NavigationMenu";
+import InventarioMenu from "../components/InventarioMenu";
 
 const MainLayout: React.FC = () => {
   return (
@@ -20,7 +20,7 @@ const MainLayout: React.FC = () => {
                 >
                   Inicio
                 </a>
-                <NavigationMenu />
+                <InventarioMenu />
                 <a
                   href="/caja"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"

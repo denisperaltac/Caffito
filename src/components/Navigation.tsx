@@ -1,14 +1,23 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import NavigationMenu from "./NavigationMenu";
+import InventarioMenu from "./InventarioMenu";
+import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
+import {
+  FaHome,
+  FaCashRegister,
+  FaShoppingCart,
+  FaCog,
+  FaUsers,
+} from "react-icons/fa";
 
 const Navigation: React.FC = () => {
   const location = useLocation();
   const currentPath = location.pathname;
 
   const getNavItemClass = (path: string) => {
-    const baseClass = "px-3 py-2 rounded-md text-sm font-medium";
+    const baseClass =
+      "px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 cursor-pointer";
     const isActive =
       path === "/" ? currentPath === "/" : currentPath.startsWith(path);
 
@@ -18,8 +27,10 @@ const Navigation: React.FC = () => {
         return `${baseClass} bg-indigo-600 text-white`;
       if (path === "/caja") return `${baseClass} bg-green-600 text-white`;
       if (path === "/ventas") return `${baseClass} bg-purple-600 text-white`;
+      if (path === "/clientes") return `${baseClass} bg-pink-600 text-white`;
       if (path === "/configuracion")
         return `${baseClass} bg-yellow-600 text-white`;
+      if (path === "/cuenta") return `${baseClass} bg-orange-600 text-white`;
       return `${baseClass} bg-gray-700 text-white`;
     }
 
@@ -39,23 +50,33 @@ const Navigation: React.FC = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 <Link to="/" className={getNavItemClass("/")}>
+                  <FaHome className="w-5 h-5" />
                   Inicio
                 </Link>
-                <div className={getNavItemClass("/inventario")}>
-                  <NavigationMenu />
-                </div>
+
+                <InventarioMenu getNavItemClass={getNavItemClass} />
+
                 <Link to="/caja/cierres" className={getNavItemClass("/caja")}>
+                  <FaCashRegister className="w-5 h-5" />
                   Caja
                 </Link>
                 <Link to="/ventas" className={getNavItemClass("/ventas")}>
+                  <FaShoppingCart className="w-5 h-5" />
                   Ventas
+                </Link>
+                <Link to="/clientes" className={getNavItemClass("/clientes")}>
+                  <FaUsers className="w-5 h-5" />
+                  Clientes
                 </Link>
                 <Link
                   to="/configuracion"
                   className={getNavItemClass("/configuracion")}
                 >
+                  <FaCog className="w-5 h-5" />
                   Configuración
                 </Link>
+
+                <AccountMenu getNavItemClass={getNavItemClass} />
               </div>
             </div>
           </div>
