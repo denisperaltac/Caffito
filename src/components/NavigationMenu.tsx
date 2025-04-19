@@ -22,7 +22,7 @@ const NavigationMenu: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-1 focus:outline-none"
       >
-        <span>Menú</span>
+        <span>Inventario</span>
         <svg
           className={`h-5 w-5 transform transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
