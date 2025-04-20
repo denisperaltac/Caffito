@@ -35,10 +35,10 @@ const AccountMenu: React.FC<{ getNavItemClass: (path: string) => string }> = ({
   };
 
   return (
-    <div className={getNavItemClass("/cuenta")} ref={menuRef}>
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2"
+        className={getNavItemClass("/cuenta")}
       >
         <FaUserCircle className="w-5 h-5" />
         <span className="hidden lg:inline">Cuenta</span>
@@ -60,7 +60,7 @@ const AccountMenu: React.FC<{ getNavItemClass: (path: string) => string }> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+        <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-50">
           <Link
             to="/cuenta/perfil"
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

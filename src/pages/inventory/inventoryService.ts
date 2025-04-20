@@ -7,6 +7,7 @@ import {
   Category,
   Brand,
   Tax,
+  ProductoOptional,
 } from "../../types/inventory";
 
 // Mock data for demonstration
@@ -119,15 +120,6 @@ export const inventoryService = {
 
   async getProductById(id: string): Promise<Product | null> {
     return mockProducts.find((p) => p.id === id) || null;
-  },
-
-  async createProduct(product: Omit<Product, "id">): Promise<Product> {
-    const newProduct = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...product,
-    };
-    mockProducts.push(newProduct);
-    return newProduct;
   },
 
   async updateProduct(

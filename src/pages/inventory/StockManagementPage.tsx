@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Producto } from "../../types/configuration";
 import { productService } from "../../services/productService";
 import Loader from "../../components/common/Loader";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { Producto } from "../../types/inventory";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -10,33 +11,45 @@ const StockManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategoria, setSelectedCategoria] = useState<string>("");
-  const [stockMinimo, setStockMinimo] = useState<number>(10);
+  const [searchCode, setSearchCode] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [debouncedSearchCode, setDebouncedSearchCode] = useState("");
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [cantidadAjuste, setCantidadAjuste] = useState<number>(0);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounce para la búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setDebouncedSearchCode(searchCode);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, searchCode]);
 
   // Cargar productos al montar el componente o cuando cambien los filtros
   useEffect(() => {
     loadProductos();
-  }, [currentPage, searchTerm, selectedCategoria]);
+  }, [currentPage, debouncedSearchTerm, debouncedSearchCode]);
 
   const loadProductos = async () => {
     try {
-      setLoading(true);
+      setIsSearching(true);
       const [response, count] = await Promise.all([
         productService.getProductos({
           page: currentPage,
           size: ITEMS_PER_PAGE,
-          nombre: searchTerm || undefined,
-          categoriaId: selectedCategoria || undefined,
+          nombre: debouncedSearchTerm || undefined,
+          codigoReferencia: debouncedSearchCode || undefined,
         }),
         productService.getCountProductos({
-          nombre: searchTerm || undefined,
-          categoriaId: selectedCategoria || undefined,
+          nombre: debouncedSearchTerm || undefined,
+          codigoReferencia: debouncedSearchCode || undefined,
         }),
       ]);
 
@@ -49,11 +62,19 @@ const StockManagementPage: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+      setIsSearching(false);
     }
   };
 
-  // Obtener categorías únicas
-  const categorias = [...new Set(productos?.map((p) => p.categoriaId.id))];
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setIsSearching(true);
+  };
+
+  const handleCodeSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchCode(e.target.value);
+    setIsSearching(true);
+  };
 
   const handleEdit = (producto: Producto) => {
     // Encontrar el proveedor activo
@@ -89,7 +110,7 @@ const StockManagementPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm("¿Está seguro que desea eliminar este producto?")) {
       try {
-        await productService.deleteProducto(id.toString());
+        await productService.deleteProduct(id);
         // Recargar la página actual después de eliminar
         loadProductos();
       } catch (err) {
@@ -113,8 +134,8 @@ const StockManagementPage: React.FC = () => {
         })),
       };
 
-      const updatedProducto = await productService.updateProducto(
-        productoConPorcentaje.id.toString(),
+      await productService.updateProducto(
+        productoConPorcentaje.id || 0,
         productoConPorcentaje,
         cantidadAjuste
       );
@@ -141,7 +162,7 @@ const StockManagementPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 min-w-[95vw]">
+    <div className="container px-4 min-w-[95vw] h-[85vh]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Stock</h1>
         <div className="text-sm text-gray-600">
@@ -157,185 +178,149 @@ const StockManagementPage: React.FC = () => {
 
       {/* Filtros */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Buscar Producto
             </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Nombre del producto..."
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nombre del producto..."
+              />
+            </div>
           </div>
           <div>
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Categoría
+              Código de Referencia
             </label>
-            <select
-              value={selectedCategoria}
-              onChange={(e) => {
-                setSelectedCategoria(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Todas las categorías</option>
-              {categorias.map((categoriaId) => {
-                const categoria = productos.find(
-                  (p) => p.categoriaId.id === categoriaId
-                )?.categoriaId;
-                return (
-                  <option key={categoriaId} value={categoriaId}>
-                    {categoria?.nombre.trim()}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Stock Mínimo
-            </label>
-            <input
-              type="number"
-              value={stockMinimo}
-              onChange={(e) => setStockMinimo(Number(e.target.value))}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              min="0"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={searchCode}
+                onChange={handleCodeSearchChange}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Código de referencia..."
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tabla de Productos */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="bg-white shadow-md rounded-lg overflow-auto max-h-[65%]">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Código Referencia
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Categoría
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Marca
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cantidad
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Proveedor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ($) Costo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ($) Venta
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ($) May.
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pto. de pedido
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock ideal
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {productos?.map((producto) => {
-                const proveedorActivo = producto.productoProveedors.find(
-                  (pp) => pp.activo
-                );
-                return (
-                  <tr key={producto.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.codigoReferencia.trim()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {producto.nombre.trim()}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {producto.descripcion?.trim()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.categoriaId.nombre.trim()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.marcaId.nombre.trim()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.cantidad}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {proveedorActivo?.proveedor.nombreProveedor.trim()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {proveedorActivo?.precioCosto.toLocaleString("es-AR", {
-                        style: "currency",
-                        currency: "ARS",
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {proveedorActivo?.precioVenta.toLocaleString("es-AR", {
-                        style: "currency",
-                        currency: "ARS",
-                      })}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {proveedorActivo?.precioMayorista.toLocaleString(
-                        "es-AR",
-                        { style: "currency", currency: "ARS" }
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.stockMin || "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.stockMax || "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                        onClick={() => handleEdit(producto)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="text-red-600 hover:text-red-900"
-                        onClick={() => handleDelete(producto.id)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {isSearching ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader size="lg" />
+            </div>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Código Referencia
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nombre
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Categoría
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Marca
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Cantidad
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ($) Costo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ($) Venta
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    ($) May.
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {productos?.map((producto) => {
+                  const proveedorActivo = producto.productoProveedors.find(
+                    (pp) => pp.activo
+                  );
+                  return (
+                    <tr key={producto.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        {producto.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {producto.codigoReferencia.trim()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {producto.nombre.trim()}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {producto.descripcion?.trim()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        {producto.categoriaId.nombre.trim()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        {producto.marcaId.nombre.trim()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        {producto.cantidad}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {proveedorActivo?.precioCosto.toLocaleString("es-AR", {
+                          style: "currency",
+                          currency: "ARS",
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {proveedorActivo?.precioVenta.toLocaleString("es-AR", {
+                          style: "currency",
+                          currency: "ARS",
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                        {proveedorActivo?.precioMayorista.toLocaleString(
+                          "es-AR",
+                          { style: "currency", currency: "ARS" }
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          onClick={() => handleEdit(producto)}
+                        >
+                          <FaEdit className="w-5 h-5" />
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDelete(producto.id)}
+                        >
+                          <FaTrash className="w-5 h-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -605,7 +590,7 @@ const StockManagementPage: React.FC = () => {
                               (
                                 nuevoPrecioCosto *
                                 (1 + porcentajeGanancia / 100)
-                              ).toFixed(2)
+                              )?.toFixed(2)
                             );
 
                             setEditingProducto({
@@ -645,7 +630,7 @@ const StockManagementPage: React.FC = () => {
                                 (
                                   precioCosto *
                                   (1 + nuevoPorcentaje / 100)
-                                ).toFixed(2)
+                                )?.toFixed(2)
                               );
 
                               setEditingProducto({

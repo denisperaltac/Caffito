@@ -59,10 +59,10 @@ const InventarioMenu: React.FC<{
   ];
 
   return (
-    <div className={getNavItemClass("/inventario")} ref={menuRef}>
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2"
+        className={getNavItemClass("/inventario")}
       >
         <FaBoxes className="w-5 h-5" />
         <span className="hidden lg:inline">Inventario</span>
@@ -84,7 +84,7 @@ const InventarioMenu: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
+        <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-md shadow-lg py-1 z-50">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (

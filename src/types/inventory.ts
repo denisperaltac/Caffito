@@ -16,19 +16,66 @@ export interface StockMovement {
   reason: string;
 }
 
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  cost: number;
-  stock: number;
-  barcode: string;
-  categoryId: string;
-  brandId: string;
-  supplierId: string;
-  taxId: string;
-  active: boolean;
+export interface ProductoProveedor {
+  id: number;
+  activo: boolean;
+  precioCosto: number;
+  precioVenta: number;
+  precioMayorista: number;
+  porcentajeGanancia: number;
+  puntoDeVentaId: number;
+  puntoDeVentaNombre: string;
+  proveedor: {
+    id: number;
+    nombreProveedor: string;
+    direccion: string;
+    telefono: string;
+    email: string;
+    cuit: string;
+    borrado: boolean;
+  } | null;
+}
+
+export interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+  codigoReferencia: string;
+  cantidad: number;
+  stockMin: number | null;
+  stockMax: number | null;
+  categoriaId: {
+    id: number;
+    nombre: string;
+  };
+  marcaId: {
+    id: number;
+    nombre: string;
+  };
+  productoProveedors: ProductoProveedor[];
+  impuestoId: number | null;
+  pesable: boolean;
+}
+
+export interface ProductoOptional {
+  id?: number;
+  nombre: string;
+  descripcion: string | null;
+  codigoReferencia: string;
+  cantidad: number;
+  stockMin: number | null;
+  stockMax: number | null;
+  categoriaId: {
+    id: number;
+    nombre: string;
+  };
+  marcaId: {
+    id: number;
+    nombre: string;
+  };
+  productoProveedors: any;
+  impuestoId: number | null;
+  pesable: boolean;
 }
 
 export interface Label {
@@ -51,11 +98,12 @@ export interface Supplier {
 }
 
 export interface Category {
-  id: string;
-  name: string;
-  description: string;
-  parentId?: string; // Optional parent category ID for hierarchical categories
-  active: boolean;
+  id: number;
+  nombre: string;
+  rubroId: {
+    id: number;
+    nombre: string;
+  } | null;
 }
 
 export interface Brand {
@@ -67,8 +115,27 @@ export interface Brand {
 
 export interface Tax {
   id: string;
-  name: string;
-  percentage: number;
-  description: string;
-  active: boolean;
+  nombre: string;
+  porcentaje: number;
+}
+
+export interface Proveedor {
+  id: number;
+  nombreProveedor: string;
+  calle: string;
+  numeroCalle: string;
+  email: string;
+  telefono: string;
+  localidadId: {
+    id: number;
+    nombre: string;
+    departamentoId: {
+      id: number;
+      nombre: string;
+      provinciaId: {
+        id: number;
+        nombre: string;
+      };
+    };
+  };
 }

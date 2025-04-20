@@ -14,6 +14,7 @@ import SuppliersPage from "./pages/inventory/SuppliersPage";
 import CategoriesPage from "./pages/inventory/CategoriesPage";
 import BrandsPage from "./pages/inventory/BrandsPage";
 import TaxesPage from "./pages/inventory/TaxesPage";
+import ProductsPage from "./pages/inventory/ProductsPage";
 import CashPage from "./pages/cash/CashPage";
 import ConfigurationPage from "./pages/configuration/ConfigurationPage";
 import PointsOfSalePage from "./pages/configuration/PointsOfSalePage";
@@ -74,6 +75,14 @@ const App: React.FC = () => {
                     element={
                       <PrivateRoute>
                         <StockMovementPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="productos"
+                    element={
+                      <PrivateRoute>
+                        <ProductsPage />
                       </PrivateRoute>
                     }
                   />

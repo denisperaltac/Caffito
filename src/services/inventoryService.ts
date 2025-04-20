@@ -1,29 +1,38 @@
 import {
   Stock,
   StockMovement,
-  Product,
+  Producto,
   Label,
   Supplier,
   Category,
   Brand,
   Tax,
+  Proveedor,
 } from "../types/inventory";
+import axiosInstance from "../config/axiosConfig";
+import { API_URL } from "../constants/api";
 
 // Mock data for demonstration
-const mockProducts: Product[] = [
+const mockProducts: Producto[] = [
   {
-    id: "1",
-    name: "Producto 1",
-    description: "Descripción del producto 1",
-    price: 100,
-    cost: 50,
-    stock: 50,
-    barcode: "123456789",
-    categoryId: "1",
-    brandId: "1",
-    supplierId: "1",
-    taxId: "1",
-    active: true,
+    id: 1,
+    nombre: "Producto 1",
+    descripcion: "Descripción del producto 1",
+    codigoReferencia: "REF001",
+    cantidad: 10,
+    stockMin: 5,
+    stockMax: 20,
+    categoriaId: {
+      id: 1,
+      nombre: "Categoría 1",
+    },
+    marcaId: {
+      id: 1,
+      nombre: "Marca 1",
+    },
+    productoProveedors: [],
+    impuestoId: null,
+    pesable: false,
   },
 ];
 
@@ -42,14 +51,15 @@ const mockSuppliers: Supplier[] = [
 
 const mockCategories: Category[] = [
   {
-    id: "1",
-    name: "Categoría 1",
-    description: "Descripción de categoría 1",
-    active: true,
+    id: 1,
+    nombre: "Categoría 1",
+    rubroId: {
+      id: 1,
+      nombre: "Rubro 1",
+    },
   },
 ];
 
-// Mock data for brands
 const mockBrands: Brand[] = [
   {
     id: "1",
@@ -68,16 +78,6 @@ const mockBrands: Brand[] = [
     name: "Marca C",
     description: "Descripción de Marca C",
     active: false,
-  },
-];
-
-const mockTaxes: Tax[] = [
-  {
-    id: "1",
-    name: "IVA",
-    percentage: 21,
-    description: "Impuesto al Valor Agregado",
-    active: true,
   },
 ];
 
@@ -107,27 +107,18 @@ export const inventoryService = {
   },
 
   // Products
-  async getProducts(): Promise<Product[]> {
+  async getProducts(): Promise<Producto[]> {
     return mockProducts;
   },
 
-  async getProductById(id: string): Promise<Product | null> {
+  async getProductById(id: number): Promise<Producto | null> {
     return mockProducts.find((p) => p.id === id) || null;
   },
 
-  async createProduct(product: Omit<Product, "id">): Promise<Product> {
-    const newProduct = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...product,
-    };
-    mockProducts.push(newProduct);
-    return newProduct;
-  },
-
   async updateProduct(
-    id: string,
-    product: Partial<Product>
-  ): Promise<Product | null> {
+    id: number,
+    product: Partial<Producto>
+  ): Promise<Producto | null> {
     const index = mockProducts.findIndex((p) => p.id === id);
     if (index === -1) return null;
     mockProducts[index] = { ...mockProducts[index], ...product };
@@ -167,12 +158,22 @@ export const inventoryService = {
 
   // Categories
   async getCategories(): Promise<Category[]> {
-    return mockCategories;
+    try {
+      const response = await axiosInstance.get(`${API_URL}/categorias`, {
+        params: {
+          size: 9999,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener las categorías:", error);
+      throw error;
+    }
   },
 
   async createCategory(category: Omit<Category, "id">): Promise<Category> {
     const newCategory = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.floor(Math.random() * 1000),
       ...category,
     };
     mockCategories.push(newCategory);
@@ -180,7 +181,7 @@ export const inventoryService = {
   },
 
   async updateCategory(
-    id: string,
+    id: number,
     categoryData: Partial<Category>
   ): Promise<Category> {
     const index = mockCategories.findIndex((c) => c.id === id);
@@ -190,7 +191,7 @@ export const inventoryService = {
     return updatedCategory;
   },
 
-  async deleteCategory(id: string): Promise<void> {
+  async deleteCategory(id: number): Promise<void> {
     const index = mockCategories.findIndex((c) => c.id === id);
     if (index === -1) throw new Error("Category not found");
     mockCategories.splice(index, 1);
@@ -198,7 +199,22 @@ export const inventoryService = {
 
   // Brands
   getBrands: async (): Promise<Brand[]> => {
-    return mockBrands;
+    try {
+      const response = await axiosInstance.get(`${API_URL}/marcas`, {
+        params: {
+          size: 9999,
+        },
+      });
+      return response.data.map((brand: any) => ({
+        id: brand.id.toString(),
+        name: brand.nombre.trim(),
+        description: "",
+        active: true,
+      }));
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+      throw error;
+    }
   },
 
   createBrand: async (brand: Omit<Brand, "id">): Promise<Brand> => {
@@ -233,7 +249,17 @@ export const inventoryService = {
 
   // Taxes
   async getTaxes(): Promise<Tax[]> {
-    return mockTaxes;
+    try {
+      const response = await axiosInstance.get(`${API_URL}/impuestos`, {
+        params: {
+          size: 9999,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching taxes:", error);
+      throw error;
+    }
   },
 
   async createTax(tax: Omit<Tax, "id">): Promise<Tax> {
@@ -241,7 +267,7 @@ export const inventoryService = {
       id: Math.random().toString(36).substr(2, 9),
       ...tax,
     };
-    mockTaxes.push(newTax);
+
     return newTax;
   },
 
@@ -288,5 +314,20 @@ export const inventoryService = {
   async deleteLabel(id: string): Promise<void> {
     // Mock implementation
     console.log(`Deleting label with id: ${id}`);
+  },
+
+  // Proveedores
+  async getProveedors(): Promise<Proveedor[]> {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/proveedors`, {
+        params: {
+          size: 9999,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener los proveedores:", error);
+      throw error;
+    }
   },
 };

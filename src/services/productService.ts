@@ -1,11 +1,21 @@
-import { PaginatedResponse, Producto } from "../types/configuration";
-import axiosInstance, { API_URL } from "../config/axiosConfig";
+import axiosInstance from "../config/axiosConfig";
+import { API_URL } from "../constants/api";
+import { Producto, ProductoOptional } from "../types/inventory";
 
 interface GetProductosParams {
   page?: number;
   size?: number;
   nombre?: string;
   categoriaId?: string;
+  codigoReferencia?: string;
+}
+
+export interface ProductsResponse {
+  content: Producto[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
 
 export const productService = {
@@ -14,15 +24,25 @@ export const productService = {
     params: GetProductosParams = {}
   ): Promise<Producto[]> => {
     try {
-      const { page = 0, size = 10, nombre, categoriaId } = params;
-      const response = await axiosInstance.get<Producto[]>("/api/productos", {
-        params: {
-          page,
-          size,
-          "nombre.contains": nombre,
-          categoriaId,
-        },
-      });
+      const {
+        page = 0,
+        size = 10,
+        nombre,
+        categoriaId,
+        codigoReferencia,
+      } = params;
+      const response = await axiosInstance.get<Producto[]>(
+        `${API_URL}/productos`,
+        {
+          params: {
+            page,
+            size,
+            "nombre.contains": nombre,
+            categoriaId,
+            "codigoReferencia.contains": codigoReferencia,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener productos:", error);
@@ -35,13 +55,17 @@ export const productService = {
     params: Omit<GetProductosParams, "page" | "size"> = {}
   ): Promise<number> => {
     try {
-      const { nombre, categoriaId } = params;
-      const response = await axiosInstance.get<number>("/api/productos/count", {
-        params: {
-          "nombre.contains": nombre,
-          categoriaId,
-        },
-      });
+      const { nombre, categoriaId, codigoReferencia } = params;
+      const response = await axiosInstance.get<number>(
+        `${API_URL}/productos/count`,
+        {
+          params: {
+            "nombre.contains": nombre,
+            categoriaId,
+            "codigoReferencia.contains": codigoReferencia,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Error al obtener el count de productos:", error);
@@ -50,7 +74,7 @@ export const productService = {
   },
 
   // Obtener un producto por ID
-  getProductoById: async (id: string): Promise<Producto> => {
+  getProductoById: async (id: number): Promise<Producto> => {
     try {
       const response = await axiosInstance.get(`${API_URL}/productos/${id}`);
       return response.data;
@@ -61,11 +85,18 @@ export const productService = {
   },
 
   // Crear un nuevo producto
-  createProducto: async (producto: Omit<Producto, "id">): Promise<Producto> => {
+  createProduct: async (
+    producto: ProductoOptional
+  ): Promise<ProductoOptional> => {
     try {
+      const payload = {
+        ...producto,
+        borrado: false,
+      };
+
       const response = await axiosInstance.post(
         `${API_URL}/productos`,
-        producto
+        payload
       );
       return response.data;
     } catch (error) {
@@ -76,8 +107,8 @@ export const productService = {
 
   // Actualizar un producto existente
   updateProducto: async (
-    id: string,
-    producto: Partial<Producto>,
+    id: number,
+    producto: Partial<ProductoOptional>,
     cantidad: number,
     peso?: number
   ): Promise<Producto> => {
@@ -96,7 +127,7 @@ export const productService = {
   },
 
   // Eliminar un producto
-  deleteProducto: async (id: string): Promise<void> => {
+  deleteProduct: async (id: number): Promise<void> => {
     try {
       await axiosInstance.delete(`${API_URL}/productos/${id}`);
     } catch (error) {
@@ -106,7 +137,7 @@ export const productService = {
   },
 
   // Obtener productos por categoría
-  getProductosByCategoria: async (categoriaId: string): Promise<Producto[]> => {
+  getProductosByCategoria: async (categoriaId: number): Promise<Producto[]> => {
     try {
       const response = await axiosInstance.get(
         `${API_URL}/productos/categoria/${categoriaId}`
@@ -115,22 +146,6 @@ export const productService = {
     } catch (error) {
       console.error(
         `Error al obtener productos de categoría ${categoriaId}:`,
-        error
-      );
-      throw error;
-    }
-  },
-
-  // Obtener productos por proveedor
-  getProductosByProveedor: async (proveedorId: string): Promise<Producto[]> => {
-    try {
-      const response = await axiosInstance.get(
-        `${API_URL}/productos/proveedor/${proveedorId}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        `Error al obtener productos de proveedor ${proveedorId}:`,
         error
       );
       throw error;
