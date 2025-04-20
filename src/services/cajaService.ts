@@ -38,7 +38,7 @@ interface GetCajasParams {
 export const cajaService = {
   getCajas: async (params: GetCajasParams = {}): Promise<Caja[]> => {
     try {
-      const { page = 0, size = 20, sort = "id,desc" } = params;
+      const { page, size, sort = "id,desc" } = params;
       const response = await axiosInstance.get<Caja[]>(`${API_URL}/cajas`, {
         params: {
           page,

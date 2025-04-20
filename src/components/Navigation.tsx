@@ -47,33 +47,33 @@ const Navigation: React.FC = () => {
                 <img src={logo} alt="Logo" className="w-24 h-16" />
               </Link>
             </div>
-            <div className="hidden md:block">
+            <div className="block">
               <div className="ml-10 flex items-baseline space-x-4">
                 <Link to="/" className={getNavItemClass("/")}>
                   <FaHome className="w-5 h-5" />
-                  Inicio
+                  <span className="hidden lg:inline">Inicio</span>
                 </Link>
 
                 <InventarioMenu getNavItemClass={getNavItemClass} />
 
                 <Link to="/caja/cierres" className={getNavItemClass("/caja")}>
                   <FaCashRegister className="w-5 h-5" />
-                  Caja
+                  <span className="hidden lg:inline">Caja</span>
                 </Link>
                 <Link to="/ventas" className={getNavItemClass("/ventas")}>
                   <FaShoppingCart className="w-5 h-5" />
-                  Ventas
+                  <span className="hidden lg:inline">Ventas</span>
                 </Link>
                 <Link to="/clientes" className={getNavItemClass("/clientes")}>
                   <FaUsers className="w-5 h-5" />
-                  Clientes
+                  <span className="hidden lg:inline">Clientes</span>
                 </Link>
                 <Link
                   to="/configuracion"
                   className={getNavItemClass("/configuracion")}
                 >
                   <FaCog className="w-5 h-5" />
-                  Configuración
+                  <span className="hidden lg:inline">Configuración</span>
                 </Link>
 
                 <AccountMenu getNavItemClass={getNavItemClass} />

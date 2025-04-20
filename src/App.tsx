@@ -22,6 +22,7 @@ import PointOfSalePage from "./pages/pointOfSale/PointOfSalePage";
 import LoginPage from "./pages/auth/LoginPage";
 import { authService } from "./services/authService";
 import CashierClosuresPage from "./pages/cash/CashierClosuresPage";
+import ClientsPage from "./pages/clients/ClientsPage";
 
 // Componente para proteger rutas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -164,6 +165,14 @@ const App: React.FC = () => {
                   element={
                     <PrivateRoute>
                       <PointOfSalePage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/clientes"
+                  element={
+                    <PrivateRoute>
+                      <ClientsPage />
                     </PrivateRoute>
                   }
                 />

@@ -7,3 +7,12 @@
 :root {
   font-family: "Poppins", sans-serif;
 }
+
+tr:nth-child(odd) {
+  background-color: whitesmoke;
+  transition: 0.3s;
+}
+
+tr:hover {
+  background-color: rgb(227, 227, 227);
+}

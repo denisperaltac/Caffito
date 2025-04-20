@@ -8,7 +8,7 @@ import CashierMovementsModal from "../../components/cash/CashierMovementsModal";
 import CashierTable from "../../components/cash/CashierTable";
 import Loader from "../../components/common/Loader";
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 8;
 
 const CashierClosuresPage: React.FC = () => {
   const [cajas, setCajas] = useState<Caja[]>([]);
@@ -179,7 +179,7 @@ const CashierClosuresPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container px-4 w-[100vw]">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Cierres de Caja</h1>
 
       {error && (
@@ -188,7 +188,7 @@ const CashierClosuresPage: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="bg-white shadow-md rounded-lg overflow-hidden w-[95vw]">
         <CashierTable
           cajas={cajas}
           onView={handleView}

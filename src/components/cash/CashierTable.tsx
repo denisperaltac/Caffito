@@ -48,7 +48,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="overflow-auto max-h-[63vh]">
+    <div className="overflow-auto max-h-[70vh] min-w-[95vw]">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -89,7 +89,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {cajas?.map((caja) => (
-            <tr key={caja.id} className="hover:bg-gray-50">
+            <tr key={caja.id}>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {caja.id}
               </td>
@@ -103,7 +103,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                   className="flex items-center justify-center"
                 >
                   <span className="text-gray-500 hover:text-gray-700 cursor-help">
-                    <FaStore />
+                    <FaStore className="w-6 h-6" />
                   </span>
                 </div>
                 <Tooltip id={`punto-venta-${caja.id}`} />
@@ -122,7 +122,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                     </span>
                   ) : (
                     <span className="text-green-500 hover:text-green-600 cursor-help">
-                      <FaCheckCircle size={20} />
+                      <FaCheckCircle size={24} />
                     </span>
                   )}
                 </div>
@@ -176,7 +176,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                     data-tooltip-id={`view-${caja.id}`}
                     data-tooltip-content="Ver detalles"
                   >
-                    <FaEye />
+                    <FaEye className="w-6 h-6" />
                   </button>
                   <Tooltip id={`view-${caja.id}`} />
 
@@ -186,7 +186,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                     data-tooltip-id={`mov-${caja.id}`}
                     data-tooltip-content="Ver movimientos"
                   >
-                    <FaExchangeAlt />
+                    <FaExchangeAlt className="w-6 h-6" />
                   </button>
                   <Tooltip id={`mov-${caja.id}`} />
 
@@ -196,7 +196,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                     data-tooltip-id={`delete-${caja.id}`}
                     data-tooltip-content="Eliminar caja"
                   >
-                    <FaTrash />
+                    <FaTrash className="w-6 h-6" />
                   </button>
                   <Tooltip id={`delete-${caja.id}`} />
                 </div>
