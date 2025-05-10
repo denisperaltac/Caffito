@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { cajaService, Caja } from "../../services/cajaService";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { cajaService, Caja, CierreCajaItem } from "../../services/cajaService";
+import { FaChevronLeft, FaChevronRight, FaDollarSign } from "react-icons/fa";
 import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 import CashierDetailsModal from "../../components/cash/CashierDetailsModal";
 import CashierMovementsModal from "../../components/cash/CashierMovementsModal";
 import CashierTable from "../../components/cash/CashierTable";
 import Loader from "../../components/common/Loader";
+import ClosuresModal from "../../components/cash/ClosuresModal";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -19,10 +20,25 @@ const CashierClosuresPage: React.FC = () => {
   const [selectedCaja, setSelectedCaja] = useState<Caja | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showMovementsModal, setShowMovementsModal] = useState(false);
+  const [currentCaja, setCurrentCaja] = useState<Caja | null>(null);
+  const [showOpenModal, setShowOpenModal] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [initialAmount, setInitialAmount] = useState<number>(0);
+  const [closingAmount, setClosingAmount] = useState<number>(0);
 
   useEffect(() => {
     loadCajas();
+    checkCurrentCaja();
   }, [currentPage]);
+
+  const checkCurrentCaja = async () => {
+    try {
+      const caja = await cajaService.getCurrentCaja();
+      setCurrentCaja(caja);
+    } catch (error) {
+      console.error("Error al verificar la caja actual:", error);
+    }
+  };
 
   const loadCajas = async () => {
     try {
@@ -79,6 +95,37 @@ const CashierClosuresPage: React.FC = () => {
       } catch (error) {
         console.error("Error al eliminar la caja:", error);
       }
+    }
+  };
+
+  const handleOpenCaja = async () => {
+    try {
+      if (initialAmount < 0) {
+        setError("El monto inicial no puede ser negativo");
+        return;
+      }
+      await cajaService.openCaja(initialAmount);
+      setShowOpenModal(false);
+      setInitialAmount(0);
+      await checkCurrentCaja();
+      await loadCajas();
+    } catch (error) {
+      setError("Error al abrir la caja");
+      console.error(error);
+    }
+  };
+
+  const handleCloseCaja = async (items: CierreCajaItem[]) => {
+    try {
+      if (!currentCaja) return;
+      await cajaService.closeCaja(items);
+      setShowCloseModal(false);
+      setClosingAmount(0);
+      await checkCurrentCaja();
+      await loadCajas();
+    } catch (error) {
+      setError("Error al cerrar la caja");
+      console.error(error);
     }
   };
 
@@ -179,8 +226,27 @@ const CashierClosuresPage: React.FC = () => {
   }
 
   return (
-    <div className="container px-4 w-[100vw]">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Cierres de Caja</h1>
+    <div className="container w-full">
+      <div className="flex justify-between items-center mb-6 w-full">
+        <h1 className="text-2xl font-bold text-gray-800">Cierres de Caja</h1>
+        <div>
+          {!currentCaja ? (
+            <button
+              onClick={() => setShowOpenModal(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+            >
+              Abrir Caja
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowCloseModal(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+            >
+              Cerrar Caja
+            </button>
+          )}
+        </div>
+      </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -188,7 +254,7 @@ const CashierClosuresPage: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden w-[95vw]">
+      <div className="bg-white shadow-md rounded-lg max-h-[65vh] overflow-scroll w-[95vw]">
         <CashierTable
           cajas={cajas}
           onView={handleView}
@@ -198,7 +264,7 @@ const CashierClosuresPage: React.FC = () => {
       </div>
 
       {renderPagination()}
-      <div className="text-center text-sm text-gray-500 mt-2">
+      <div className="text-center text-sm text-gray-500 ">
         Mostrando {cajas?.length} de {totalItems} cierres
       </div>
 
@@ -213,6 +279,62 @@ const CashierClosuresPage: React.FC = () => {
         <CashierMovementsModal
           caja={selectedCaja}
           onClose={() => setShowMovementsModal(false)}
+        />
+      )}
+
+      {/* Open Caja Modal */}
+      {showOpenModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Abrir Caja</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Monto Inicial
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaDollarSign className="text-gray-500" />
+                </div>
+                <input
+                  type="number"
+                  value={initialAmount || ""}
+                  onChange={(e) => setInitialAmount(Number(e.target.value))}
+                  className="w-full pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowOpenModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleOpenCaja}
+                disabled={initialAmount < 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Abrir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close Caja Modal */}
+      {showCloseModal && (
+        <ClosuresModal
+          closingAmount={closingAmount}
+          setClosingAmount={setClosingAmount}
+          handleCloseCaja={handleCloseCaja}
+          showCloseModal={showCloseModal}
+          setShowCloseModal={setShowCloseModal}
+          currentCaja={currentCaja}
         />
       )}
     </div>

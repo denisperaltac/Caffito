@@ -10,6 +10,11 @@ export interface Cliente {
   mayorista: boolean | null;
   empleado: boolean | null;
   activo: boolean;
+  email: string;
+  telefono: string;
+  direccion: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GetClientesParams {

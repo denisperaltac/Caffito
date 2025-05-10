@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   FaEdit,
   FaTrash,
-  FaUser,
-  FaUserTie,
   FaCheck,
   FaTimes,
   FaChevronLeft,
@@ -13,7 +11,6 @@ import {
   FaSortDown,
   FaIdCard,
   FaUserAlt,
-  FaFileAlt,
   FaStore,
   FaBriefcase,
   FaToggleOn,

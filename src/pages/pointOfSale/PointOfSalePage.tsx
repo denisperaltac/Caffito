@@ -268,6 +268,11 @@ const PointOfSalePage: React.FC = () => {
       });
     }
 
+    // Limpiar la búsqueda y los resultados
+    setProductSearchTerm("");
+    setProductos([]);
+    setIsProductSearching(false);
+
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }

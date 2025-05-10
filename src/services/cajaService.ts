@@ -29,6 +29,12 @@ export interface Caja {
   flujoCajas: FlujoCaja[];
 }
 
+export interface CierreCajaItem {
+  ingresoEfectivo: number;
+  tipoPagoNombre: string;
+  tipoPagoId: number;
+}
+
 interface GetCajasParams {
   page?: number;
   size?: number;
@@ -61,6 +67,49 @@ export const cajaService = {
       return response.data;
     } catch (error) {
       console.error("Error al obtener el conteo de cajas:", error);
+      throw error;
+    }
+  },
+
+  getCurrentCaja: async (): Promise<Caja | null> => {
+    try {
+      const response = await axiosInstance.get<Caja>(
+        `${API_URL}/cajas/current`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener la caja actual:", error);
+      throw error;
+    }
+  },
+
+  openCaja: async (inicio: number): Promise<Caja> => {
+    try {
+      const response = await axiosInstance.post<Caja>(
+        `${API_URL}/cajas/iniciar`,
+        inicio.toString(),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al abrir la caja:", error);
+      throw error;
+    }
+  },
+
+  closeCaja: async (items: CierreCajaItem[]): Promise<Caja> => {
+    try {
+      const response = await axiosInstance.post<Caja>(
+        `${API_URL}/cajas/cerrar`,
+        items
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al cerrar la caja:", error);
       throw error;
     }
   },

@@ -3,13 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import InventarioMenu from "./InventarioMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
-import {
-  FaHome,
-  FaCashRegister,
-  FaShoppingCart,
-  FaCog,
-  FaUsers,
-} from "react-icons/fa";
+import MoneyBag from "../assets/MoneyBag.svg";
+import { FaHome, FaShoppingCart, FaCog, FaUsers } from "react-icons/fa";
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -57,7 +52,11 @@ const Navigation: React.FC = () => {
                 <InventarioMenu getNavItemClass={getNavItemClass} />
 
                 <Link to="/caja/cierres" className={getNavItemClass("/caja")}>
-                  <FaCashRegister className="w-5 h-5" />
+                  <img
+                    src={MoneyBag}
+                    alt="Caja"
+                    className="min-w-5 min-h-5 w-5 h-5"
+                  />
                   <span className="hidden lg:inline">Caja</span>
                 </Link>
                 <Link to="/ventas" className={getNavItemClass("/ventas")}>

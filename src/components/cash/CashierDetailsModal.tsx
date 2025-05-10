@@ -1,5 +1,12 @@
 import React from "react";
-import { FaTimes } from "react-icons/fa";
+import {
+  FaTimes,
+  FaMoneyBillWave,
+  FaCreditCard,
+  FaExchangeAlt,
+} from "react-icons/fa";
+import { FaRegRectangleList } from "react-icons/fa6";
+import { LuTruck } from "react-icons/lu";
 import { Caja } from "../../services/cajaService";
 
 interface CashierDetailsModalProps {
@@ -29,6 +36,36 @@ const formatCurrency = (amount: number | null) => {
     style: "currency",
     currency: "ARS",
   });
+};
+
+const getTipoPagoIcon = (nombre: string) => {
+  switch (nombre.toLowerCase().replace(/\s+/g, "")) {
+    case "efectivo":
+      return <FaMoneyBillWave />;
+    case "tarjetadebito":
+      return <FaCreditCard />;
+    case "tarjetacredito":
+      return <FaExchangeAlt />;
+    case "cuentacorriente":
+      return <FaRegRectangleList />;
+    default:
+      return <LuTruck />;
+  }
+};
+
+const getTipoPagoColor = (nombre: string) => {
+  switch (nombre.toLowerCase().replace(/\s+/g, "")) {
+    case "efectivo":
+      return "bg-green-100 text-green-800";
+    case "tarjetadebito":
+      return "bg-blue-100 text-blue-800";
+    case "tarjetacredito":
+      return "bg-purple-100 text-purple-800";
+    case "cuentacorriente":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
 };
 
 const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
@@ -66,7 +103,7 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
               <p className="text-sm text-gray-500">Usuario</p>
               <p className="font-medium">{caja.userLogin}</p>
@@ -119,16 +156,23 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
               <tbody className="bg-white divide-y divide-gray-200">
                 {caja.flujoCajas.map((flujo) => (
                   <tr key={flujo.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {flujo.tipoPagoNombre.trim()}
+                    <td className="px-6 py-2 whitespace-nowrap text-sm">
+                      <div
+                        className={`flex items-center space-x-2 px-3 py-1 rounded-full w-fit ${getTipoPagoColor(
+                          flujo.tipoPagoNombre
+                        )}`}
+                      >
+                        <span>{getTipoPagoIcon(flujo.tipoPagoNombre)}</span>
+                        <span>{flujo.tipoPagoNombre.trim()}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(flujo.pendiente)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(flujo.ingresoEfectivo)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm">
                       <span
                         className={`font-medium ${
                           flujo.diferencia >= 0
@@ -142,16 +186,16 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
                   </tr>
                 ))}
                 <tr className="bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                     Total
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                     {formatCurrency(totalIngreso)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                     {formatCurrency(totalIngresoDeclarado)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm">
                     <span
                       className={`font-bold ${
                         totalDiferencia >= 0 ? "text-green-600" : "text-red-600"
