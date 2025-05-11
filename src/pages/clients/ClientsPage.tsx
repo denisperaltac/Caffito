@@ -7,6 +7,8 @@ import {
 } from "../../services/clientService";
 import { Pagination } from "../../components/clients/Pagination";
 import { TableClients } from "../../components/clients/TableClients";
+import { Bottom } from "../../components/common/Bottom";
+import { ModalAddClient } from "../../components/clients/ModalAddClient";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -30,6 +32,7 @@ const ClientsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [sortField, setSortField] = useState<SortField>("id");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [openModal, setOpenModal] = useState(false);
   const [inputSearch, setInputSearch] = useState({
     apellido: "",
     nombre: "",
@@ -94,11 +97,11 @@ const ClientsPage: React.FC = () => {
   };
 
   return (
-    <div className="container px-4 w-[100vw]">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Clientes</h1>
+    <div className="container  min-w-full">
+      <div className="flex justify-between items-center mb-4 w-full">
+        <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
 
-        <div className="ml-8 flex gap-4 items-center mb-4 w-full">
+        <div className="ml-8 flex gap-4 items-center w-full">
           <input
             type="text"
             name="nombre"
@@ -117,6 +120,14 @@ const ClientsPage: React.FC = () => {
             className="w-[250px] px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-['Poppins']"
           />
         </div>
+        <Bottom
+          text="Agregar Cliente"
+          color="blue"
+          size="w-[200px]"
+          onClick={() => {
+            setOpenModal(true);
+          }}
+        />
       </div>
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -139,6 +150,12 @@ const ClientsPage: React.FC = () => {
               setSortDirection(direction as SortDirection)
             }
             clientes={clientes}
+          />
+
+          <ModalAddClient
+            open={openModal}
+            onClose={() => setOpenModal(false)}
+            loadClientes={loadClientes}
           />
 
           <Pagination

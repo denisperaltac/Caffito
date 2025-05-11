@@ -1,11 +1,16 @@
 import React from "react";
 import { IoClose } from "react-icons/io5";
+import { Bottom } from "./Bottom";
 
 export const Modal = ({
   children,
   open,
   onClose,
+  onSave,
   size,
+  disabledBtn,
+  modalDelete,
+  textBtn,
 }: {
   children: React.ReactNode;
   open: boolean;
@@ -16,21 +21,43 @@ export const Modal = ({
     | "w-1/2 h-1/2"
     | "w-1/3 h-1/3"
     | "w-1/4 h-1/4";
+  onSave?: () => void;
+  disabledBtn?: boolean;
+  modalDelete?: boolean;
+  textBtn?: string;
 }) => {
   return (
     <>
       {open ? (
-        <div className="fixed z-50 inset-0 bg-black bg-opacity-50 flex transition-all duration-300 items-center justify-center h-screen w-screen">
+        <div className="fixed z-50 inset-0 bg-black bg-opacity-50 flex transition-all duration-300 items-center justify-center h-screen w-screen overflow-hidden">
           <div
-            className={`bg-white p-6 flex flex-row justify-between rounded-lg w-full h- ${
+            className={`bg-white p-6 flex flex-col justify-between overflow-auto rounded-lg ${
               size || "w-[90%] h-[90%]"
             }`}
           >
-            {children}
-            <IoClose
-              className="text-2xl rounded-full -mr-2 -mt-2 w-8 h-8 p-1 cursor-pointer hover:scale-125 hover:bg-gray-200 transition-all duration-300"
-              onClick={onClose}
-            />
+            <div className="flex flex-row justify-between w-full h-full gap-4">
+              {children}
+              <IoClose
+                className="text-2xl rounded-full -mr-2 -mt-2 w-8 h-8 p-1 cursor-pointer hover:scale-125 hover:bg-gray-200 transition-all duration-300"
+                onClick={onClose}
+              />
+            </div>
+            <div className="flex justify-end gap-4">
+              <Bottom
+                color="gray"
+                disabled={false}
+                text="Cancel"
+                onClick={onClose}
+              />
+              {onSave && (
+                <Bottom
+                  color={modalDelete ? "red" : "blue"}
+                  disabled={disabledBtn}
+                  text={textBtn || "Save"}
+                  onClick={onSave}
+                />
+              )}
+            </div>
           </div>
         </div>
       ) : (

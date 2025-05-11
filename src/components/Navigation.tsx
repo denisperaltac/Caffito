@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import InventarioMenu from "./InventarioMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
-import MoneyBag from "../assets/MoneyBag.svg";
+import MoneyBag from "../assets/svg/MoneyBagWhite.svg";
 import { FaHome, FaShoppingCart, FaCog, FaUsers } from "react-icons/fa";
 
 const Navigation: React.FC = () => {

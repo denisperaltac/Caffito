@@ -6,6 +6,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Navigation from "./components/Navigation";
 import InventoryPage from "./pages/inventory/InventoryPage";
 import StockManagementPage from "./pages/inventory/StockManagementPage";
@@ -25,6 +26,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import { authService } from "./services/authService";
 import CashierClosuresPage from "./pages/cash/CashierClosuresPage";
 import ClientsPage from "./pages/clients/ClientsPage";
+import { Home } from "./pages/Home";
 
 // Componente para proteger rutas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -52,7 +54,7 @@ const AppContent: React.FC = () => {
             path="/"
             element={
               <PrivateRoute>
-                <InventoryPage />
+                <Home />
               </PrivateRoute>
             }
           />
@@ -196,6 +198,7 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <Router>
+      <Toaster position="top-right" />
       <AppContent />
     </Router>
   );

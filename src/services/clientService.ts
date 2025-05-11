@@ -1,5 +1,6 @@
 import axiosInstance from "../config/axiosConfig";
 import { API_URL } from "../constants/api";
+import { toast } from "react-hot-toast";
 
 export interface Cliente {
   id: number;
@@ -15,6 +16,7 @@ export interface Cliente {
   direccion: string;
   createdAt: string;
   updatedAt: string;
+  tipoDocumentoId?: number;
 }
 
 export interface GetClientesParams {
@@ -79,8 +81,16 @@ export const clientService = {
   },
 
   createCliente: async (cliente: Partial<Cliente>): Promise<Cliente> => {
+    const promise = axiosInstance.post(`${API_URL}/clientes`, cliente);
+
+    toast.promise(promise, {
+      loading: "Creando cliente...",
+      success: "Cliente creado exitosamente",
+      error: "Error al crear el cliente",
+    });
+
     try {
-      const response = await axiosInstance.post(`${API_URL}/clientes`, cliente);
+      const response = await promise;
       return response.data;
     } catch (error) {
       console.error("Error al crear el cliente:", error);
@@ -88,14 +98,15 @@ export const clientService = {
     }
   },
 
-  updateCliente: async (
-    id: number,
-    cliente: Partial<Cliente>
-  ): Promise<Cliente> => {
+  updateCliente: async (cliente: Partial<Cliente>): Promise<Cliente> => {
     try {
-      const response = await axiosInstance.put(
-        `${API_URL}/clientes/${id}`,
-        cliente
+      const response = await toast.promise(
+        axiosInstance.put(`${API_URL}/clientes`, cliente),
+        {
+          loading: "Actualizando cliente...",
+          success: "Cliente actualizado exitosamente",
+          error: "Error al actualizar el cliente",
+        }
       );
       return response.data;
     } catch (error) {
@@ -104,11 +115,23 @@ export const clientService = {
     }
   },
 
-  deleteCliente: async (id: number): Promise<void> => {
+  deactiveCliente: async (cliente: Partial<Cliente>): Promise<Cliente> => {
+    const promise = axiosInstance.put(`${API_URL}/clientes`, {
+      ...cliente,
+      activo: false,
+    });
+
+    toast.promise(promise, {
+      loading: "Desactivando cliente...",
+      success: "Cliente desactivado exitosamente",
+      error: "Error al desactivar el cliente",
+    });
+
     try {
-      await axiosInstance.delete(`${API_URL}/clientes/${id}`);
+      const response = await promise;
+      return response.data;
     } catch (error) {
-      console.error("Error al eliminar el cliente:", error);
+      console.error("Error al actualizar el cliente:", error);
       throw error;
     }
   },

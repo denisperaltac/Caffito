@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { clientService } from "../../services/clientService";
+import { useState } from "react";
 import {
   FaEdit,
   FaTrash,
@@ -18,7 +17,8 @@ import {
 import { Tooltip } from "react-tooltip";
 import { Cliente } from "../../services/clientService";
 import { SortField } from "../../types/cliente";
-import ModalEditClient from "./ModalEditClient";
+import { ModalEditClient } from "./ModalEditClient";
+import { ModalDeactivateClient } from "./ModalDeactivateClient";
 
 interface TableClientsProps {
   loadClientes: () => Promise<void>;
@@ -38,6 +38,7 @@ export const TableClients = ({
 }: TableClientsProps) => {
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
   const [open, setOpen] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
 
   const handleEdit = (cliente: Cliente) => {
     setSelectedClient(cliente);
@@ -45,18 +46,8 @@ export const TableClients = ({
   };
 
   const handleDelete = async (cliente: Cliente) => {
-    if (
-      window.confirm(
-        `¿Estás seguro de que deseas eliminar al cliente ${cliente.nombre.trim()}?`
-      )
-    ) {
-      try {
-        await clientService.deleteCliente(cliente.id);
-        await loadClientes();
-      } catch (error) {
-        console.error("Error al eliminar el cliente:", error);
-      }
-    }
+    setSelectedClient(cliente);
+    setOpenDelete(true);
   };
 
   const handleSort = (field: SortField) => {
@@ -148,23 +139,23 @@ export const TableClients = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {clientes?.map((cliente) => (
             <tr key={cliente.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.id}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.nombre.trim()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.apellido.trim()}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.tipoDocumentoNombre
                   ? `${
                       cliente.tipoDocumentoNombre
                     } - ${cliente.numeroDocumento.trim()}`
                   : cliente.numeroDocumento?.trim() || "-"}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center space-x-4">
                   <div
                     className="flex items-center space-x-1"
@@ -196,14 +187,14 @@ export const TableClients = ({
                   <Tooltip id={`empleado-${cliente.id}`} />
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.activo ? (
                   <FaCheck className="w-5 h-5 text-green-600" />
                 ) : (
                   <FaTimes className="w-5 h-5 text-red-600" />
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end space-x-2">
                   <button
                     onClick={() => handleEdit(cliente)}
@@ -234,6 +225,13 @@ export const TableClients = ({
         client={selectedClient}
         open={open}
         onClose={() => setOpen(false)}
+        loadClientes={loadClientes}
+      />
+      <ModalDeactivateClient
+        client={selectedClient || ({} as Cliente)}
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        loadClientes={loadClientes}
       />
     </div>
   );
