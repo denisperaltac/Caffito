@@ -16,3 +16,12 @@ tr:nth-child(odd) {
 tr:hover {
   background-color: rgb(227, 227, 227);
 }
+
+.background-login {
+  background: #ffffff;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(234, 11, 11, 0.5) 100%
+  );
+}

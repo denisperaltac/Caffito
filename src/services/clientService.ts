@@ -21,8 +21,8 @@ export interface GetClientesParams {
   page?: number;
   size?: number;
   sort?: string;
-  nombre?: string;
-  apellido?: string;
+  "nombre.contains"?: string;
+  "apellido.contains"?: string;
   numeroDocumento?: string;
   tipoDocumentoId?: number;
   mayorista?: boolean;
