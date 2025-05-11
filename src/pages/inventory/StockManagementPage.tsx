@@ -150,10 +150,6 @@ const StockManagementPage: React.FC = () => {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
