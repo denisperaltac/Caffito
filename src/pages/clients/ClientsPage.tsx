@@ -38,6 +38,7 @@ const ClientsPage: React.FC = () => {
     apellido: "",
     nombre: "",
   });
+
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {

@@ -13,8 +13,7 @@ const ModalEditClient = ({
 }) => {
   const [formData, setFormData] = useState<Cliente | null>(client);
   return (
-    <Modal open={open} onClose={onClose}>
-      <p>Hola</p>
+    <Modal open={open} onClose={onClose} size="w-1/2 h-1/2">
       {formData && (
         <div>
           <h1>Edit Client</h1>
