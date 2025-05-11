@@ -226,7 +226,7 @@ const CashierClosuresPage: React.FC = () => {
   }
 
   return (
-    <div className="container w-full">
+    <div className="container min-w-full">
       <div className="flex justify-between items-center mb-6 w-full">
         <h1 className="text-2xl font-bold text-gray-800">Cierres de Caja</h1>
         <div>
@@ -254,7 +254,7 @@ const CashierClosuresPage: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg max-h-[65vh] overflow-scroll w-[95vw]">
+      <div className="bg-white shadow-md rounded-lg max-h-[65vh] overflow-auto w-full">
         <CashierTable
           cajas={cajas}
           onView={handleView}

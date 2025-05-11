@@ -17,6 +17,11 @@ tr:hover {
   background-color: rgb(227, 227, 227);
 }
 
+th {
+  background-color: #ffffff;
+  border-bottom: 2px solid #898989;
+}
+
 .background-login {
   background: #ffffff;
   background: linear-gradient(

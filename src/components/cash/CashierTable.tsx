@@ -52,34 +52,34 @@ const CashierTable: React.FC<CashierTableProps> = ({
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               User
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Ubicación
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Estado
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Fecha inicio
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Fecha cierre
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Inicio
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Total ingreso
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Cierre
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Arqueo
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               Acciones
             </th>
           </tr>
@@ -87,10 +87,10 @@ const CashierTable: React.FC<CashierTableProps> = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {cajas?.map((caja) => (
             <tr key={caja.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 {caja.userLogin}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div
                   data-tooltip-id={`punto-venta-${caja.id}`}
                   data-tooltip-content={caja.puntoDeVentaNombre}
@@ -102,7 +102,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                 </div>
                 <Tooltip id={`punto-venta-${caja.id}`} />
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div
                   data-tooltip-id={`estado-${caja.id}`}
                   data-tooltip-content={
@@ -122,32 +122,32 @@ const CashierTable: React.FC<CashierTableProps> = ({
                 </div>
                 <Tooltip id={`estado-${caja.id}`} />
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex flex-col">
                   <span>{formatDate(caja.fecha).date}</span>
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-gray-500 text-sm">
                     {formatDate(caja.fecha).time}
                   </span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex flex-col">
                   <span>{formatDate(caja.fechaCierre).date}</span>
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-gray-500 text-sm">
                     {formatDate(caja.fechaCierre).time}
                   </span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 {formatCurrency(caja.inicio)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 {formatCurrency(caja.ingreso)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 {caja.cierre ? formatCurrency(caja.cierre) : "-"}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
+              <td className="px-6 py-3 whitespace-nowrap text-sm">
                 {caja.cierre ? (
                   <span
                     className={`font-medium ${
@@ -162,7 +162,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                   "-"
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => onView(caja)}

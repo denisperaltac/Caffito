@@ -76,42 +76,42 @@ export const TableClients = ({
         <thead className="bg-gray-50">
           <tr>
             <th
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
+              className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
               onClick={() => handleSort("id")}
             >
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 md:gap-2">
                 <FaIdCard className="w-4 h-4" />
                 <span>ID</span>
                 {renderSortIcon("id")}
               </div>
             </th>
             <th
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
+              className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
               onClick={() => handleSort("nombre")}
             >
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 md:gap-2">
                 <FaUserAlt className="w-4 h-4" />
                 <span>Nombre</span>
                 {renderSortIcon("nombre")}
               </div>
             </th>
             <th
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
+              className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
               onClick={() => handleSort("apellido")}
             >
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 md:gap-2">
                 <FaUserAlt className="w-4 h-4" />
                 <span>Apellido</span>
                 {renderSortIcon("apellido")}
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <div className="flex items-center space-x-1">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center space-x-1 md:gap-2">
                 <FaIdCard className="w-4 h-4" />
                 <span>Documento</span>
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
               <div className="flex items-center space-x-2">
                 <FaStore className="w-4 h-4" />
                 <FaBriefcase className="w-4 h-4" />
@@ -119,17 +119,17 @@ export const TableClients = ({
               </div>
             </th>
             <th
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
+              className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-300"
               onClick={() => handleSort("activo")}
             >
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 md:gap-2">
                 <FaToggleOn className="w-4 h-4" />
                 <span>Activo</span>
                 {renderSortIcon("activo")}
               </div>
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <div className="flex items-center justify-end space-x-1">
+            <th className="px-6 py-3 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <div className="flex items-center justify-end space-x-1 md:gap-2">
                 <FaCog className="w-4 h-4" />
                 <span>Acciones</span>
               </div>
@@ -158,7 +158,7 @@ export const TableClients = ({
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center space-x-4">
                   <div
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 md:gap-2"
                     data-tooltip-id={`mayorista-${cliente.id}`}
                     data-tooltip-content={
                       cliente.mayorista ? "Mayorista" : "No es mayorista"
@@ -172,7 +172,7 @@ export const TableClients = ({
                   </div>
                   <Tooltip id={`mayorista-${cliente.id}`} />
                   <div
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 md:gap-2"
                     data-tooltip-id={`empleado-${cliente.id}`}
                     data-tooltip-content={
                       cliente.empleado ? "Empleado" : "No es empleado"

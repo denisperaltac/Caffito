@@ -1,77 +1,112 @@
-import React from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  setCurrentPage: (page: number) => void;
+  totalItems: number;
+  items: any[];
 }
 
-const Pagination: React.FC<PaginationProps> = ({
+export const Pagination = ({
   currentPage,
   totalPages,
-  onPageChange,
-}) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i);
+  setCurrentPage,
+  items,
+  totalItems,
+}: PaginationProps) => {
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+  const pages = [];
+  const maxVisiblePages = 5;
+  let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(0, endPage - maxVisiblePages + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(
+      <button
+        key={i}
+        onClick={() => handlePageChange(i)}
+        className={`px-3 py-1 rounded-md ${
+          currentPage === i
+            ? "bg-blue-600 text-white"
+            : "bg-white text-gray-700 hover:bg-gray-300"
+        }`}
+      >
+        {i + 1}
+      </button>
+    );
+  }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex-1 flex justify-between sm:hidden">
+    <>
+      <div className="flex items-center justify-center space-x-2 mt-4">
         <button
-          onClick={() => onPageChange(currentPage - 1)}
+          onClick={() => handlePageChange(0)}
           disabled={currentPage === 0}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-md bg-white text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="w-4 h-4">
+            <FaChevronLeft />
+          </span>
+        </button>
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 0}
+          className="p-2 rounded-md bg-white text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Anterior
         </button>
+        {startPage > 0 && (
+          <>
+            <button
+              onClick={() => handlePageChange(0)}
+              className="px-3 py-1 rounded-md bg-white text-gray-700 hover:bg-gray-300"
+            >
+              1
+            </button>
+            {startPage > 1 && <span className="px-2">...</span>}
+          </>
+        )}
+        {pages}
+        {endPage < totalPages - 1 && (
+          <>
+            {endPage < totalPages - 2 && <span className="px-2">...</span>}
+            <button
+              onClick={() => handlePageChange(totalPages - 1)}
+              className="px-3 py-1 rounded-md bg-white text-gray-700 hover:bg-gray-300"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
         <button
-          onClick={() => onPageChange(currentPage + 1)}
+          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages - 1}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-md bg-white text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Siguiente
         </button>
+        <button
+          onClick={() => handlePageChange(totalPages - 1)}
+          disabled={currentPage === totalPages - 1}
+          className="p-2 rounded-md bg-white text-gray-700 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="w-4 h-4">
+            <FaChevronRight />
+          </span>
+        </button>
       </div>
-      <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
-        <div>
-          <nav
-            className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-            aria-label="Pagination"
-          >
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Anterior</span>
-              <FaChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            {pages.map((page) => (
-              <button
-                key={page}
-                onClick={() => onPageChange(page)}
-                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                  currentPage === page
-                    ? "z-10 bg-indigo-50 border-indigo-500 text-indigo-600"
-                    : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                }`}
-              >
-                {page + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={currentPage === totalPages - 1}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Siguiente</span>
-              <FaChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </nav>
-        </div>
+      <div className="text-center text-sm text-gray-500 mt-2">
+        Mostrando {items?.length} de {totalItems} items
       </div>
-    </div>
+    </>
   );
 };
-
-export default Pagination;

@@ -5,7 +5,7 @@ import {
   Cliente,
   GetClientesParams,
 } from "../../services/clientService";
-import { Pagination } from "../../components/clients/Pagination";
+import { Pagination } from "../../components/common/Pagination";
 import { TableClients } from "../../components/clients/TableClients";
 import { Bottom } from "../../components/common/Bottom";
 import { ModalAddClient } from "../../components/clients/ModalAddClient";
@@ -162,7 +162,7 @@ const ClientsPage: React.FC = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
-            clientes={clientes}
+            items={clientes}
             totalItems={totalItems}
           />
         </>

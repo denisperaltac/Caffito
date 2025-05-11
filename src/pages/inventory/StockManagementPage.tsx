@@ -3,6 +3,7 @@ import { productService } from "../../services/productService";
 import Loader from "../../components/common/Loader";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Producto } from "../../types/inventory";
+import { Pagination } from "../../components/common/Pagination";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -163,11 +164,8 @@ const StockManagementPage: React.FC = () => {
 
   return (
     <div className="container px-4 min-w-[95vw] h-[85vh]">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-2xl font-bold text-gray-800">Gestión de Stock</h1>
-        <div className="text-sm text-gray-600">
-          Mostrando {productos?.length} de {totalCount} productos
-        </div>
       </div>
 
       {error && (
@@ -177,41 +175,32 @@ const StockManagementPage: React.FC = () => {
       )}
 
       {/* Filtros */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div className="mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Buscar Producto
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Nombre del producto..."
-              />
-            </div>
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nombre del producto..."
+            />
           </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Código de Referencia
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchCode}
-                onChange={handleCodeSearchChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Código de referencia..."
-              />
-            </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              value={searchCode}
+              onChange={handleCodeSearchChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Código de referencia..."
+            />
           </div>
         </div>
       </div>
 
       {/* Tabla de Productos */}
-      <div className="bg-white shadow-md rounded-lg overflow-auto max-h-[65%]">
+      <div className="bg-white shadow-md rounded-lg overflow-auto h-[65vh]">
         <div className="overflow-x-auto">
           {isSearching ? (
             <div className="flex justify-center items-center h-64">
@@ -219,36 +208,36 @@ const StockManagementPage: React.FC = () => {
             </div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
                     Código Referencia
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
                     Nombre
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Categoría
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Marca
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Cantidad
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
                     ($) Costo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
                     ($) Venta
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     ($) May.
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -260,13 +249,13 @@ const StockManagementPage: React.FC = () => {
                   );
                   return (
                     <tr key={producto.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {producto.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                         {producto.codigoReferencia.trim()}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-3">
                         <div className="text-sm font-medium text-gray-900">
                           {producto.nombre.trim()}
                         </div>
@@ -274,34 +263,34 @@ const StockManagementPage: React.FC = () => {
                           {producto.descripcion?.trim()}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {producto.categoriaId.nombre.trim()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {producto.marcaId.nombre.trim()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {producto.cantidad}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                         {proveedorActivo?.precioCosto.toLocaleString("es-AR", {
                           style: "currency",
                           currency: "ARS",
                         })}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                         {proveedorActivo?.precioVenta.toLocaleString("es-AR", {
                           style: "currency",
                           currency: "ARS",
                         })}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {proveedorActivo?.precioMayorista.toLocaleString(
                           "es-AR",
                           { style: "currency", currency: "ARS" }
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
                         <button
                           className="text-blue-600 hover:text-blue-900 mr-3"
                           onClick={() => handleEdit(producto)}
@@ -326,129 +315,13 @@ const StockManagementPage: React.FC = () => {
 
       {/* Paginación */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6">
-          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-            {/* Primera página */}
-            <button
-              onClick={() => handlePageChange(0)}
-              disabled={currentPage === 0}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Primera</span>
-              <svg
-                className="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {/* Página anterior */}
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-              className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Anterior</span>
-              <svg
-                className="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {/* Páginas alrededor de la actual */}
-            {(() => {
-              const pages = [];
-              const maxPagesToShow = 5;
-              let startPage = Math.max(
-                0,
-                currentPage - Math.floor(maxPagesToShow / 2)
-              );
-              let endPage = Math.min(
-                totalPages - 1,
-                startPage + maxPagesToShow - 1
-              );
-
-              if (endPage - startPage + 1 < maxPagesToShow) {
-                startPage = Math.max(0, endPage - maxPagesToShow + 1);
-              }
-
-              for (let i = startPage; i <= endPage; i++) {
-                pages.push(
-                  <button
-                    key={i}
-                    onClick={() => handlePageChange(i)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      currentPage === i
-                        ? "z-10 bg-indigo-50 border-indigo-500 text-indigo-600"
-                        : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                );
-              }
-
-              return pages;
-            })()}
-
-            {/* Página siguiente */}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages - 1}
-              className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Siguiente</span>
-              <svg
-                className="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {/* Última página */}
-            <button
-              onClick={() => handlePageChange(totalPages - 1)}
-              disabled={currentPage === totalPages - 1}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span className="sr-only">Última</span>
-              <svg
-                className="h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0zM4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </nav>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+          totalItems={totalCount}
+          items={productos}
+        />
       )}
 
       {/* Modal de Edición */}
