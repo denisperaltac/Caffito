@@ -4,7 +4,13 @@ import InventarioMenu from "./InventarioMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
 import MoneyBag from "../assets/svg/MoneyBagWhite.svg";
-import { FaHome, FaShoppingCart, FaCog, FaUsers } from "react-icons/fa";
+import {
+  FaHome,
+  FaShoppingCart,
+  FaCog,
+  FaUsers,
+  FaMoneyBillWave,
+} from "react-icons/fa";
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -25,6 +31,7 @@ const Navigation: React.FC = () => {
       if (path === "/clientes") return `${baseClass} bg-pink-600 text-white`;
       if (path === "/configuracion")
         return `${baseClass} bg-yellow-600 text-white`;
+      if (path === "/gastos") return `${baseClass} bg-red-600 text-white`;
       if (path === "/cuenta") return `${baseClass} bg-orange-600 text-white`;
       return `${baseClass} bg-gray-700 text-white`;
     }
@@ -66,6 +73,10 @@ const Navigation: React.FC = () => {
                 <Link to="/clientes" className={getNavItemClass("/clientes")}>
                   <FaUsers className="w-5 h-5" />
                   <span className="hidden lg:inline">Clientes</span>
+                </Link>
+                <Link to="/gastos" className={getNavItemClass("/gastos")}>
+                  <FaMoneyBillWave className="w-5 h-5" />
+                  <span className="hidden lg:inline">Gastos</span>
                 </Link>
                 <Link
                   to="/configuracion"
