@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Gasto } from "../../types/expenses";
 import { expensesService } from "../../services/expensesService";
-import { FaTimes } from "react-icons/fa";
 import { Input } from "../common/Input";
 import { Modal } from "../common/Modal";
 interface ExpenseModalProps {
