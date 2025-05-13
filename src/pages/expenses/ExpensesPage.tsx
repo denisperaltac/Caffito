@@ -7,7 +7,7 @@ import ExpenseModal from "../../components/expenses/ExpenseModal";
 
 const ITEMS_PER_PAGE = 10;
 
-type SortField = "gastoId" | "name" | "monto" | "fecha" | "pagado";
+type SortField = "id" | "name" | "monto" | "fecha" | "pagado";
 type SortDirection = "asc" | "desc";
 
 const ExpensesPage: React.FC = () => {
@@ -17,7 +17,7 @@ const ExpensesPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [sortField, setSortField] = useState<SortField>("gastoId");
+  const [sortField, setSortField] = useState<SortField>("id");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -75,11 +75,13 @@ const ExpensesPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number | undefined) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar este gasto?")) {
       try {
-        await expensesService.deleteGasto(id);
-        loadGastos();
+        if (id) {
+          await expensesService.deleteGasto(id);
+          loadGastos();
+        }
       } catch (error) {
         console.error("Error al eliminar el gasto:", error);
       }
@@ -142,7 +144,7 @@ const ExpensesPage: React.FC = () => {
                 <tr>
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("gastoId")}
+                    onClick={() => handleSort("id")}
                   >
                     ID
                   </th>
@@ -177,9 +179,9 @@ const ExpensesPage: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {gastos?.map((gasto) => (
-                  <tr key={gasto.gastoId}>
+                  <tr key={gasto.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {gasto.gastoId}
+                      {gasto.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {gasto.name}
@@ -212,7 +214,7 @@ const ExpensesPage: React.FC = () => {
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(gasto.gastoId)}
+                        onClick={() => handleDelete(gasto.id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         Eliminar

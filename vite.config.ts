@@ -7,7 +7,6 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://test.caffito.com.ar",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
@@ -15,7 +14,7 @@ export default defineConfig({
           proxy.on("error", (err, _req, _res) => {
             console.error("proxy error", err);
           });
-          proxy.on("proxyReq", (proxyReq, req, _res) => {
+          proxy.on("proxyReq", (_, req, _res) => {
             console.log("Sending Request to the Target:", req.method, req.url);
           });
           proxy.on("proxyRes", (proxyRes, req, _res) => {

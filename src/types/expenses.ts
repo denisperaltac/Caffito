@@ -1,5 +1,5 @@
 export interface Gasto {
-  gastoId: number;
+  id?: number;
   name: string;
   monto: number;
   categoriaId?: number;
@@ -7,8 +7,8 @@ export interface Gasto {
   fecha: string;
   hora?: string;
   notes?: string;
-  pagado: boolean;
-  deleted: boolean;
+  pagado?: boolean;
+  deleted?: boolean;
 }
 
 export interface GetGastosParams {

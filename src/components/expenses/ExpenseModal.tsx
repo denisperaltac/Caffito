@@ -3,6 +3,7 @@ import { Gasto } from "../../types/expenses";
 import { expensesService } from "../../services/expensesService";
 import { Input } from "../common/Input";
 import { Modal } from "../common/Modal";
+
 interface ExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +24,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     hora: new Date().toTimeString().slice(0, 5),
     notes: "",
     pagado: false,
+    categoriaId: undefined,
+    proveedorId: undefined,
   });
 
   useEffect(() => {
@@ -39,6 +42,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         hora: new Date().toTimeString().slice(0, 5),
         notes: "",
         pagado: false,
+        categoriaId: undefined,
+        proveedorId: undefined,
       });
     }
   }, [expense]);
@@ -46,10 +51,10 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (expense?.gastoId) {
+      if (expense?.id) {
         await expensesService.updateGasto({
           ...formData,
-          gastoId: expense.gastoId,
+          id: expense.id,
         });
       } else {
         await expensesService.createGasto(formData);
@@ -69,7 +74,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
       onClose={onClose}
       onSave={handleSubmit}
       textBtn="Guardar"
-      size="w-1/3 h-[90%]"
+      size="w-1/2 h-full"
     >
       <div className="flex flex-col gap-4 justify-start items-center w-full h-full">
         <div className="flex h-[10%] mt-4 flex-row justify-between w-full">
@@ -78,7 +83,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 w-full">
+        <form onSubmit={handleSubmit} className="w-full grid grid-cols-2 gap-4">
           <Input
             label="Nombre"
             name="name"
@@ -96,6 +101,28 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
             className="w-full"
             onChange={(e) =>
               setFormData({ ...formData, monto: Number(e.target.value) })
+            }
+          />
+
+          <Input
+            label="ID Categoría"
+            name="categoriaId"
+            type="number"
+            value={formData.categoriaId}
+            className="w-full"
+            onChange={(e) =>
+              setFormData({ ...formData, categoriaId: Number(e.target.value) })
+            }
+          />
+
+          <Input
+            label="ID Proveedor"
+            name="proveedorId"
+            type="number"
+            value={formData.proveedorId}
+            className="w-full"
+            onChange={(e) =>
+              setFormData({ ...formData, proveedorId: Number(e.target.value) })
             }
           />
 

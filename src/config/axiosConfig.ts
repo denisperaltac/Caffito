@@ -2,7 +2,6 @@ import axios from "axios";
 import { authService } from "../services/authService";
 
 const axiosInstance = axios.create({
-  baseURL: "https://test.caffito.com.ar",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json, text/plain, */*",
@@ -40,5 +39,5 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export const API_URL = "https://test.caffito.com.ar/api";
+export const API_URL = import.meta.env.VITE_API_URL;
 export default axiosInstance;

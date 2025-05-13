@@ -15,13 +15,7 @@ export const Modal = ({
   children: React.ReactNode;
   open: boolean;
   onClose: () => void;
-  size?:
-    | "w-[90%] h-[90%]"
-    | "w-2/3 h-2/3"
-    | "w-1/2 h-1/2"
-    | "w-1/3 h-1/3"
-    | "w-1/4 h-1/4"
-    | "w-1/3 h-[90%]";
+  size?: string;
   onSave?: any;
   disabledBtn?: boolean;
   modalDelete?: boolean;
