@@ -1,4 +1,3 @@
-import React from "react";
 import { formatDate } from "../../utils/formatters";
 import { formatCurrency } from "../../utils/formatters";
 import { CategoriaFormat } from "../common/CategoriaFormat";
