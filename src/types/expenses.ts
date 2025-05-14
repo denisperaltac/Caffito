@@ -4,6 +4,12 @@ export interface Gasto {
   monto: number;
   categoriaId?: number;
   proveedorId?: number;
+  categoria?: {
+    id: number;
+  };
+  proveedor?: {
+    id: number;
+  };
   fecha: string;
   hora?: string;
   notes?: string;

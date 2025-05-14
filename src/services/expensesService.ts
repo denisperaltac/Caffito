@@ -97,4 +97,24 @@ export const expensesService = {
       throw error;
     }
   },
+
+  getGastosProveedor: async (): Promise<any[]> => {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/gasto-proveedors`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener los gastos por proveedor:", error);
+      throw error;
+    }
+  },
+
+  getGastosCategory: async (): Promise<any[]> => {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/gasto-categories`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener los gastos por categoría:", error);
+      throw error;
+    }
+  },
 };

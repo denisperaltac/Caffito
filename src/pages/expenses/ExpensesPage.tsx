@@ -4,6 +4,7 @@ import { Pagination } from "../../components/common/Pagination";
 import Loader from "../../components/common/Loader";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import ExpenseModal from "../../components/expenses/ExpenseModal";
+import { ExpensesTable } from "../../components/expenses/ExpensesTable";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -138,93 +139,13 @@ const ExpensesPage: React.FC = () => {
             <Loader size="lg" />
           </div>
         ) : Array.isArray(gastos) && gastos.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("id")}
-                  >
-                    ID
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("name")}
-                  >
-                    Nombre
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("monto")}
-                  >
-                    Monto
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("fecha")}
-                  >
-                    Fecha
-                  </th>
-                  <th
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort("pagado")}
-                  >
-                    Estado
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {gastos?.map((gasto) => (
-                  <tr key={gasto.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {gasto.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {gasto.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(gasto.monto)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDate(gasto.fecha)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          gasto.pagado
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {gasto.pagado ? "Pagado" : "Pendiente"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => {
-                          setSelectedGasto(gasto);
-                          setShowModal(true);
-                        }}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(gasto.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ExpensesTable
+            gastos={gastos}
+            handleSort={handleSort}
+            handleDelete={handleDelete}
+            setSelectedGasto={setSelectedGasto}
+            setShowModal={setShowModal}
+          />
         ) : (
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">No hay gastos disponibles</p>

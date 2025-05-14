@@ -4,6 +4,7 @@ import Loader from "../../components/common/Loader";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Producto } from "../../types/inventory";
 import { Pagination } from "../../components/common/Pagination";
+import { CategoriaFormat } from "../../components/common/CategoriaFormat";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -243,6 +244,10 @@ const StockManagementPage: React.FC = () => {
                   const proveedorActivo = producto.productoProveedors.find(
                     (pp) => pp.activo
                   );
+                  let { icon, color } = CategoriaFormat(
+                    producto.categoriaId?.nombre?.trim() || "Sin categoría"
+                  );
+
                   return (
                     <tr key={producto.id} className="hover:bg-gray-50">
                       <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
@@ -260,7 +265,16 @@ const StockManagementPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
-                        {producto.categoriaId.nombre.trim()}
+                        {producto.categoriaId?.nombre ? (
+                          <span
+                            className={`flex flex-row items-center justify-between gap-2 px-2 py-1 w-full h-full rounded-lg`}
+                            style={{ backgroundColor: color }}
+                          >
+                            {producto.categoriaId?.nombre.trim()} {icon}
+                          </span>
+                        ) : (
+                          <span>Sin Categoria</span>
+                        )}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                         {producto.marcaId.nombre.trim()}
