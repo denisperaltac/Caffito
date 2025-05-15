@@ -1,4 +1,4 @@
-import { qz } from "qz-tray";
+import qz from "qz-tray";
 import { Factura } from "../types/configuration";
 
 // Configuración de la impresora
@@ -9,16 +9,50 @@ const printerConfig = {
 };
 
 // Inicializar qz-tray
-const initializeQz = async () => {
+export const initializeQz = async () => {
   try {
-    if (!qz.websocket.isActive()) {
-      console.log("Iniciando conexión con qz-tray...");
-      await qz.websocket.connect();
-      console.log("Conexión establecida con qz-tray");
+    // Asegurarse de que qz-tray está cargado
+    if (!qz) {
+      throw new Error("qz-tray no está cargado correctamente");
     }
+
+    // Verificar si ya hay una conexión activa
+    if (qz.websocket.isActive()) {
+      console.log("Ya existe una conexión activa con qz-tray");
+      return true;
+    }
+
+    // Intentar establecer la conexión
+    console.log("Intentando conectar con qz-tray...");
+
+    // Intentar conectar con un timeout
+    const connectionPromise = qz.websocket.connect();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(
+        () => reject(new Error("Timeout al conectar con QZ Tray")),
+        5000
+      );
+    });
+
+    await Promise.race([connectionPromise, timeoutPromise]);
+    console.log("Conexión establecida con qz-tray");
     return true;
   } catch (error) {
     console.error("Error al inicializar qz-tray:", error);
+    if (error instanceof Error) {
+      if (error.message.includes("Unable to establish connection")) {
+        console.error("Por favor, asegúrate de que:");
+        console.error(
+          "1. QZ Tray está instalado y ejecutándose en tu computadora"
+        );
+        console.error(
+          "2. La aplicación web está accediendo desde http://localhost o https://"
+        );
+        console.error(
+          "3. QZ Tray tiene permisos para conectarse a esta aplicación"
+        );
+      }
+    }
     throw error;
   }
 };

@@ -1,13 +1,13 @@
 declare module "qz-tray" {
-  export const qz: {
+  interface QZ {
     websocket: {
+      isActive(): boolean;
       connect(): Promise<void>;
       disconnect(): Promise<void>;
-      isActive(): boolean;
     };
-    printers: {
-      find(name: string): Promise<string>;
-    };
-    print(config: any): Promise<any>;
-  };
+    print(config: any): Promise<void>;
+  }
+
+  const qz: QZ;
+  export default qz;
 }

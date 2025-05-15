@@ -17,6 +17,7 @@ import CancelModal from "../../components/pointOfSale/CancelModal";
 import CustomProductModal from "../../components/pointOfSale/CustomProductModal";
 import axiosInstance from "../../config/axiosConfig";
 import { toast } from "react-hot-toast";
+import { initializeQz } from "../../services/printService";
 
 interface Producto {
   id: number;
@@ -111,7 +112,8 @@ const PointOfSalePage: React.FC = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
-  console.log(factura);
+  console.log(facturaGuardada);
+
   // Efecto para establecer consumidor final cuando se cargan los clientes
   useEffect(() => {
     if (clientes.length > 0) {
@@ -133,6 +135,7 @@ const PointOfSalePage: React.FC = () => {
   // Load initial data
   useEffect(() => {
     loadInitialData();
+    initializeQz();
   }, []);
 
   const loadInitialData = async () => {
