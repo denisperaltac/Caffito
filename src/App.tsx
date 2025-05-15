@@ -27,6 +27,7 @@ import { authService } from "./services/authService";
 import CashierClosuresPage from "./pages/cash/CashierClosuresPage";
 import ClientsPage from "./pages/clients/ClientsPage";
 import ExpensesPage from "./pages/expenses/ExpensesPage";
+import Statistics from "./pages/Statistics";
 import { Home } from "./pages/Home";
 
 // Componente para proteger rutas
@@ -195,6 +196,14 @@ const AppContent: React.FC = () => {
             element={
               <PrivateRoute>
                 <ExpensesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/estadisticas"
+            element={
+              <PrivateRoute>
+                <Statistics />
               </PrivateRoute>
             }
           />

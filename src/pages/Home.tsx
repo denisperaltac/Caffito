@@ -2,6 +2,8 @@ import Box from "../assets/svg/Box.svg";
 import BoxPlus from "../assets/svg/BoxPlus.svg";
 import MoneyBag from "../assets/svg/MoneyBag.svg";
 import People from "../assets/svg/People.svg";
+import Bill from "../assets/svg/Bill.svg";
+import ChartLineUp from "../assets/svg/ChartLineUp.svg";
 import ShoppingCart from "../assets/svg/ShoppingCart.svg";
 import { Link } from "react-router-dom";
 
@@ -10,7 +12,7 @@ export const Home = () => {
     {
       id: 1,
       title: "Gestionar inventario",
-      description: "Gestionar el inventario de productos",
+      description: "Alta, baja y modificacion de productos",
       icon: Box,
       color: "bg-blue-500",
       borderColor: "border-blue-500",
@@ -19,8 +21,18 @@ export const Home = () => {
     },
     {
       id: 2,
+      title: "Gestionar cajas",
+      description: "Cierra y abre nuevas cajas",
+      icon: MoneyBag,
+      color: "bg-yellow-500",
+      borderColor: "border-yellow-500",
+      hoverColor: "hover:bg-yellow-500/10",
+      link: "/caja/cierres",
+    },
+    {
+      id: 3,
       title: "Gestionar clientes",
-      description: "Gestionar los clientes",
+      description: "Alta, baja y modificacion de clientes",
       icon: People,
       color: "bg-green-500",
       borderColor: "border-green-500",
@@ -28,7 +40,7 @@ export const Home = () => {
       link: "/clientes",
     },
     {
-      id: 3,
+      id: 4,
       title: "Gestionar ventas",
       description: "Haz una venta",
       icon: ShoppingCart,
@@ -36,16 +48,6 @@ export const Home = () => {
       borderColor: "border-red-500",
       hoverColor: "hover:bg-red-500/10",
       link: "/ventas",
-    },
-    {
-      id: 4,
-      title: "Gestionar cajas",
-      description: "Gestionar las cajas",
-      icon: MoneyBag,
-      color: "bg-yellow-500",
-      borderColor: "border-yellow-500",
-      hoverColor: "hover:bg-yellow-500/10",
-      link: "/caja/cierres",
     },
     {
       id: 5,
@@ -56,6 +58,26 @@ export const Home = () => {
       borderColor: "border-purple-500",
       hoverColor: "hover:bg-purple-500/10",
       link: "/inventario/productos",
+    },
+    {
+      id: 6,
+      title: "Estadisticas",
+      description: "Estadisticas de ventas y gastos",
+      icon: ChartLineUp,
+      color: "bg-orange-500",
+      borderColor: "border-orange-500",
+      hoverColor: "hover:bg-orange-500/10",
+      link: "/estadisticas",
+    },
+    {
+      id: 7,
+      title: "Administrar gastos",
+      description: "Alta, baja y modificacion de gastos",
+      icon: Bill,
+      color: "bg-gray-500",
+      borderColor: "border-gray-500",
+      hoverColor: "hover:bg-gray-500/10",
+      link: "/gastos",
     },
   ];
 

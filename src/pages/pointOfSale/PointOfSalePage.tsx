@@ -112,8 +112,6 @@ const PointOfSalePage: React.FC = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
-  console.log(facturaGuardada);
-
   // Efecto para establecer consumidor final cuando se cargan los clientes
   useEffect(() => {
     if (clientes.length > 0) {

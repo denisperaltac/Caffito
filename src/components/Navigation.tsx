@@ -3,14 +3,15 @@ import { Link, useLocation } from "react-router-dom";
 import InventarioMenu from "./InventarioMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
-import MoneyBag from "../assets/svg/MoneyBagWhite.svg";
 import {
   FaHome,
   FaShoppingCart,
   FaCog,
   FaUsers,
   FaMoneyBillWave,
+  FaChartBar,
 } from "react-icons/fa";
+import { FaCashRegister } from "react-icons/fa6";
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -32,6 +33,8 @@ const Navigation: React.FC = () => {
       if (path === "/configuracion")
         return `${baseClass} bg-yellow-600 text-white`;
       if (path === "/gastos") return `${baseClass} bg-red-600 text-white`;
+      if (path === "/estadisticas")
+        return `${baseClass} bg-teal-600 text-white`;
       if (path === "/cuenta") return `${baseClass} bg-orange-600 text-white`;
       return `${baseClass} bg-gray-700 text-white`;
     }
@@ -40,50 +43,55 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gray-800">
-      <div className="max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Link to="/" className="text-white font-bold">
-                <img src={logo} alt="Logo" className="w-24 h-16" />
-              </Link>
-            </div>
-            <div className="block">
-              <div className="ml-10 flex items-baseline space-x-4">
+    <nav className="bg-gray-800 w-full z-50">
+      <div className="flex items-center justify-between h-16 w-full">
+        <div className="flex items-center w-full">
+          <div className="flex-shrink-0 px-5">
+            <Link to="/" className="text-white font-bold">
+              <img src={logo} alt="Logo" className="w-24 h-16" />
+            </Link>
+          </div>
+          <div className="block w-full">
+            <div className=" flex w-full items-baseline justify-between space-x-4">
+              <div className="flex items-center space-x-4">
                 <Link to="/" className={getNavItemClass("/")}>
                   <FaHome className="w-5 h-5" />
-                  <span className="hidden lg:inline">Inicio</span>
+                  <span className="hidden xl:inline">Inicio</span>
                 </Link>
 
                 <InventarioMenu getNavItemClass={getNavItemClass} />
 
                 <Link to="/caja/cierres" className={getNavItemClass("/caja")}>
-                  <img
-                    src={MoneyBag}
-                    alt="Caja"
-                    className="min-w-5 min-h-5 w-5 h-5"
-                  />
-                  <span className="hidden lg:inline">Caja</span>
+                  <FaCashRegister className="w-5 h-5" />
+                  <span className="hidden xl:inline">Caja</span>
                 </Link>
                 <Link to="/ventas" className={getNavItemClass("/ventas")}>
                   <FaShoppingCart className="w-5 h-5" />
-                  <span className="hidden lg:inline">Ventas</span>
+                  <span className="hidden xl:inline">Ventas</span>
                 </Link>
                 <Link to="/clientes" className={getNavItemClass("/clientes")}>
                   <FaUsers className="w-5 h-5" />
-                  <span className="hidden lg:inline">Clientes</span>
+                  <span className="hidden xl:inline">Clientes</span>
                 </Link>
                 <Link to="/gastos" className={getNavItemClass("/gastos")}>
                   <FaMoneyBillWave className="w-5 h-5" />
-                  <span className="hidden lg:inline">Gastos</span>
+                  <span className="hidden xl:inline">Gastos</span>
                 </Link>
+                <Link
+                  to="/estadisticas"
+                  className={getNavItemClass("/estadisticas")}
+                >
+                  <FaChartBar className="w-5 h-5" />
+                  <span className="hidden xl:inline">Estadísticas</span>
+                </Link>
+              </div>
+              <div className="flex items-center space-x-4">
                 <Link
                   to="/configuracion"
                   className={getNavItemClass("/configuracion")}
                 >
                   <FaCog className="w-5 h-5" />
-                  <span className="hidden lg:inline">Configuración</span>
+                  <span className="hidden xl:inline">Configuración</span>
                 </Link>
 
                 <AccountMenu getNavItemClass={getNavItemClass} />
