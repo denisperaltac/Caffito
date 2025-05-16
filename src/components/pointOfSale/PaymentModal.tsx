@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
+import { FaTrash, FaPlus } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatters";
 import { FaMoneyBillWave, FaCreditCard, FaExchangeAlt } from "react-icons/fa";
 import { FaRegRectangleList } from "react-icons/fa6";
