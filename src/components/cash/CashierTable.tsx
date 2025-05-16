@@ -42,7 +42,7 @@ const getShift = (dateString: string | null) => {
 
 const formatCurrency = (amount: number | null) => {
   if (amount === null) return "-";
-  return amount.toLocaleString("es-AR", {
+  return amount?.toLocaleString("es-AR", {
     style: "currency",
     currency: "ARS",
   });

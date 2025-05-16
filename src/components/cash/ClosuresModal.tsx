@@ -5,6 +5,7 @@ import { LuTruck } from "react-icons/lu";
 import { formatCurrency } from "../../utils/formatters";
 import { FaDollarSign } from "react-icons/fa";
 import { CierreCajaItem } from "../../services/cajaService";
+import { Bottom } from "../common/Bottom";
 
 interface ClosuresModalProps {
   closingAmount: number;
@@ -57,6 +58,7 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
   handleCloseCaja,
   showCloseModal,
   setShowCloseModal,
+  currentCaja,
 }) => {
   const [paymentTypes, setPaymentTypes] = useState<PaymentType[]>([
     { id: "1", nombre: "Efectivo", amount: 0, tipoPagoId: 1 },
@@ -72,7 +74,7 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
   );
 
   useEffect(() => {
-    const sum = paymentTypes.reduce((acc, curr) => acc + curr.amount, 0);
+    const sum = paymentTypes.reduce((acc, curr) => acc + (curr.amount || 0), 0);
     setTotalAmount(sum);
     setClosingAmount(sum);
   }, [paymentTypes]);
@@ -100,9 +102,11 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
   };
 
   const hasErrors = Object.values(inputErrors).some((error) => error);
-  const allInputsFilled = paymentTypes.every(
-    (type) => type.amount !== undefined && type.amount >= 0
-  );
+  const allInputsFilled =
+    paymentTypes.every((type) => {
+      const amount = type.amount || 0;
+      return amount >= 0 && amount !== undefined && amount !== null;
+    }) && paymentTypes.some((type) => (type.amount || 0) > 0);
 
   if (!showCloseModal) return null;
 
@@ -154,28 +158,37 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
           ))}
         </div>
 
-        <div className="border-t pt-4 mb-6">
-          <div className="flex justify-end mb-2">
-            <span className="text-2xl font-bold">
-              Total: {formatCurrency(totalAmount)}
-            </span>
-          </div>
+        <div className="border-t pt-4 mb-6 flex flex-col justify-end w-full items-end text-2xl">
+          <p className="text-2xl text-black font-bold">
+            Total: {formatCurrency(totalAmount)}
+          </p>
+          <p className="text-base text-gray-500">
+            Esperado: {formatCurrency(currentCaja?.ingreso || 0)}
+          </p>
+          <p
+            className={`text-base ${
+              totalAmount - (currentCaja?.ingreso || 0) > 0
+                ? "text-green-500"
+                : "text-red-500"
+            }`}
+          >
+            Diferencia:{" "}
+            {formatCurrency(totalAmount - (currentCaja?.ingreso || 0))}
+          </p>
         </div>
 
         <div className="flex justify-end space-x-4">
-          <button
+          <Bottom
+            color="gray"
+            text="Cancelar"
             onClick={() => setShowCloseModal(false)}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleCloseCajaSubmit}
+          />
+          <Bottom
+            color="blue"
             disabled={hasErrors || !allInputsFilled}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Cerrar Caja
-          </button>
+            text="Cerrar Caja"
+            onClick={handleCloseCajaSubmit}
+          />
         </div>
       </div>
     </div>

@@ -49,7 +49,7 @@ interface InvoiceDetailsModalProps {
 }
 
 const formatCurrency = (amount: number) => {
-  return amount.toLocaleString("es-AR", {
+  return amount?.toLocaleString("es-AR", {
     style: "currency",
     currency: "ARS",
   });
@@ -57,7 +57,7 @@ const formatCurrency = (amount: number) => {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString("es-AR", {
+  return date?.toLocaleString("es-AR", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -101,8 +101,8 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-4xl max-h-[90vh] overflow-hidden">
-        <div className="flex justify-between items-center p-4 border-b">
+      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-4xl h-[90vh] overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b max-h-14">
           <h2 className="text-xl font-semibold text-gray-800">
             Factura {factura.id}
           </h2>
@@ -122,7 +122,7 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
           </div>
         )}
 
-        <div className="p-4 overflow-auto max-h-[calc(90vh-12rem)]">
+        <div className="p-4 overflow-auto h-[calc(90vh-3.5rem)]">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>

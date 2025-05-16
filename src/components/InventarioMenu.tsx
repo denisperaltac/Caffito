@@ -3,8 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   FaBoxes,
   FaExchangeAlt,
-  FaChartLine,
-  FaClipboardList,
   FaTags,
   FaTruck,
   FaLayerGroup,
@@ -14,7 +12,8 @@ import {
 
 const InventarioMenu: React.FC<{
   getNavItemClass: (path: string) => string;
-}> = ({ getNavItemClass }) => {
+  showText?: boolean;
+}> = ({ getNavItemClass, showText }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -65,7 +64,8 @@ const InventarioMenu: React.FC<{
         className={getNavItemClass("/inventario")}
       >
         <FaBoxes className="w-5 h-5" />
-        <span className="hidden lg:inline">Inventario</span>
+        <span className="hidden xl:inline">Inventario</span>
+        {showText && <span>Inventario</span>}
         <svg
           className={`w-4 h-4 transition-transform ${
             isOpen ? "transform rotate-180" : ""
