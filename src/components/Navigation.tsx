@@ -47,7 +47,7 @@ const Navigation: React.FC = () => {
 
   return (
     <nav className="bg-gray-800 w-full z-50">
-      <div className="flex items-center justify-between h-16 w-full overflow-x-auto">
+      <div className="flex items-center justify-between h-16 w-full">
         <div className="flex items-center w-full">
           <div className="flex-shrink-0 px-5">
             <Link to="/" className="text-white font-bold">
@@ -127,32 +127,57 @@ const Navigation: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-gray-800">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link to="/" className={getNavItemClass("/")}>
+            <Link
+              to="/"
+              className={getNavItemClass("/")}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <FaHome className="w-5 h-5" />
               <span>Inicio</span>
             </Link>
 
-            <InventarioMenu getNavItemClass={getNavItemClass} showText />
+            <InventarioMenu
+              getNavItemClass={getNavItemClass}
+              showText
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
 
-            <Link to="/caja/cierres" className={getNavItemClass("/caja")}>
+            <Link
+              to="/caja/cierres"
+              className={getNavItemClass("/caja")}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <FaCashRegister className="w-5 h-5" />
               <span>Caja</span>
             </Link>
-            <Link to="/ventas" className={getNavItemClass("/ventas")}>
+            <Link
+              to="/ventas"
+              className={getNavItemClass("/ventas")}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <FaShoppingCart className="w-5 h-5" />
               <span>Ventas</span>
             </Link>
-            <Link to="/clientes" className={getNavItemClass("/clientes")}>
+            <Link
+              to="/clientes"
+              className={getNavItemClass("/clientes")}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <FaUsers className="w-5 h-5" />
               <span>Clientes</span>
             </Link>
-            <Link to="/gastos" className={getNavItemClass("/gastos")}>
+            <Link
+              to="/gastos"
+              className={getNavItemClass("/gastos")}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <FaMoneyBillWave className="w-5 h-5" />
               <span>Gastos</span>
             </Link>
             <Link
               to="/estadisticas"
               className={getNavItemClass("/estadisticas")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               <FaChartBar className="w-5 h-5" />
               <span>Estadísticas</span>
@@ -160,12 +185,17 @@ const Navigation: React.FC = () => {
             <Link
               to="/configuracion"
               className={getNavItemClass("/configuracion")}
+              onClick={() => setIsMobileMenuOpen(false)}
             >
               <FaCog className="w-5 h-5" />
               <span>Configuración</span>
             </Link>
 
-            <AccountMenu getNavItemClass={getNavItemClass} showText />
+            <AccountMenu
+              getNavItemClass={getNavItemClass}
+              showText
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
           </div>
         </div>
       )}

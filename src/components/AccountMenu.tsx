@@ -5,7 +5,8 @@ import { FaUser, FaCog, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 const AccountMenu: React.FC<{
   getNavItemClass: (path: string) => string;
   showText?: boolean;
-}> = ({ getNavItemClass, showText }) => {
+  setIsMobileMenuOpen?: (isOpen: boolean) => void;
+}> = ({ getNavItemClass, showText, setIsMobileMenuOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,7 +71,10 @@ const AccountMenu: React.FC<{
           <Link
             to="/cuenta/perfil"
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              setIsMobileMenuOpen?.(false);
+            }}
           >
             <FaUser className="w-4 h-4" />
             Perfil
@@ -78,7 +82,10 @@ const AccountMenu: React.FC<{
           <Link
             to="/cuenta/configuracion"
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              setIsMobileMenuOpen?.(false);
+            }}
           >
             <FaCog className="w-4 h-4" />
             Configuración
