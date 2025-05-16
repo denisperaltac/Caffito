@@ -64,6 +64,22 @@ interface Pago {
   tipoPagoId: number;
 }
 
+const initialFactura: Factura = {
+  id: "",
+  facturaRenglons: [],
+  total: 0,
+  subtotal: 0,
+  descuento: 0,
+  interes: 0,
+  pagos: [],
+  comprobanteId: {
+    tipoComprobanteId: "",
+    tipoDocumentoId: "",
+    nroDocumento: "",
+  },
+  clienteId: 1,
+};
+
 const PointOfSalePage: React.FC = () => {
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -79,26 +95,13 @@ const PointOfSalePage: React.FC = () => {
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
   const [clientSearchTerm, setClientSearchTerm] = useState("");
-  const [factura, setFactura] = useState<Factura>({
-    id: "",
-    facturaRenglons: [],
-    total: 0,
-    subtotal: 0,
-    descuento: 0,
-    interes: 0,
-    pagos: [],
-    comprobanteId: {
-      tipoComprobanteId: "",
-      tipoDocumentoId: "",
-      nroDocumento: "",
-    },
-    clienteId: 1,
-  });
+  const [factura, setFactura] = useState<Factura>(initialFactura);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
   const [showCustomProductModal, setShowCustomProductModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingBtn, setLoadingBtn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const productSearchTimeout = useRef<NodeJS.Timeout>();
   const clientSearchTimeout = useRef<NodeJS.Timeout>();
@@ -112,6 +115,7 @@ const PointOfSalePage: React.FC = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
+  console.log(facturaGuardada);
   // Efecto para establecer consumidor final cuando se cargan los clientes
   useEffect(() => {
     if (clientes.length > 0) {
@@ -330,9 +334,11 @@ const PointOfSalePage: React.FC = () => {
 
   const handleFinalizar = async () => {
     try {
+      setLoadingBtn(true);
       const nuevaFactura = await pointOfSaleService.createFactura(factura);
       setFacturaGuardada(nuevaFactura);
       setShowPaymentModal(false);
+      setLoadingBtn(false);
       setShowPrintModal(true);
       setTotalPagado(0);
     } catch (err) {
@@ -343,8 +349,15 @@ const PointOfSalePage: React.FC = () => {
 
   const handlePrint = async () => {
     try {
+      setLoadingBtn(true);
       await pointOfSaleService.imprimirFactura(factura);
       toast.success("Factura impresa correctamente");
+      setLoadingBtn(false);
+      setShowPrintModal(false);
+      setFacturaGuardada(null);
+      setFactura(initialFactura);
+      setTotalPagado(0);
+      setPagos([]);
     } catch (error) {
       console.error("Error al imprimir la factura:", error);
       toast.error("Error al imprimir la factura");
@@ -912,6 +925,7 @@ const PointOfSalePage: React.FC = () => {
         removePago={removePago}
         factura={factura}
         totalPagado={totalPagado}
+        loadingBtn={loadingBtn}
       />
 
       {/* Promotion Modal */}
@@ -981,7 +995,7 @@ const PointOfSalePage: React.FC = () => {
                   onClick={handlePrint}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
                 >
-                  Sí
+                  {loadingBtn ? <Loader size="sm" /> : "Sí"}
                 </button>
               </div>
             </div>

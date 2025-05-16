@@ -1,6 +1,30 @@
 import qz from "qz-tray";
 import { Factura } from "../types/configuration";
 
+// Extender la definición de tipos de qz-tray
+declare module "qz-tray" {
+  interface QZ {
+    configs: {
+      create(
+        printer: string,
+        options?: { copies?: number }
+      ): {
+        printer: string;
+        copies: number;
+      };
+    };
+    print(
+      config: { printer: string; copies: number },
+      data: string[]
+    ): Promise<any>;
+    websocket: {
+      connect(): Promise<any>;
+      disconnect(): Promise<any>;
+      isActive(): boolean;
+    };
+  }
+}
+
 // Configuración de la impresora
 const printerConfig = {
   printer: "POS-58", // Nombre de la impresora térmica
@@ -17,7 +41,7 @@ export const initializeQz = async () => {
     }
 
     // Verificar si ya hay una conexión activa
-    if (qz.websocket.isActive()) {
+    if ((qz as any).websocket.isActive()) {
       console.log("Ya existe una conexión activa con qz-tray");
       return true;
     }
@@ -26,7 +50,7 @@ export const initializeQz = async () => {
     console.log("Intentando conectar con qz-tray...");
 
     // Intentar conectar con un timeout
-    const connectionPromise = qz.websocket.connect();
+    const connectionPromise = (qz as any).websocket.connect();
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(
         () => reject(new Error("Timeout al conectar con QZ Tray")),
@@ -65,36 +89,40 @@ const formatTicketContent = (factura: Factura) => {
   lines.push("CAFFITO");
   lines.push("-------------------");
   lines.push(`Fecha: ${new Date().toLocaleString()}`);
-  lines.push(`Cliente: ${factura.clienteId}`);
+  lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
   lines.push("-------------------");
 
   // Detalles de la factura
-  factura.facturaRenglons.forEach((renglon) => {
-    lines.push(`${renglon.detalle}`);
-    lines.push(
-      `${renglon.cantidad} x ${renglon.precioVenta} = ${
-        renglon.cantidad * renglon.precioVenta
-      }`
-    );
-  });
+  if (factura.facturaRenglons && factura.facturaRenglons.length > 0) {
+    factura.facturaRenglons.forEach((renglon) => {
+      lines.push(`${renglon.detalle || ""}`);
+      lines.push(
+        `${renglon.cantidad || 0} x ${renglon.precioVenta || 0} = ${
+          (renglon.cantidad || 0) * (renglon.precioVenta || 0)
+        }`
+      );
+    });
+  }
 
   // Totales
   lines.push("-------------------");
-  lines.push(`Subtotal: ${factura.subtotal}`);
+  lines.push(`Subtotal: ${factura.subtotal || 0}`);
   if (factura.descuento > 0) {
     lines.push(`Descuento: -${factura.descuento}`);
   }
   if (factura.interes > 0) {
     lines.push(`Interés: +${factura.interes}`);
   }
-  lines.push(`Total: ${factura.total}`);
+  lines.push(`Total: ${factura.total || 0}`);
 
   // Pagos
   lines.push("-------------------");
   lines.push("Pagos:");
-  factura.pagos.forEach((pago) => {
-    lines.push(`${pago.tipoPagoNombre.trim()}: ${pago.monto}`);
-  });
+  if (factura.pagos && factura.pagos.length > 0) {
+    factura.pagos.forEach((pago) => {
+      lines.push(`${pago.tipoPagoNombre?.trim() || ""}: ${pago.monto || 0}`);
+    });
+  }
 
   // Pie
   lines.push("-------------------");
@@ -108,23 +136,24 @@ const formatTicketContent = (factura: Factura) => {
 export const printService = {
   printInvoice: async (factura: Factura) => {
     try {
-      // Inicializar qz-tray si no está conectado
-      await initializeQz();
+      // Verificar si qz-tray está cargado
+      if (!qz) {
+        throw new Error("qz-tray no está cargado correctamente");
+      }
+
+      // Solo conectar si no hay una conexión activa
+      if (!(qz as any).websocket.isActive()) {
+        console.log("Intentando conectar con qz-tray...");
+        await initializeQz();
+      }
 
       // Formatear el contenido del ticket
       const ticketContent = formatTicketContent(factura);
 
-      // Configurar el trabajo de impresión
-      const config = {
-        ...printerConfig,
-        data: [
-          {
-            type: "raw",
-            format: "plain",
-            data: ticketContent,
-          },
-        ],
-      };
+      // Configurar el trabajo de impresión usando qz.configs.create
+      const config = (qz as any).configs.create(printerConfig.printer, {
+        copies: printerConfig.copies,
+      });
 
       console.log("Datos a imprimir:", {
         config,
@@ -132,8 +161,13 @@ export const printService = {
         factura,
       });
 
-      // Enviar a imprimir
-      await qz.print(config);
+      // Enviar a imprimir usando qz.print con el contenido del ticket directamente
+      await (qz as any)
+        .print(config, [ticketContent])
+        .then(() => {
+          console.log("Impreso OK");
+        })
+        .catch((error: any) => console.error(error));
 
       return true;
     } catch (error) {
@@ -145,8 +179,8 @@ export const printService = {
   // Cerrar la conexión con qz-tray
   closeConnection: async () => {
     try {
-      if (qz.websocket.isActive()) {
-        await qz.websocket.disconnect();
+      if ((qz as any).websocket.isActive()) {
+        await (qz as any).websocket.disconnect();
       }
     } catch (error) {
       console.error("Error al cerrar la conexión con qz-tray:", error);

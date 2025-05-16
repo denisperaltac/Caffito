@@ -44,7 +44,7 @@ const Navigation: React.FC = () => {
 
   return (
     <nav className="bg-gray-800 w-full z-50">
-      <div className="flex items-center justify-between h-16 w-full">
+      <div className="flex items-center justify-between h-16 w-full overflow-x-auto">
         <div className="flex items-center w-full">
           <div className="flex-shrink-0 px-5">
             <Link to="/" className="text-white font-bold">

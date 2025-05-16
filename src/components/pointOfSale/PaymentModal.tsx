@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { FaTrash, FaPlus } from "react-icons/fa";
+import { FaTrash, FaPlus, FaSpinner } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatters";
 import { FaMoneyBillWave, FaCreditCard, FaExchangeAlt } from "react-icons/fa";
 import { FaRegRectangleList } from "react-icons/fa6";
 import { LuTruck } from "react-icons/lu";
 import { Pago } from "../../types/configuration";
+import Loader from "../common/Loader";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface PaymentModalProps {
     total: number;
   };
   totalPagado: number;
+  loadingBtn: boolean;
 }
 
 const getTipoPagoIcon = (nombre: string) => {
@@ -91,6 +93,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   removePago,
   factura,
   totalPagado,
+  loadingBtn,
 }) => {
   // Efecto para autocompletar el monto con el valor restante
   useEffect(() => {
@@ -271,10 +274,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             </button>
             <button
               onClick={onFinalize}
-              disabled={totalPagado < factura.total}
+              disabled={totalPagado < factura.total || loadingBtn}
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Finalizar
+              {loadingBtn ? (
+                <div className="flex items-center gap-2">
+                  <Loader size="sm" />
+                  <span>Cargando...</span>
+                </div>
+              ) : (
+                "Finalizar"
+              )}
             </button>
           </div>
         </div>

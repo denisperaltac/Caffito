@@ -20,13 +20,16 @@ tr:hover {
 th {
   background-color: #ffffff;
   border-bottom: 2px solid #898989;
+  color: whitesmoke;
 }
 
 .background-login {
-  background: #ffffff;
+  background: #eb0505;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(234, 11, 11, 0.5) 100%
+    rgba(235, 5, 5, 1) 0%,
+    rgba(245, 245, 245, 1) 40%,
+    rgba(245, 245, 245, 1) 60%,
+    rgba(31, 210, 70, 1) 100%
   );
 }
