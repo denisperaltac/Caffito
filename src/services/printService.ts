@@ -22,14 +22,29 @@ declare module "qz-tray" {
       disconnect(): Promise<any>;
       isActive(): boolean;
     };
+    printers: {
+      getDefault(): Promise<string>;
+    };
   }
 }
 
 // Configuración de la impresora
 const printerConfig = {
-  printer: "POS-58", // Nombre de la impresora térmica
+  printer: "", // Se establecerá dinámicamente
   copies: 1,
   jobName: "Factura",
+};
+
+// Obtener la impresora por defecto
+const getDefaultPrinter = async () => {
+  try {
+    const defaultPrinter = await (qz as any).printers.getDefault();
+    printerConfig.printer = defaultPrinter;
+    return defaultPrinter;
+  } catch (error) {
+    console.error("Error al obtener la impresora por defecto:", error);
+    throw error;
+  }
 };
 
 // Inicializar qz-tray
@@ -60,6 +75,8 @@ export const initializeQz = async () => {
 
     await Promise.race([connectionPromise, timeoutPromise]);
     console.log("Conexión establecida con qz-tray");
+    await getDefaultPrinter();
+
     return true;
   } catch (error) {
     console.error("Error al inicializar qz-tray:", error);
