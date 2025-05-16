@@ -3,9 +3,14 @@ import React from "react";
 interface LoaderProps {
   size?: "sm" | "md" | "lg";
   className?: string;
+  color?: "red" | "blue" | "green" | "yellow" | "purple" | "orange";
 }
 
-const Loader: React.FC<LoaderProps> = ({ size = "md", className = "" }) => {
+const Loader: React.FC<LoaderProps> = ({
+  size = "md",
+  className = "",
+  color = "blue",
+}) => {
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-6 h-6",
@@ -13,11 +18,19 @@ const Loader: React.FC<LoaderProps> = ({ size = "md", className = "" }) => {
     xl: "w-16 h-16",
   };
 
+  const colorClasses = {
+    red: "fill-red-600",
+    blue: "fill-blue-600",
+    green: "fill-green-600",
+    yellow: "fill-yellow-600",
+    purple: "fill-purple-600",
+    orange: "fill-orange-600",
+  };
   return (
     <div role="status" className={className}>
       <svg
         aria-hidden="true"
-        className={`${sizeClasses[size]} text-gray-200 animate-spin fill-blue-600`}
+        className={`${sizeClasses[size]} text-gray-300 animate-spin ${colorClasses[color]}`}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
