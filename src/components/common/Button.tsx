@@ -18,7 +18,7 @@ type colorBottom =
   | "white"
   | "black";
 
-export const Bottom = ({
+export const Button = ({
   color,
   disabled,
   text,

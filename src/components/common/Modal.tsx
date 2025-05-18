@@ -1,6 +1,6 @@
 import React from "react";
 import { IoClose } from "react-icons/io5";
-import { Bottom } from "./Bottom";
+import { Button } from "./Button";
 
 export const Modal = ({
   children,
@@ -38,14 +38,14 @@ export const Modal = ({
               />
             </div>
             <div className="flex justify-end gap-4">
-              <Bottom
+              <Button
                 color="gray"
                 disabled={false}
                 text="Cancel"
                 onClick={onClose}
               />
               {onSave && (
-                <Bottom
+                <Button
                   color={modalDelete ? "red" : "blue"}
                   disabled={disabledBtn}
                   text={textBtn || "Save"}

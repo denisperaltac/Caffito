@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FaBoxes,
-  FaExchangeAlt,
   FaTags,
   FaTruck,
   FaLayerGroup,
@@ -44,11 +43,11 @@ const InventarioMenu: React.FC<{
       label: "Gestión de Stock",
       icon: FaBoxes,
     },
-    {
-      path: "/inventario/movimiento-stock",
-      label: "Movimiento Stock",
-      icon: FaExchangeAlt,
-    },
+    // {
+    //   path: "/inventario/movimiento-stock",
+    //   label: "Movimiento Stock",
+    //   icon: FaExchangeAlt,
+    // },
     { path: "/inventario/productos", label: "Productos", icon: FaBoxes },
     { path: "/inventario/etiquetas", label: "Etiquetas", icon: FaTags },
     { path: "/inventario/proveedor", label: "Proveedor", icon: FaTruck },

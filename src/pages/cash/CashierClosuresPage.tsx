@@ -8,6 +8,7 @@ import CashierMovementsModal from "../../components/cash/CashierMovementsModal";
 import CashierTable from "../../components/cash/CashierTable";
 import Loader from "../../components/common/Loader";
 import ClosuresModal from "../../components/cash/ClosuresModal";
+import { Button } from "../../components/common/Button";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -231,19 +232,17 @@ const CashierClosuresPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-800">Cierres de Caja</h1>
         <div>
           {!currentCaja ? (
-            <button
+            <Button
+              color="green"
+              text="Abrir Caja"
               onClick={() => setShowOpenModal(true)}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              Abrir Caja
-            </button>
+            />
           ) : (
-            <button
+            <Button
+              color="red"
+              text="Cerrar Caja"
               onClick={() => setShowCloseModal(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-            >
-              Cerrar Caja
-            </button>
+            />
           )}
         </div>
       </div>

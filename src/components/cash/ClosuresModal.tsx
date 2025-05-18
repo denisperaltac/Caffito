@@ -5,7 +5,7 @@ import { LuTruck } from "react-icons/lu";
 import { formatCurrency } from "../../utils/formatters";
 import { FaDollarSign } from "react-icons/fa";
 import { CierreCajaItem } from "../../services/cajaService";
-import { Bottom } from "../common/Bottom";
+import { Button } from "../common/Button";
 
 interface ClosuresModalProps {
   closingAmount: number;
@@ -178,12 +178,12 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
         </div>
 
         <div className="flex justify-end space-x-4">
-          <Bottom
+          <Button
             color="gray"
             text="Cancelar"
             onClick={() => setShowCloseModal(false)}
           />
-          <Bottom
+          <Button
             color="blue"
             disabled={hasErrors || !allInputsFilled}
             text="Cerrar Caja"
