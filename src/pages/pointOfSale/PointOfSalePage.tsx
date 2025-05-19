@@ -73,9 +73,9 @@ const initialFactura: Factura = {
   interes: 0,
   pagos: [],
   comprobanteId: {
-    tipoComprobanteId: "",
-    tipoDocumentoId: "",
-    nroDocumento: "",
+    tipoComprobanteId: 1,
+    tipoDocumentoId: 1,
+    nroDocumento: "0",
   },
   clienteId: 1,
 };
@@ -108,7 +108,12 @@ const PointOfSalePage: React.FC = () => {
   const [customProductName, setCustomProductName] = useState("");
   const [customProductPrice, setCustomProductPrice] = useState("");
   const [tiposPago, setTiposPago] = useState<any[]>([]);
+  const [tipoComprobantes, setTipoComprobantes] = useState<any[]>([]);
+  const [tipoDocumentos, setTipoDocumentos] = useState<any[]>([]);
   const [tipoPagoSeleccionado, setTipoPagoSeleccionado] = useState("");
+  const [tipoComprobanteId, setTipoComprobanteId] = useState<number>(1);
+  const [tipoDocumentoId, setTipoDocumentoId] = useState<number>(1);
+  const [nroDocumento, setNroDocumento] = useState("0");
   const [montoPago, setMontoPago] = useState("");
   const [totalPagado, setTotalPagado] = useState(0);
   const [pagos, setPagos] = useState<Pago[]>([]);
@@ -143,15 +148,25 @@ const PointOfSalePage: React.FC = () => {
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      const [clientesData, promocionesData, tiposPagoData] = await Promise.all([
+      const [
+        clientesData,
+        promocionesData,
+        tiposPagoData,
+        tipoComprobantesData,
+        tipoDocumentosData,
+      ] = await Promise.all([
         pointOfSaleService.getClientes(),
         pointOfSaleService.getPromociones(),
         pointOfSaleService.getTiposPago(),
+        pointOfSaleService.getTipoComprobantes(),
+        pointOfSaleService.getTipoDocumentos(),
       ]);
 
       setClientes(clientesData);
       setPromociones(promocionesData);
       setTiposPago(tiposPagoData);
+      setTipoComprobantes(tipoComprobantesData);
+      setTipoDocumentos(tipoDocumentosData);
       setError(null);
     } catch (err) {
       setError("Error al cargar los datos iniciales");
@@ -315,6 +330,7 @@ const PointOfSalePage: React.FC = () => {
       tipoPagoId: parseInt(tipoPagoSeleccionado),
     };
 
+    // Actualizar la factura solo con el nuevo pago
     setFactura((prevFactura) => ({
       ...prevFactura,
       pagos: [...prevFactura.pagos, nuevoPago],
@@ -335,12 +351,34 @@ const PointOfSalePage: React.FC = () => {
   const handleFinalizar = async () => {
     try {
       setLoadingBtn(true);
-      const nuevaFactura = await pointOfSaleService.createFactura(factura);
+      console.log("Valores actuales:", {
+        tipoComprobanteId,
+        tipoDocumentoId,
+        nroDocumento,
+      });
+
+      const facturaConComprobante = {
+        ...factura,
+        comprobanteId: {
+          tipoComprobanteId: tipoComprobanteId,
+          tipoDocumentoId: tipoDocumentoId,
+          nroDocumento: nroDocumento,
+        },
+      };
+      console.log("Payload de la factura:", facturaConComprobante);
+      const nuevaFactura = await pointOfSaleService.createFactura(
+        facturaConComprobante
+      );
       setFacturaGuardada(nuevaFactura);
       setShowPaymentModal(false);
       setLoadingBtn(false);
       setShowPrintModal(true);
+      // Reset all payment modal data
       setTotalPagado(0);
+      setPagos([]);
+      setMontoPago("");
+      setTipoPagoSeleccionado("");
+      resetComprobanteId();
     } catch (err) {
       setError("Error al guardar la factura");
       console.error(err);
@@ -377,9 +415,9 @@ const PointOfSalePage: React.FC = () => {
       interes: 0,
       pagos: [],
       comprobanteId: {
-        tipoComprobanteId: "",
-        tipoDocumentoId: "",
-        nroDocumento: "",
+        tipoComprobanteId: 1,
+        tipoDocumentoId: 1,
+        nroDocumento: "0",
       },
       clienteId: 1,
     });
@@ -436,9 +474,9 @@ const PointOfSalePage: React.FC = () => {
       interes: 0,
       pagos: [],
       comprobanteId: {
-        tipoComprobanteId: "",
-        tipoDocumentoId: "",
-        nroDocumento: "",
+        tipoComprobanteId: 1,
+        tipoDocumentoId: 1,
+        nroDocumento: "0",
       },
       clienteId: 1,
     });
@@ -458,6 +496,12 @@ const PointOfSalePage: React.FC = () => {
         `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
       );
     }
+  };
+
+  const resetComprobanteId = () => {
+    setTipoComprobanteId(1);
+    setTipoDocumentoId(1);
+    setNroDocumento("0");
   };
 
   const renderProductos = () => {
@@ -913,7 +957,10 @@ const PointOfSalePage: React.FC = () => {
       {/* Payment Modal */}
       <PaymentModal
         isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={() => {
+          setShowPaymentModal(false);
+          resetComprobanteId();
+        }}
         onFinalize={handleFinalizar}
         tiposPago={tiposPago}
         tipoPagoSeleccionado={tipoPagoSeleccionado}
@@ -926,6 +973,14 @@ const PointOfSalePage: React.FC = () => {
         factura={factura}
         totalPagado={totalPagado}
         loadingBtn={loadingBtn}
+        tipoComprobantes={tipoComprobantes}
+        tipoDocumentos={tipoDocumentos}
+        tipoComprobanteId={tipoComprobanteId}
+        setTipoComprobanteId={setTipoComprobanteId}
+        tipoDocumentoId={tipoDocumentoId}
+        setTipoDocumentoId={setTipoDocumentoId}
+        nroDocumento={nroDocumento}
+        setNroDocumento={setNroDocumento}
       />
 
       {/* Promotion Modal */}

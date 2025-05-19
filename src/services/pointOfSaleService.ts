@@ -10,6 +10,27 @@ import { API_URL } from "../constants/api";
 import axiosInstance from "../config/axiosConfig";
 import { printService } from "./printService";
 
+// Add TipoPago interface
+interface TipoPago {
+  id: number;
+  nombre: string;
+  interes: number;
+}
+
+// Add TipoComprobante interface
+interface TipoComprobante {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
+
+// Add TipoDocumento interface
+interface TipoDocumento {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
+
 // Mock data
 const mockProductos: any = [
   {
@@ -88,9 +109,40 @@ export const pointOfSaleService = {
     return response.data;
   },
 
-  getTiposPago: async (): Promise<any[]> => {
-    const response = await axiosInstance.get(`${API_URL}/tipo-pagos`);
-    return response.data;
+  getTiposPago: async (): Promise<TipoPago[]> => {
+    try {
+      const response = await axiosInstance.get<TipoPago[]>(
+        `${API_URL}/tipo-pagos`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener tipos de pago:", error);
+      throw error;
+    }
+  },
+
+  getTipoComprobantes: async (): Promise<TipoComprobante[]> => {
+    try {
+      const response = await axiosInstance.get<TipoComprobante[]>(
+        `${API_URL}/tipo-comprobantes`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener tipos de comprobante:", error);
+      throw error;
+    }
+  },
+
+  getTipoDocumentos: async (): Promise<TipoDocumento[]> => {
+    try {
+      const response = await axiosInstance.get<TipoDocumento[]>(
+        `${API_URL}/tipo-documentos`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener tipos de documento:", error);
+      throw error;
+    }
   },
 
   // Invoice methods
@@ -116,12 +168,13 @@ export const pointOfSaleService = {
           tipoPagoId: pago.tipoPagoId,
         })),
         comprobanteId: {
-          nroDocumento: "0",
-          tipoComprobanteId: 1,
-          tipoDocumentoId: 1,
+          tipoComprobanteId: Number(factura.comprobanteId.tipoComprobanteId),
+          tipoDocumentoId: Number(factura.comprobanteId.tipoDocumentoId),
+          nroDocumento: factura.comprobanteId.nroDocumento,
         },
       };
 
+      console.log("Payload enviado al servidor:", facturaPayload);
       const response = await axiosInstance.post(
         `${API_URL}/facturas`,
         facturaPayload
@@ -147,8 +200,8 @@ export const pointOfSaleService = {
       facturaRenglons: [],
       pagos: [],
       comprobanteId: {
-        tipoComprobanteId: "",
-        tipoDocumentoId: "",
+        tipoComprobanteId: 1,
+        tipoDocumentoId: 1,
         nroDocumento: "",
       },
       clienteId: 1,
@@ -168,8 +221,8 @@ export const pointOfSaleService = {
       facturaRenglons: [],
       pagos: [pago],
       comprobanteId: {
-        tipoComprobanteId: "",
-        tipoDocumentoId: "",
+        tipoComprobanteId: 1,
+        tipoDocumentoId: 1,
         nroDocumento: "",
       },
       clienteId: 1,

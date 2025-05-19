@@ -27,6 +27,14 @@ interface PaymentModalProps {
   };
   totalPagado: number;
   loadingBtn: boolean;
+  tipoComprobantes: Array<{ id: number; nombre: string }>;
+  tipoDocumentos: Array<{ id: number; nombre: string }>;
+  tipoComprobanteId: number;
+  setTipoComprobanteId: (id: number) => void;
+  tipoDocumentoId: number;
+  setTipoDocumentoId: (id: number) => void;
+  nroDocumento: string;
+  setNroDocumento: (nro: string) => void;
 }
 
 const getTipoPagoIcon = (nombre: string) => {
@@ -94,6 +102,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   factura,
   totalPagado,
   loadingBtn,
+  tipoComprobantes,
+  tipoDocumentos,
+  tipoComprobanteId,
+  setTipoComprobanteId,
+  tipoDocumentoId,
+  setTipoDocumentoId,
+  nroDocumento,
+  setNroDocumento,
 }) => {
   // Efecto para autocompletar el monto con el valor restante
   useEffect(() => {
@@ -154,42 +170,44 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   ))}
                 </div>
               </div>
-              <div>
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Monto
-                </label>
-                <input
-                  type="number"
-                  value={montoPago}
-                  onChange={(e) => setMontoPago(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingrese el monto"
-                />
+              <div className="flex flex-row gap-4 w-full">
+                <div className="w-full">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Monto
+                  </label>
+                  <input
+                    type="number"
+                    value={montoPago}
+                    onChange={(e) => setMontoPago(e.target.value)}
+                    className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ingrese el monto"
+                  />
+                </div>
+                <div className="flex items-end justify-center">
+                  <button
+                    onClick={agregarPago}
+                    disabled={
+                      !tipoPagoSeleccionado ||
+                      !montoPago ||
+                      parseFloat(montoPago) <= 0 ||
+                      parseFloat(montoPago) > factura.total - totalPagado
+                    }
+                    className={`flex items-center justify-center px-4 py-2 rounded-lg text-white ${
+                      !tipoPagoSeleccionado ||
+                      !montoPago ||
+                      parseFloat(montoPago) <= 0 ||
+                      parseFloat(montoPago) > factura.total - totalPagado
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    }`}
+                  >
+                    <span className="mr-2">
+                      <FaPlus />
+                    </span>
+                    Agregar
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={agregarPago}
-                disabled={
-                  !tipoPagoSeleccionado ||
-                  !montoPago ||
-                  parseFloat(montoPago) <= 0 ||
-                  parseFloat(montoPago) > factura.total - totalPagado
-                }
-                className={`flex items-center justify-center px-4 py-2 rounded-lg text-white ${
-                  !tipoPagoSeleccionado ||
-                  !montoPago ||
-                  parseFloat(montoPago) <= 0 ||
-                  parseFloat(montoPago) > factura.total - totalPagado
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600"
-                }`}
-              >
-                <span className="mr-2">
-                  <FaPlus />
-                </span>
-                Agregar
-              </button>
             </div>
           </div>
 
@@ -258,10 +276,64 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 Total: {formatCurrency(factura.total)}
               </span>
             </div>
-            <div className="flex justify-end mb-4">
-              <span className="text-xl">
-                Total Pagado: {formatCurrency(totalPagado)}
-              </span>
+          </div>
+
+          {/* New Comprobante Fields */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Tipo Comprobante
+              </label>
+              <select
+                value={tipoComprobanteId}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  console.log("Cambiando tipoComprobanteId a:", value);
+                  setTipoComprobanteId(value);
+                }}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {tipoComprobantes.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Tipo Documento
+              </label>
+              <select
+                value={tipoDocumentoId}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  console.log("Cambiando tipoDocumentoId a:", value);
+                  setTipoDocumentoId(value);
+                }}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {tipoDocumentos.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Nro. Documento
+              </label>
+              <input
+                type="text"
+                value={nroDocumento}
+                onChange={(e) => {
+                  console.log("Cambiando nroDocumento a:", e.target.value);
+                  setNroDocumento(e.target.value);
+                }}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ingrese el número de documento"
+              />
             </div>
           </div>
 

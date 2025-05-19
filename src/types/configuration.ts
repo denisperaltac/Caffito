@@ -190,15 +190,15 @@ export interface Pago {
 
 export interface Factura {
   id: string;
+  facturaRenglons: FacturaRenglon[];
+  total: number;
   subtotal: number;
   descuento: number;
   interes: number;
-  total: number;
-  facturaRenglons: FacturaRenglon[];
   pagos: Pago[];
   comprobanteId: {
-    tipoComprobanteId: string;
-    tipoDocumentoId: string;
+    tipoComprobanteId: number;
+    tipoDocumentoId: number;
     nroDocumento: string;
   };
   clienteId: number;
