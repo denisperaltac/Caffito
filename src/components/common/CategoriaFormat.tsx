@@ -11,7 +11,6 @@ export const CategoriaFormat = (categoria: string) => {
   let color = "default"; // Color predeterminado
   let icon = <GrStatusUnknown />; // Ícono predeterminado
 
-  console.log(categoria.trim());
   switch (categoria.trim()) {
     case "ALMACEN":
       color = "cyan";

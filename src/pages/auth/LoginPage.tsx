@@ -52,29 +52,26 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="h-screen w-screen -my-6 sm:-mx-6 lg:-mx-8 background-login flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg p-8 shadow-lg">
+      <div className="max-w-md w-full bg-white rounded-lg p-8 shadow-2xl">
         <div className="flex flex-col justify-center items-center">
           <img src={logo} alt="logo" className="w-80 h-auto select-none" />
-          <h2 className="text-center text-3xl font-extrabold text-gray-900 select-none">
-            Iniciar sesión
-          </h2>
         </div>
         <form className="mt-8 space-y-2" onSubmit={handleSubmit}>
           <div className="space-y-6">
-            <div className="relative">
+            <div className="relative pb-3">
               <input
                 id="username"
                 name="username"
                 type="text"
                 required
-                className="peer w-full px-4 pt-6 pb-2 text-sm border border-gray-300 rounded-md bg-white text-gray-900 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                className="peer w-full px-4 pt-3 pb-3 text-sm border border-gray-300 rounded-md bg-white text-gray-900 placeholder-transparent focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition"
                 placeholder="Usuario"
                 value={credentials.username}
                 onChange={handleChange}
               />
               <label
                 htmlFor="username"
-                className="absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-500"
+                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
               >
                 Usuario
               </label>
@@ -86,14 +83,14 @@ const LoginPage: React.FC = () => {
                 name="password"
                 type="password"
                 required
-                className="peer w-full px-4 pt-6 pb-2 text-sm border border-gray-300 rounded-md bg-white text-gray-900 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                className="peer w-full px-4 pt-3 pb-3 text-sm border border-gray-300 rounded-md bg-white text-gray-900 placeholder-transparent focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition"
                 placeholder="Contraseña"
                 value={credentials.password}
                 onChange={handleChange}
               />
               <label
                 htmlFor="password"
-                className="absolute left-4 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-2 peer-focus:text-sm peer-focus:text-indigo-500"
+                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
               >
                 Contraseña
               </label>
@@ -110,7 +107,7 @@ const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative h-10 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+              className="group relative h-10 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 duration-300"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
