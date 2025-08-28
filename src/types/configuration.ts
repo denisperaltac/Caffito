@@ -180,6 +180,7 @@ export interface FacturaRenglon {
   cantidad: number;
   precioVenta: number;
   detalle: string;
+  peso?: number; // Peso en kg para productos pesables
 }
 
 export interface Pago {

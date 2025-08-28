@@ -83,6 +83,7 @@ const initialFactura: Factura = {
 const PointOfSalePage: React.FC = () => {
   // Refs
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const renglonesTableRef = useRef<HTMLDivElement>(null);
 
   // State
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -90,6 +91,7 @@ const PointOfSalePage: React.FC = () => {
   const [promociones, setPromociones] = useState<Promocion[]>([]);
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [isProductSearching, setIsProductSearching] = useState(false);
+  const [isClientSearching, setIsClientSearching] = useState(false);
   const [searchByCode, setSearchByCode] = useState(true);
   const [viewMode, setViewMode] = useState<"cards" | "list">("list");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
@@ -120,7 +122,6 @@ const PointOfSalePage: React.FC = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
-  console.log(facturaGuardada);
   // Efecto para establecer consumidor final cuando se cargan los clientes
   useEffect(() => {
     if (clientes.length > 0) {
@@ -133,7 +134,9 @@ const PointOfSalePage: React.FC = () => {
           clienteId: consumidorFinal.id,
         }));
         setClientSearchTerm(
-          `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
+          `${(consumidorFinal.nombre || "").trim()} ${(
+            consumidorFinal.apellido || ""
+          ).trim()}`
         );
       }
     }
@@ -215,19 +218,87 @@ const PointOfSalePage: React.FC = () => {
     }, 300);
   };
 
+  // Nueva función para manejar Enter (como filterCodigo en Angular)
+  const handleProductSearchEnter = async () => {
+    if (!productSearchTerm.trim()) return;
+
+    try {
+      setIsProductSearching(true);
+      setError(null);
+
+      const codigo = productSearchTerm.trim();
+
+      // Verificar si es un código pesable (formato: [letra][5 dígitos][6 dígitos precio])
+      // Ejemplo: 2000800012874 -> 00080 (subcódigo) + 0012874 (precio)
+      if (codigo.length >= 12) {
+        // Extraer el subcódigo (5 dígitos del medio)
+        const subcodigo = codigo.substring(1, 6);
+        console.log("Subcódigo extraído:", subcodigo);
+
+        // Extraer el precio (6 dígitos del final)
+        const precio = codigo.substring(6, 12);
+        console.log("Precio extraído:", precio, "pesos");
+
+        // Buscar producto por subcódigo
+        const response = await axiosInstance.get<Producto>(
+          `${API_URL}/productos/codigo/${subcodigo}`
+        );
+
+        if (response.data) {
+          const producto = response.data;
+
+          if (producto.pesable) {
+            // Es un producto pesable, agregarlo con peso calculado
+            agregarRenglonPesable(producto, Number(precio));
+            setProductSearchTerm("");
+            setProductos([]);
+            return;
+          } else {
+            // No es pesable, agregarlo normal
+            agregarRenglon(producto);
+            setProductSearchTerm("");
+            setProductos([]);
+            return;
+          }
+        }
+      }
+
+      // Si no es pesable o no se encontró, buscar por código exacto
+      const response = await axiosInstance.get<Producto>(
+        `${API_URL}/productos/codigo/${codigo}`
+      );
+
+      if (response.data) {
+        // Producto encontrado, agregarlo inmediatamente
+        agregarRenglon(response.data);
+        setProductSearchTerm("");
+        setProductos([]);
+      } else {
+        // Si no se encontró, hacer búsqueda normal
+        buscarProductos(codigo);
+      }
+    } catch (err) {
+      console.log("Error en búsqueda exacta, haciendo búsqueda normal:", err);
+      // Si hay error, hacer búsqueda normal
+      buscarProductos(productSearchTerm.trim());
+    } finally {
+      setIsProductSearching(false);
+    }
+  };
+
   const handleProductSearchKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    if (e.key === "Enter" && productos.length === 1) {
-      agregarRenglon(productos[0]);
-      setProductSearchTerm("");
-      setProductos([]);
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleProductSearchEnter();
     }
   };
 
   const handleClientSearch = (value: string) => {
     setClientSearchTerm(value);
     setShowClientDropdown(true);
+    setIsClientSearching(true);
 
     if (clientSearchTimeout.current) {
       clearTimeout(clientSearchTimeout.current);
@@ -236,18 +307,23 @@ const PointOfSalePage: React.FC = () => {
     clientSearchTimeout.current = setTimeout(() => {
       const filtered = clientes.filter(
         (cliente) =>
-          cliente.nombre.toLowerCase().includes(value.toLowerCase()) ||
-          cliente.apellido.toLowerCase().includes(value.toLowerCase()) ||
+          (cliente.nombre?.toLowerCase() || "").includes(value.toLowerCase()) ||
+          (cliente.apellido?.toLowerCase() || "").includes(
+            value.toLowerCase()
+          ) ||
           (cliente.numeroDocumento &&
             cliente.numeroDocumento.toLowerCase().includes(value.toLowerCase()))
       );
       setFilteredClientes(filtered);
+      setIsClientSearching(false);
     }, 300);
   };
 
   const selectCliente = (cliente: Cliente) => {
     setFactura({ ...factura, clienteId: cliente.id });
-    setClientSearchTerm(`${cliente.nombre.trim()} ${cliente.apellido.trim()}`);
+    setClientSearchTerm(
+      `${(cliente.nombre || "").trim()} ${(cliente.apellido || "").trim()}`
+    );
     setShowClientDropdown(false);
   };
 
@@ -296,19 +372,62 @@ const PointOfSalePage: React.FC = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
+
+    // Hacer scroll hacia abajo después de agregar producto
+    setTimeout(scrollToBottom, 100);
+  };
+
+  // Función para agregar productos pesables
+  const agregarRenglonPesable = (producto: Producto, precioTotal: number) => {
+    // Calcular el peso basándose en el precio total y el precio por kg
+    const precioPorKg = producto.productoProveedors[0].precioVenta;
+    const peso = Math.round((precioTotal / precioPorKg) * 100) / 100; // Redondear a 2 decimales
+
+    const nuevoRenglon: FacturaRenglon = {
+      id: Math.random().toString(36).substr(2, 9),
+      productoId: producto.id.toString(),
+      cantidad: 1,
+      precioVenta: precioTotal,
+      detalle: `${producto.nombre.trim()} ${producto.marcaId.nombre.trim()}`,
+      peso: peso, // Agregar el peso calculado
+    };
+
+    setFactura({
+      ...factura,
+      facturaRenglons: [...factura.facturaRenglons, nuevoRenglon],
+      subtotal: Number(factura.subtotal) + Number(precioTotal),
+      total:
+        Number(factura.subtotal) +
+        Number(precioTotal) -
+        Number(factura.descuento) +
+        Number(factura.interes),
+    });
+
+    // Limpiar la búsqueda y los resultados
+    setProductSearchTerm("");
+    setProductos([]);
+    setIsProductSearching(false);
+
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+
+    // Hacer scroll hacia abajo después de agregar producto
+    setTimeout(scrollToBottom, 100);
   };
 
   const removeRenglon = (index: number) => {
     const renglon = factura.facturaRenglons[index];
+    const montoRenglon = renglon.peso
+      ? renglon.precioVenta
+      : renglon.precioVenta * renglon.cantidad;
+
     setFactura({
       ...factura,
       facturaRenglons: factura.facturaRenglons.filter((_, i) => i !== index),
-      subtotal: factura.subtotal - renglon.precioVenta * renglon.cantidad,
+      subtotal: factura.subtotal - montoRenglon,
       total:
-        factura.subtotal -
-        renglon.precioVenta * renglon.cantidad -
-        factura.descuento +
-        factura.interes,
+        factura.subtotal - montoRenglon - factura.descuento + factura.interes,
     });
   };
 
@@ -462,6 +581,9 @@ const PointOfSalePage: React.FC = () => {
     setCustomProductName("");
     setCustomProductPrice("");
     setShowCustomProductModal(false);
+
+    // Hacer scroll hacia abajo después de agregar producto
+    setTimeout(scrollToBottom, 100);
   };
 
   const handleCancelFactura = () => {
@@ -504,6 +626,14 @@ const PointOfSalePage: React.FC = () => {
     setNroDocumento("0");
   };
 
+  // Función para hacer scroll hacia abajo en la tabla de renglones
+  const scrollToBottom = () => {
+    if (renglonesTableRef.current) {
+      renglonesTableRef.current.scrollTop =
+        renglonesTableRef.current.scrollHeight;
+    }
+  };
+
   const renderProductos = () => {
     if (isProductSearching) {
       return (
@@ -515,8 +645,10 @@ const PointOfSalePage: React.FC = () => {
 
     if (productos.length === 0) {
       return (
-        <div className="col-span-full text-center text-gray-500">
-          No se encontraron productos
+        <div className="col-span-full text-center mt-5 text-gray-500">
+          {productSearchTerm.trim().length > 0
+            ? "No se encontraron productos"
+            : "Escribe el nombre o código del producto"}
         </div>
       );
     }
@@ -734,7 +866,8 @@ const PointOfSalePage: React.FC = () => {
 
         {/* Factura */}
         <div className="bg-white shadow-md rounded-lg p-3 flex flex-col h-full">
-          <div className="mb-3">
+          {/* Cliente */}
+          <div className="mb-3 min-h-[120px] h-[15%]">
             <h2 className="text-xl font-bold mb-2">Factura</h2>
             <div className="mb-3">
               <label className="block text-gray-700 font-bold mb-2">
@@ -777,101 +910,130 @@ const PointOfSalePage: React.FC = () => {
                     <FaSearch size={16} color="#9CA3AF" />
                   </div>
                 </div>
-                {showClientDropdown && filteredClientes.length > 0 && (
+                {showClientDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-auto">
-                    {filteredClientes.map((cliente) => (
-                      <div
-                        key={cliente.id}
-                        onClick={() => selectCliente(cliente)}
-                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
-                      >
-                        <span>
-                          {cliente.nombre.trim()} {cliente.apellido.trim()}
-                        </span>
-                        {cliente.numeroDocumento && (
-                          <span className="text-sm text-gray-500">
-                            {cliente.numeroDocumento.trim()}
-                          </span>
-                        )}
+                    {isClientSearching ? (
+                      <div className="flex justify-center items-center p-4 py-3">
+                        <Loader size="lg" />
                       </div>
-                    ))}
+                    ) : filteredClientes.length > 0 ? (
+                      filteredClientes.map((cliente) => (
+                        <div
+                          key={cliente.id}
+                          onClick={() => selectCliente(cliente)}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
+                        >
+                          <span>
+                            {(cliente.nombre || "").trim()}{" "}
+                            {(cliente.apellido || "").trim()}
+                          </span>
+                          {cliente.numeroDocumento && (
+                            <span className="text-sm text-gray-500">
+                              {cliente.numeroDocumento.trim()}
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-8 text-center text-gray-500">
+                        No se encontraron resultados
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
-
-          <div className="mb-3 flex-1 max-h-[40vh] overflow-auto">
-            <table className="w-full  overflow-auto">
-              <thead className="sticky top-0 bg-white">
-                <tr className="border-b">
-                  <th className="text-left py-2">ID</th>
-                  <th className="text-left py-2">Producto</th>
-                  <th className="text-right py-2">Cantidad</th>
-                  <th className="text-right py-2">Precio</th>
-                  <th className="text-right py-2">Subtotal</th>
-                  <th></th>
+          {/* Renglones */}
+          <div
+            ref={renglonesTableRef}
+            className="mb-3 flex-1 overflow-auto border-2 border-gray-500 rounded-sm h-[65%] max-h-[450px]"
+          >
+            <table className="w-full overflow-auto">
+              <thead className="sticky top-0">
+                <tr>
+                  <th className="text-center  text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    ID
+                  </th>
+                  <th className="text-left text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    Producto
+                  </th>
+                  <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    Cantidad/Peso
+                  </th>
+                  <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    Precio
+                  </th>
+                  <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    Subtotal
+                  </th>
+                  <th className="bg-gray-100"></th>
                 </tr>
               </thead>
               <tbody>
                 {factura.facturaRenglons.map((renglon, index) => (
-                  <tr key={renglon.id} className="border-b">
-                    <td className="py-2 font-bold">{index + 1}</td>
+                  <tr key={renglon.id}>
+                    <td className="py-2 font-bold text-center ">{index + 1}</td>
                     <td className="py-2">{renglon.detalle}</td>
                     <td className="text-right py-2">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => {
-                            if (renglon.cantidad > 1) {
+                      {renglon.peso ? (
+                        <span>{renglon.peso} kg</span>
+                      ) : (
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => {
+                              if (renglon.cantidad > 1) {
+                                const updatedRenglons = [
+                                  ...factura.facturaRenglons,
+                                ];
+                                updatedRenglons[index].cantidad--;
+                                setFactura({
+                                  ...factura,
+                                  facturaRenglons: updatedRenglons,
+                                  subtotal:
+                                    factura.subtotal - renglon.precioVenta,
+                                  total:
+                                    factura.subtotal -
+                                    renglon.precioVenta -
+                                    factura.descuento +
+                                    factura.interes,
+                                });
+                              }
+                            }}
+                            disabled={renglon.cantidad <= 1}
+                            className={`p-1 rounded ${
+                              renglon.cantidad <= 1
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-blue-500 hover:text-blue-700"
+                            }`}
+                          >
+                            <FaMinus size={14} />
+                          </button>
+                          <span>{renglon.cantidad}</span>
+                          <button
+                            onClick={() => {
                               const updatedRenglons = [
                                 ...factura.facturaRenglons,
                               ];
-                              updatedRenglons[index].cantidad--;
+                              updatedRenglons[index].cantidad++;
                               setFactura({
                                 ...factura,
                                 facturaRenglons: updatedRenglons,
                                 subtotal:
-                                  factura.subtotal - renglon.precioVenta,
+                                  factura.subtotal + renglon.precioVenta,
                                 total:
-                                  factura.subtotal -
+                                  factura.subtotal +
                                   renglon.precioVenta -
                                   factura.descuento +
                                   factura.interes,
                               });
-                            }
-                          }}
-                          disabled={renglon.cantidad <= 1}
-                          className={`p-1 rounded ${
-                            renglon.cantidad <= 1
-                              ? "text-gray-300 cursor-not-allowed"
-                              : "text-blue-500 hover:text-blue-700"
-                          }`}
-                        >
-                          <FaMinus size={14} />
-                        </button>
-                        <span>{renglon.cantidad}</span>
-                        <button
-                          onClick={() => {
-                            const updatedRenglons = [
-                              ...factura.facturaRenglons,
-                            ];
-                            updatedRenglons[index].cantidad++;
-                            setFactura({
-                              ...factura,
-                              facturaRenglons: updatedRenglons,
-                              subtotal: factura.subtotal + renglon.precioVenta,
-                              total:
-                                factura.subtotal +
-                                renglon.precioVenta -
-                                factura.descuento +
-                                factura.interes,
-                            });
-                          }}
-                          className="p-1 rounded text-blue-500 hover:text-blue-700"
-                        >
-                          <FaPlus size={14} />
-                        </button>
-                      </div>
+                            }}
+                            className="p-1 rounded text-blue-500 hover:text-blue-700"
+                          >
+                            <FaPlus size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="text-right py-2">
                       {formatCurrency(renglon.precioVenta)}
@@ -893,14 +1055,15 @@ const PointOfSalePage: React.FC = () => {
             </table>
           </div>
 
-          <div className="mb-3">
+          {/* Totales */}
+          <div className="mb-3 h-[20%] min-h-[130px]">
             <div className="flex justify-between mb-2 text-xl">
               <span>Subtotal:</span>
               <span>{formatCurrency(factura.subtotal)}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span>Descuento:</span>
-              <span>-{formatCurrency(factura.descuento)}</span>
+              <span>{formatCurrency(factura.descuento)}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span>Interés:</span>
