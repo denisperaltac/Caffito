@@ -5,6 +5,7 @@ import { Producto } from "../../types/inventory";
 import { Pagination } from "../../components/common/Pagination";
 import { EditProduct } from "../../components/stockManagement/EditProduct";
 import { TableProductsManagement } from "../../components/stockManagement/TableProductsManagement";
+import toast from "react-hot-toast";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,8 +28,13 @@ const StockManagementPage: React.FC = () => {
   // Debounce para la búsqueda
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setDebouncedSearchCode(searchCode);
+      console.log("currentPage", currentPage);
+      if (currentPage === 0) {
+        setDebouncedSearchTerm(searchTerm);
+        setDebouncedSearchCode(searchCode);
+      } else {
+        setCurrentPage(0);
+      }
     }, 500);
 
     return () => clearTimeout(timer);
@@ -80,7 +86,10 @@ const StockManagementPage: React.FC = () => {
 
   const handleEdit = (producto: Producto) => {
     // Encontrar el proveedor activo
-    const proveedorActivo = producto.productoProveedors.find((pp) => pp.activo);
+    const proveedorActivo =
+      producto.productoProveedors.find((pp) => pp.activo) ||
+      producto.productoProveedors[0];
+    console.log("proveedorActivo", proveedorActivo);
 
     // Calcular el porcentaje de ganancia si existe precio de costo y venta
     const porcentajeGanancia =
@@ -125,7 +134,7 @@ const StockManagementPage: React.FC = () => {
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProducto) return;
-
+    console.log("editingProducto", editingProducto);
     try {
       // Asegurarse de que el proveedor activo tenga un porcentaje de ganancia
       const productoConPorcentaje = {
@@ -141,7 +150,11 @@ const StockManagementPage: React.FC = () => {
         productoConPorcentaje,
         cantidadAjuste
       );
+
+      toast.success("Producto actualizado correctamente");
+
       loadProductos();
+
       setShowEditModal(false);
       setEditingProducto(null);
       setCantidadAjuste(0);
@@ -197,10 +210,10 @@ const StockManagementPage: React.FC = () => {
       </div>
 
       {/* Tabla de Productos */}
-      <div className="bg-white shadow-md rounded-lg overflow-auto h-full">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-lg overflow-auto min-h-[65vh]">
+        <div className="overflow-x-auto min-h-[65vh] max-h-[65vh]">
           {isSearching ? (
-            <div className="flex justify-center items-center h-64">
+            <div className="flex justify-center items-center min-h-[65vh]">
               <Loader size="lg" />
             </div>
           ) : (

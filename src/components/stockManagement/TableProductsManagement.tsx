@@ -14,7 +14,7 @@ export const TableProductsManagement = ({
   handleDelete,
 }: TableProductsManagementProps) => {
   return (
-    <table className="min-w-full divide-y divide-gray-200">
+    <table className="min-w-full transition-opacity-300 divide-y divide-gray-200 ">
       <thead>
         <tr>
           <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
@@ -51,9 +51,9 @@ export const TableProductsManagement = ({
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
         {productos?.map((producto) => {
-          const proveedorActivo = producto.productoProveedors.find(
-            (pp) => pp.activo
-          );
+          const proveedorActivo =
+            producto.productoProveedors.find((pp) => pp.activo) ||
+            producto.productoProveedors[0];
           let { icon, color } = CategoriaFormat(
             producto.categoriaId?.nombre?.trim() || "Sin categoría"
           );
@@ -92,13 +92,13 @@ export const TableProductsManagement = ({
               <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                 {producto.cantidad}
               </td>
-              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 font-bold whitespace-nowrap text-base text-gray-900">
                 {proveedorActivo?.precioCosto.toLocaleString("es-AR", {
                   style: "currency",
                   currency: "ARS",
                 })}
               </td>
-              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-3 font-bold whitespace-nowrap text-base text-gray-900">
                 {proveedorActivo?.precioVenta.toLocaleString("es-AR", {
                   style: "currency",
                   currency: "ARS",

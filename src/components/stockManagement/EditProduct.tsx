@@ -139,13 +139,15 @@ export const EditProduct = ({
                     step="0.01"
                     value={
                       editingProducto.productoProveedors.find((pp) => pp.activo)
-                        ?.precioCosto || ""
+                        ?.precioCosto ||
+                      editingProducto.productoProveedors[0]?.precioCosto ||
+                      ""
                     }
                     onChange={(e) => {
                       const proveedorActivo =
                         editingProducto.productoProveedors.find(
                           (pp) => pp.activo
-                        );
+                        ) || editingProducto.productoProveedors[0];
                       if (proveedorActivo) {
                         const nuevoPrecioCosto = Number(e.target.value);
                         const porcentajeGanancia =
@@ -186,7 +188,7 @@ export const EditProduct = ({
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
-                          );
+                          ) || editingProducto.productoProveedors[0];
                         if (proveedorActivo) {
                           const nuevoPorcentaje = 45;
                           const precioCosto = proveedorActivo.precioCosto;
@@ -222,7 +224,7 @@ export const EditProduct = ({
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
-                          );
+                          ) || editingProducto.productoProveedors[0];
                         if (proveedorActivo) {
                           const nuevoPorcentaje = 50;
                           const precioCosto = proveedorActivo.precioCosto;
@@ -257,13 +259,16 @@ export const EditProduct = ({
                       value={
                         editingProducto.productoProveedors.find(
                           (pp) => pp.activo
-                        )?.porcentajeGanancia || ""
+                        )?.porcentajeGanancia ||
+                        editingProducto.productoProveedors[0]
+                          ?.porcentajeGanancia ||
+                        ""
                       }
                       onChange={(e) => {
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
-                          );
+                          ) || editingProducto.productoProveedors[0];
                         if (proveedorActivo) {
                           const nuevoPorcentaje = Number(e.target.value);
                           const precioCosto = proveedorActivo.precioCosto;
@@ -301,13 +306,15 @@ export const EditProduct = ({
                     step="0.01"
                     value={
                       editingProducto.productoProveedors.find((pp) => pp.activo)
-                        ?.precioVenta || ""
+                        ?.precioVenta ||
+                      editingProducto.productoProveedors[0]?.precioVenta ||
+                      ""
                     }
                     onChange={(e) => {
                       const proveedorActivo =
                         editingProducto.productoProveedors.find(
                           (pp) => pp.activo
-                        );
+                        ) || editingProducto.productoProveedors[0];
                       if (proveedorActivo) {
                         const nuevoPrecioVenta = Number(e.target.value);
                         const precioCosto = proveedorActivo.precioCosto;
@@ -344,13 +351,15 @@ export const EditProduct = ({
                     step="0.01"
                     value={
                       editingProducto.productoProveedors.find((pp) => pp.activo)
-                        ?.precioMayorista || ""
+                        ?.precioMayorista ||
+                      editingProducto.productoProveedors[0]?.precioMayorista ||
+                      ""
                     }
                     onChange={(e) => {
                       const proveedorActivo =
                         editingProducto.productoProveedors.find(
                           (pp) => pp.activo
-                        );
+                        ) || editingProducto.productoProveedors[0];
                       if (proveedorActivo) {
                         setEditingProducto({
                           ...editingProducto,

@@ -33,3 +33,16 @@ th {
     rgba(31, 210, 70, 0.5) 100%
   );
 }
+
+.transition-opacity-300 {
+  animation: opacity-300 0.3s ease-in-out;
+}
+
+@keyframes opacity-300 {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

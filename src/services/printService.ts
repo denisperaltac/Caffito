@@ -1,6 +1,5 @@
 import qz from "qz-tray";
 import { Factura } from "../types/configuration";
-import LogoCaffito from "../assets/LogoCaffito.png";
 import LogoCaffitoBN from "../assets/LogoCaffitoBN.png";
 
 // Extender la definición de tipos de qz-tray
