@@ -145,7 +145,6 @@ const formatTicketContent = (
   lines.push("Direccion: Lavalle 773");
   lines.push("Tel: (3408) 680521");
   lines.push("CUIT: 20-18096191-8");
-  lines.push("--------------------------------");
   lines.push(`Fecha: ${fecha}`);
   lines.push(`Hora: ${hora}`);
   // Identificadores de ticket / comprobante
@@ -153,6 +152,11 @@ const formatTicketContent = (
     lines.push(`NR.T.: ${factura.comprobanteId.codigo}`);
   } else {
     lines.push(`Ticket #: ${factura.id || "N/A"}`);
+  }
+  // Datos AFIP (si existen)
+  if (factura.comprobanteId && factura.comprobanteId.cae) {
+    lines.push("--------------------------------");
+    lines.push(`CAE: ${factura.comprobanteId.cae}`);
   }
   lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
   lines.push("--------------------------------");
@@ -200,11 +204,7 @@ const formatTicketContent = (
   // Pie
   lines.push("--------------------------------");
   lines.push("¡Gracias por su compra!");
-  // Datos AFIP (si existen)
-  if (factura.comprobanteId && factura.comprobanteId.cae) {
-    lines.push("--------------------------------");
-    lines.push(`CAE: ${factura.comprobanteId.cae}`);
-  }
+
   lines.push("--------------------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
 
@@ -234,7 +234,7 @@ export const printService = {
       const ticketContent = formatTicketContent(factura, {
         omitTitle: Boolean(logoDataUrl),
       });
-
+      console.log(ticketContent);
       // Configurar el trabajo de impresión usando qz.configs.create
       const config = (qz as any).configs.create(printerConfig.printer, {
         copies: printerConfig.copies,
