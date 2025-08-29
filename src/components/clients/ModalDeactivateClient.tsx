@@ -9,12 +9,12 @@ export const ModalDeactivateClient = ({
   onClose,
   loadClientes,
 }: {
-  client: Cliente;
+  client: Cliente | any;
   open: boolean;
   onClose: () => void;
   loadClientes: () => void;
 }) => {
-  const [formData, setFormData] = useState<Cliente>(client);
+  const [formData, setFormData] = useState<Cliente>(client || ({} as Cliente));
   const [deactivateInput, setDeactivateInput] = useState<string>("");
   const [disabledBtn, setDisabledBtn] = useState<boolean>(false);
 

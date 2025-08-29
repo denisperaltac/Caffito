@@ -13,12 +13,16 @@ import {
   FaBriefcase,
   FaToggleOn,
   FaCog,
+  FaEye,
+  FaBook,
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
-import { Cliente } from "../../services/clientService";
+import { Cliente } from "../../types/cliente";
 import { SortField } from "../../types/cliente";
 import { ModalEditClient } from "./ModalEditClient";
 import { ModalDeactivateClient } from "./ModalDeactivateClient";
+import { ModalCuentaCorriente } from "./ModalCuentaCorriente";
+import { ModalViewClient } from "./ModalViewClient";
 
 interface TableClientsProps {
   loadClientes: () => Promise<void>;
@@ -26,7 +30,7 @@ interface TableClientsProps {
   sortField: string;
   setSortField: (field: string) => void;
   setSortDirection: (direction: string) => void;
-  clientes: Cliente[];
+  clientes?: Cliente[] | any;
 }
 export const TableClients = ({
   loadClientes,
@@ -36,9 +40,11 @@ export const TableClients = ({
   setSortDirection,
   clientes,
 }: TableClientsProps) => {
-  const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Cliente | any>(null);
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openCuentaCorriente, setOpenCuentaCorriente] = useState(false);
+  const [openView, setOpenView] = useState(false);
 
   const handleEdit = (cliente: Cliente) => {
     setSelectedClient(cliente);
@@ -48,6 +54,16 @@ export const TableClients = ({
   const handleDelete = async (cliente: Cliente) => {
     setSelectedClient(cliente);
     setOpenDelete(true);
+  };
+
+  const handleCuentaCorriente = (cliente: Cliente) => {
+    setSelectedClient(cliente);
+    setOpenCuentaCorriente(true);
+  };
+
+  const handleView = (cliente: Cliente) => {
+    setSelectedClient(cliente);
+    setOpenView(true);
   };
 
   const handleSort = (field: SortField) => {
@@ -137,7 +153,7 @@ export const TableClients = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {clientes?.map((cliente) => (
+          {clientes?.map((cliente: Cliente) => (
             <tr key={cliente.id} className="hover:bg-gray-50">
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.id}
@@ -150,9 +166,9 @@ export const TableClients = ({
               </td>
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
                 {cliente.tipoDocumentoNombre
-                  ? `${
-                      cliente.tipoDocumentoNombre
-                    } - ${cliente.numeroDocumento.trim()}`
+                  ? `${cliente.tipoDocumentoNombre} - ${
+                      cliente.numeroDocumento?.trim() || "-"
+                    }`
                   : cliente.numeroDocumento?.trim() || "-"}
               </td>
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
@@ -197,6 +213,26 @@ export const TableClients = ({
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end space-x-2">
                   <button
+                    onClick={() => handleView(cliente)}
+                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
+                    data-tooltip-id={`view-${cliente.id}`}
+                    data-tooltip-content="Ver cliente"
+                  >
+                    <FaEye className="w-5 h-5" />
+                  </button>
+                  <Tooltip id={`view-${cliente.id}`} />
+
+                  <button
+                    onClick={() => handleCuentaCorriente(cliente)}
+                    className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+                    data-tooltip-id={`cc-${cliente.id}`}
+                    data-tooltip-content="Cuenta Corriente"
+                  >
+                    <FaBook className="w-5 h-5" />
+                  </button>
+                  <Tooltip id={`cc-${cliente.id}`} />
+
+                  <button
                     onClick={() => handleEdit(cliente)}
                     className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
                     data-tooltip-id={`edit-${cliente.id}`}
@@ -228,10 +264,20 @@ export const TableClients = ({
         loadClientes={loadClientes}
       />
       <ModalDeactivateClient
-        client={selectedClient || ({} as Cliente)}
+        client={selectedClient}
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         loadClientes={loadClientes}
+      />
+      <ModalCuentaCorriente
+        cliente={selectedClient}
+        open={openCuentaCorriente}
+        onClose={() => setOpenCuentaCorriente(false)}
+      />
+      <ModalViewClient
+        cliente={selectedClient}
+        open={openView}
+        onClose={() => setOpenView(false)}
       />
     </div>
   );

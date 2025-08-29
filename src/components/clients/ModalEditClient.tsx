@@ -9,12 +9,12 @@ export const ModalEditClient = ({
   onClose,
   loadClientes,
 }: {
-  client: Cliente | null;
+  client: Cliente | any;
   open: boolean;
   onClose: () => void;
   loadClientes: () => void;
 }) => {
-  const [formData, setFormData] = useState<Cliente | null>(client);
+  const [formData, setFormData] = useState<Cliente>(client);
   const [nameError, setNameError] = useState<string>("");
   const [disabledBtn, setDisabledBtn] = useState<boolean>(false);
 

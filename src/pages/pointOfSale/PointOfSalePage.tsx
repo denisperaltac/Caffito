@@ -870,8 +870,7 @@ const PointOfSalePage: React.FC = () => {
         {/* Factura */}
         <div className="bg-white shadow-md rounded-lg p-3 flex flex-col h-full">
           {/* Cliente */}
-          <div className="mb-3 min-h-[120px] h-[15%]">
-            <h2 className="text-xl font-bold mb-2">Factura</h2>
+          <div className="mb-3 min-h-[80px] h-[10%]">
             <div className="mb-3">
               <label className="block text-gray-700 font-bold mb-2">
                 Cliente
@@ -950,7 +949,7 @@ const PointOfSalePage: React.FC = () => {
           {/* Renglones */}
           <div
             ref={renglonesTableRef}
-            className="mb-3 flex-1 overflow-auto border-2 border-gray-500 rounded-sm h-[65%] max-h-[450px]"
+            className="mb-2 flex-1 overflow-auto border border-gray-500 rounded-sm h-[75%] max-h-[600px]"
           >
             <table className="w-full overflow-auto">
               <thead className="sticky top-0">
@@ -1059,8 +1058,8 @@ const PointOfSalePage: React.FC = () => {
           </div>
 
           {/* Totales */}
-          <div className="mb-3 h-[20%] min-h-[130px]">
-            <div className="flex justify-between mb-2 text-xl">
+          <div className="h-[18%] min-h-[120px]">
+            <div className="flex justify-between mb-2 text-lg">
               <span>Subtotal:</span>
               <span>{formatCurrency(factura.subtotal)}</span>
             </div>
@@ -1072,7 +1071,7 @@ const PointOfSalePage: React.FC = () => {
               <span>Interés:</span>
               <span>{formatCurrency(factura.interes)}</span>
             </div>
-            <div className="flex justify-between font-bold text-3xl">
+            <div className="flex justify-between font-bold text-xl">
               <span>Total:</span>
               <span>{formatCurrency(factura.total)}</span>
             </div>

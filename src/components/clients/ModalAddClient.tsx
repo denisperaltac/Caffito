@@ -119,7 +119,7 @@ export const ModalAddClient = ({
     <Modal
       open={open}
       onClose={onClose}
-      size="w-[90%] h-[90%]"
+      size="w-auto h-auto"
       onSave={handleSave}
       disabledBtn={disabledBtn}
     >

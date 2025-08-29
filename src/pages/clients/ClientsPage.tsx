@@ -142,6 +142,7 @@ const ClientsPage: React.FC = () => {
       ) : (
         <>
           <TableClients
+            clientes={clientes}
             loadClientes={loadClientes}
             sortDirection={sortDirection}
             sortField={sortField}
@@ -149,7 +150,6 @@ const ClientsPage: React.FC = () => {
             setSortDirection={(direction: string) =>
               setSortDirection(direction as SortDirection)
             }
-            clientes={clientes}
           />
 
           <ModalAddClient
