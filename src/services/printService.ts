@@ -300,7 +300,7 @@ export const printService = {
           },
         });
         console.log(
-          "Logo agregado con opciones optimizadas para XPRINTER XP-58IIH"
+          "Logo agregado con opciones optimizadas para la impresora XPRINTER XP-58IIH"
         );
       }
 
