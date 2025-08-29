@@ -245,20 +245,25 @@ export const printService = {
         factura,
       });
 
-      // Construir datos a imprimir: logo (si existe) + ticket
-      const dataToPrint: any[] = [];
+      // Construir datos a imprimir
+      const dataWithLogo: any[] = [];
       if (logoDataUrl) {
-        dataToPrint.push({ type: "image", data: logoDataUrl });
+        console.log("Logo cargado para impresión (bytes)", logoDataUrl.length);
+        dataWithLogo.push({ type: "image", data: logoDataUrl });
       }
-      dataToPrint.push(ticketContent);
+      dataWithLogo.push(ticketContent);
 
-      // Enviar a imprimir usando qz.print
-      await (qz as any)
-        .print(config, dataToPrint)
-        .then(() => {
-          console.log("Impreso OK");
-        })
-        .catch((error: any) => console.error(error));
+      const dataTextOnly: any[] = [ticketContent];
+
+      // Enviar a imprimir: intenta con imagen, si falla reintenta solo texto
+      try {
+        await (qz as any).print(config, dataWithLogo);
+        console.log("Impreso OK (con logo)");
+      } catch (error) {
+        console.warn("Fallo impresión con logo, reintento solo texto", error);
+        await (qz as any).print(config, dataTextOnly);
+        console.log("Impreso OK (solo texto)");
+      }
 
       return true;
     } catch (error) {
