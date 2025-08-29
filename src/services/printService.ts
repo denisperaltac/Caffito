@@ -274,7 +274,7 @@ export const printService = {
           options: {
             language: "escp",
             dotDensity: "double",
-            width: 350,
+            width: 280,
             height: "auto",
           },
         });
