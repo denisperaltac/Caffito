@@ -179,7 +179,9 @@ const formatTicketContent = (
 
   // Totales
   lines.push("--------------------------------");
-  lines.push(`Subtotal: $${factura.subtotal?.toFixed(2) || "0.00"}`);
+  if (factura.descuento > 0 || factura.interes > 0) {
+    lines.push(`Subtotal: $${factura.subtotal?.toFixed(2) || "0.00"}`);
+  }
   if (factura.descuento > 0) {
     lines.push(`Descuento: -$${factura.descuento.toFixed(2)}`);
   }
@@ -266,11 +268,15 @@ export const printService = {
         // Usar la API correcta de QZ Tray para imágenes
         // QZ Tray espera un objeto con propiedades específicas
         dataToPrint.push({
-          type: "image",
+          type: "raw",
+          format: "image",
           data: logoDataUrl,
-          // Opciones básicas para impresora térmica
-          width: 350, // Ancho para papel de 58mm
-          height: "auto",
+          options: {
+            language: "escp",
+            dotDensity: "double",
+            width: 350,
+            height: "auto",
+          },
         });
         console.log("Logo agregado usando API correcta de QZ Tray");
       }
