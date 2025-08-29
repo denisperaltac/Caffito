@@ -1,5 +1,6 @@
 import qz from "qz-tray";
 import { Factura } from "../types/configuration";
+import LogoCaffito from "../assets/LogoCaffito.png";
 
 // Extender la definición de tipos de qz-tray
 declare module "qz-tray" {
@@ -111,17 +112,40 @@ const hora = now.toLocaleTimeString("es-AR", {
   hour12: false,
 });
 
+// Cargar imagen como base64 (data URL)
+const loadImageAsBase64 = async (url: string): Promise<string | null> => {
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    console.error("No se pudo cargar el logo para impresión", e);
+    return null;
+  }
+};
+
 // Formatear el contenido del ticket
-const formatTicketContent = (factura: Factura) => {
+const formatTicketContent = (
+  factura: Factura,
+  options?: { omitTitle?: boolean }
+) => {
   const lines = [];
 
   // Encabezado
-  lines.push("Caffito");
-  lines.push("-------------------");
-  lines.push("Dirección: Lavalle 773");
+  if (!options?.omitTitle) {
+    lines.push("Caffito");
+  }
+  lines.push("--------------------------------");
+  lines.push("Direccion: Lavalle 773");
   lines.push("Tel: (3408) 680521");
   lines.push("CUIT: 20-18096191-8");
-  lines.push("-------------------");
+  lines.push("--------------------------------");
   lines.push(`Fecha: ${fecha}`);
   lines.push(`Hora: ${hora}`);
   // Identificadores de ticket / comprobante
@@ -131,12 +155,12 @@ const formatTicketContent = (factura: Factura) => {
     lines.push(`Ticket #: ${factura.id || "N/A"}`);
   }
   lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
-  lines.push("-------------------");
+  lines.push("--------------------------------");
 
   // Detalles de la factura
   if (factura.facturaRenglons && factura.facturaRenglons.length > 0) {
     lines.push("PRODUCTOS");
-    lines.push("-------------------");
+    lines.push("--------------------------------");
     factura.facturaRenglons.forEach((renglon) => {
       lines.push(`${renglon.detalle || ""}`);
       lines.push(
@@ -150,7 +174,7 @@ const formatTicketContent = (factura: Factura) => {
   }
 
   // Totales
-  lines.push("-------------------");
+  lines.push("--------------------------------");
   lines.push(`Subtotal: $${factura.subtotal?.toFixed(2) || "0.00"}`);
   if (factura.descuento > 0) {
     lines.push(`Descuento: -$${factura.descuento.toFixed(2)}`);
@@ -161,7 +185,7 @@ const formatTicketContent = (factura: Factura) => {
   lines.push(`Total: $${factura.total?.toFixed(2) || "0.00"}`);
 
   // Pagos
-  lines.push("-------------------");
+  lines.push("--------------------------------");
   lines.push("PAGOS");
   if (factura.pagos && factura.pagos.length > 0) {
     factura.pagos.forEach((pago) => {
@@ -174,14 +198,14 @@ const formatTicketContent = (factura: Factura) => {
   }
 
   // Pie
-  lines.push("-------------------");
+  lines.push("--------------------------------");
   lines.push("¡Gracias por su compra!");
   // Datos AFIP (si existen)
   if (factura.comprobanteId && factura.comprobanteId.cae) {
-    lines.push("-------------------");
+    lines.push("--------------------------------");
     lines.push(`CAE: ${factura.comprobanteId.cae}`);
   }
-  lines.push("-------------------");
+  lines.push("--------------------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
 
   return lines.join("\n");
@@ -202,8 +226,14 @@ export const printService = {
         await initializeQz();
       }
 
-      // Formatear el contenido del ticket
-      const ticketContent = formatTicketContent(factura);
+      // Intentar cargar el logo (opcional)
+      const logoDataUrl = await loadImageAsBase64(
+        LogoCaffito as unknown as string
+      );
+      // Formatear el contenido del ticket (si hay logo, omite el título "Caffito")
+      const ticketContent = formatTicketContent(factura, {
+        omitTitle: Boolean(logoDataUrl),
+      });
 
       // Configurar el trabajo de impresión usando qz.configs.create
       const config = (qz as any).configs.create(printerConfig.printer, {
@@ -216,9 +246,16 @@ export const printService = {
         factura,
       });
 
-      // Enviar a imprimir usando qz.print con el contenido del ticket directamente
+      // Construir datos a imprimir: logo (si existe) + ticket
+      const dataToPrint: any[] = [];
+      if (logoDataUrl) {
+        dataToPrint.push({ type: "image", data: logoDataUrl });
+      }
+      dataToPrint.push(ticketContent);
+
+      // Enviar a imprimir usando qz.print
       await (qz as any)
-        .print(config, [ticketContent])
+        .print(config, dataToPrint)
         .then(() => {
           console.log("Impreso OK");
         })
