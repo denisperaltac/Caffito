@@ -17,7 +17,7 @@ declare module "qz-tray" {
     };
     print(
       config: { printer: string; copies: number },
-      data: string[]
+      data: any[]
     ): Promise<any>;
     websocket: {
       connect(): Promise<any>;
@@ -259,28 +259,37 @@ export const printService = {
         copies: printerConfig.copies,
       });
 
-      // Construir datos a imprimir - usar solo strings para compatibilidad
-      const dataToPrint: string[] = [];
+      // Construir datos a imprimir usando la API correcta de QZ Tray
+      const dataToPrint: any[] = [];
 
       if (logoDataUrl) {
-        // Agregar el logo como string base64 directamente
-        dataToPrint.push(logoDataUrl);
-        console.log("Logo agregado como base64 para XPRINTER XP-58IIH");
+        // Usar la API correcta de QZ Tray para imágenes
+        // QZ Tray espera un objeto con propiedades específicas
+        dataToPrint.push({
+          type: "image",
+          data: logoDataUrl,
+          // Opciones básicas para impresora térmica
+          width: 350, // Ancho para papel de 58mm
+          height: "auto",
+        });
+        console.log("Logo agregado usando API correcta de QZ Tray");
       }
 
       // Agregar el contenido del ticket
       dataToPrint.push(ticketContent);
 
-      console.log("Enviando trabajo de impresión con datos simples... 2");
+      console.log("Enviando trabajo de impresión con API correcta...");
 
-      // Intentar imprimir con datos simples
+      // Intentar imprimir con la API correcta
       try {
         await (qz as any).print(config, dataToPrint);
-        console.log("✅ Impresión exitosa con logo y texto");
+        console.log(
+          "✅ Impresión exitosa con logo y texto usando API correcta"
+        );
         return true;
       } catch (printError) {
         console.warn(
-          "⚠️ Fallo en impresión con logo, intentando solo texto:",
+          "⚠️ Fallo en impresión con API correcta, intentando solo texto:",
           printError
         );
 
