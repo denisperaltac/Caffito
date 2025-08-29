@@ -133,16 +133,15 @@ const loadImageAsBase64 = async (url: string): Promise<string | null> => {
 
 // Formatear el contenido del ticket
 const formatTicketContent = (
-  factura: Factura,
+  factura: Factura & { clienteNombreApellido?: string },
   options?: { omitTitle?: boolean }
 ) => {
   const lines = [];
-
+  console.log("Factura", factura);
   // Encabezado
   if (!options?.omitTitle) {
     lines.push("Caffito");
   }
-  lines.push("--------------------------------");
   lines.push("Direccion: Lavalle 773");
   lines.push("Tel: (3408) 680521");
   lines.push("CUIT: 20-18096191-8");
@@ -158,13 +157,16 @@ const formatTicketContent = (
   if (factura.comprobanteId && factura.comprobanteId.cae) {
     lines.push(`CAE: ${factura.comprobanteId.cae}`);
   }
-  lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
+  if (factura.clienteNombreApellido) {
+    lines.push(`Cliente: ${factura.clienteNombreApellido}`);
+  } else {
+    lines.push(`Consumidor Final`);
+  }
   lines.push("--------------------------------");
 
   // Detalles de la factura
   if (factura.facturaRenglons && factura.facturaRenglons.length > 0) {
     lines.push("PRODUCTOS");
-    lines.push("--------------------------------");
     factura.facturaRenglons.forEach((renglon) => {
       lines.push(`${renglon.detalle || ""}`);
       lines.push(
