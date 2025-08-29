@@ -145,8 +145,7 @@ const formatTicketContent = (
   lines.push("Direccion: Lavalle 773");
   lines.push("Tel: (3408) 680521");
   lines.push("CUIT: 20-18096191-8");
-  lines.push(`Fecha: ${fecha}`);
-  lines.push(`Hora: ${hora}`);
+  lines.push(`Fecha: ${fecha} - ${hora}`);
   // Identificadores de ticket / comprobante
   if (factura.comprobanteId && factura.comprobanteId.codigo) {
     lines.push(`NR.T.: ${factura.comprobanteId.codigo}`);
@@ -209,7 +208,6 @@ const formatTicketContent = (
   lines.push("¡Gracias por su compra!");
   lines.push("--------------------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
-  lines.push("");
   lines.push("");
   lines.push("");
   lines.push("");
