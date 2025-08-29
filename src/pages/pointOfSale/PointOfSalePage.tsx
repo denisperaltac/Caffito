@@ -507,7 +507,10 @@ const PointOfSalePage: React.FC = () => {
   const handlePrint = async () => {
     try {
       setLoadingBtn(true);
-      await pointOfSaleService.imprimirFactura(factura);
+      // Imprimir la factura guardada (contiene datos de AFIP si aplica)
+      const facturaParaImprimir = facturaGuardada ? facturaGuardada : factura;
+      await pointOfSaleService.imprimirFactura(facturaParaImprimir);
+      console.log(facturaParaImprimir);
       toast.success("Factura impresa correctamente");
       setLoadingBtn(false);
       setShowPrintModal(false);

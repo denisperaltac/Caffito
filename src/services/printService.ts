@@ -124,7 +124,12 @@ const formatTicketContent = (factura: Factura) => {
   lines.push("-------------------");
   lines.push(`Fecha: ${fecha}`);
   lines.push(`Hora: ${hora}`);
-  lines.push(`Ticket #: ${factura.id || "N/A"}`);
+  // Identificadores de ticket / comprobante
+  if (factura.comprobanteId && factura.comprobanteId.codigo) {
+    lines.push(`NR.T.: ${factura.comprobanteId.codigo}`);
+  } else {
+    lines.push(`Ticket #: ${factura.id || "N/A"}`);
+  }
   lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
   lines.push("-------------------");
 
@@ -171,6 +176,11 @@ const formatTicketContent = (factura: Factura) => {
   // Pie
   lines.push("-------------------");
   lines.push("¡Gracias por su compra!");
+  // Datos AFIP (si existen)
+  if (factura.comprobanteId && factura.comprobanteId.cae) {
+    lines.push("-------------------");
+    lines.push(`CAE: ${factura.comprobanteId.cae}`);
+  }
   lines.push("-------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
 
