@@ -203,9 +203,13 @@ const formatTicketContent = (
   // Pie
   lines.push("--------------------------------");
   lines.push("¡Gracias por su compra!");
-
   lines.push("--------------------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
+  lines.push("");
+  lines.push("");
+  lines.push("");
+  lines.push("");
+  lines.push("");
 
   return lines.join("\n");
 };
@@ -225,49 +229,143 @@ export const printService = {
         await initializeQz();
       }
 
-      // Intentar cargar el logo (opcional)
-      const logoDataUrl = await loadImageAsBase64(
-        LogoCaffito as unknown as string
-      );
+      // Intentar cargar el logo
+      let logoDataUrl: string | null = null;
+      try {
+        logoDataUrl = await loadImageAsBase64(LogoCaffito as unknown as string);
+        if (logoDataUrl) {
+          console.log("Logo cargado correctamente para impresión");
+        }
+      } catch (error) {
+        console.warn("No se pudo cargar el logo:", error);
+      }
+
       // Formatear el contenido del ticket (si hay logo, omite el título "Caffito")
       const ticketContent = formatTicketContent(factura, {
         omitTitle: Boolean(logoDataUrl),
       });
-      console.log(ticketContent);
-      // Configurar el trabajo de impresión usando qz.configs.create
+
+      console.log("Datos a imprimir:", {
+        printer: printerConfig.printer,
+        hasLogo: Boolean(logoDataUrl),
+        factura,
+      });
+
+      // Configurar el trabajo de impresión
       const config = (qz as any).configs.create(printerConfig.printer, {
         copies: printerConfig.copies,
       });
 
-      console.log("Datos a imprimir:", {
-        config,
-        ticketContent,
-        factura,
+      // Opciones específicas para impresora térmica XPRINTER XP-58IIH (58mm)
+      const printOptions = {
+        rasterize: true, // Forzar rasterización para mejor compatibilidad
+        width: 380, // Ancho en píxeles para papel de 58mm (aproximadamente 380px)
+        height: "auto", // Altura automática
+        density: 203, // DPI estándar para impresoras térmicas
+        orientation: "portrait", // Orientación vertical
+        colorType: "grayscale", // Escala de grises para impresoras térmicas
+        jobName: "Caffito Ticket",
+        perSpool: true, // Un trabajo por spool
+        altPrinting: false, // Impresión normal
+        encoding: "UTF-8", // Codificación de caracteres
+        replaceSpecialCharacters: true, // Reemplazar caracteres especiales
+        scaleContent: true, // Escalar contenido al ancho del papel
+        size: {
+          // Tamaño específico para 58mm
+          width: "58mm",
+          height: "auto",
+        },
+      };
+
+      // Construir datos a imprimir con opciones optimizadas
+      const dataToPrint: any[] = [];
+
+      if (logoDataUrl) {
+        // Agregar el logo con opciones específicas para impresora térmica
+        dataToPrint.push({
+          type: "image",
+          data: logoDataUrl,
+          options: {
+            ...printOptions,
+            // Opciones específicas para imagen
+            imageWidth: 350, // Ancho de imagen para 58mm (un poco menor que el ancho del papel)
+            imageHeight: "auto", // Altura automática manteniendo proporción
+            imageDensity: 203, // DPI para imagen
+            imageThreshold: 128, // Umbral para conversión a blanco y negro
+            imageInvert: false, // No invertir colores
+            imageMirror: false, // No espejar imagen
+            imageRotate: 0, // Sin rotación
+            imageInterpolation: "nearest", // Interpolación más rápida
+            imageSmoothing: false, // Sin suavizado para mejor definición
+          },
+        });
+        console.log(
+          "Logo agregado con opciones optimizadas para XPRINTER XP-58IIH"
+        );
+      }
+
+      // Agregar el contenido del ticket
+      dataToPrint.push({
+        type: "text",
+        data: ticketContent,
+        options: {
+          ...printOptions,
+          // Opciones específicas para texto
+          fontSize: 12, // Tamaño de fuente estándar
+          fontFamily: "monospace", // Fuente monoespaciada para mejor alineación
+          textAlign: "left", // Alineación a la izquierda
+          textBold: false, // Sin negrita por defecto
+          textItalic: false, // Sin cursiva por defecto
+          textUnderline: false, // Sin subrayado por defecto
+          textStrike: false, // Sin tachado por defecto
+          textInvert: false, // Sin inversión de colores
+          textMirror: false, // Sin espejo de texto
+          textRotate: 0, // Sin rotación de texto
+          textSpacing: 0, // Espaciado normal entre caracteres
+          textLineSpacing: 1.2, // Espaciado entre líneas
+        },
       });
 
-      // Construir datos a imprimir
-      const dataWithLogo: any[] = [];
-      if (logoDataUrl) {
-        console.log("Logo cargado para impresión (bytes)", logoDataUrl.length);
-        dataWithLogo.push({ type: "image", data: logoDataUrl });
-      }
-      dataWithLogo.push(ticketContent);
+      console.log("Enviando trabajo de impresión con opciones optimizadas...");
 
-      const dataTextOnly: any[] = [ticketContent];
-
-      // Enviar a imprimir: intenta con imagen, si falla reintenta solo texto
+      // Intentar imprimir con todas las opciones optimizadas
       try {
-        await (qz as any).print(config, dataWithLogo);
-        console.log("Impreso OK (con logo)");
-      } catch (error) {
-        console.warn("Fallo impresión con logo, reintento solo texto", error);
-        await (qz as any).print(config, dataTextOnly);
-        console.log("Impreso OK (solo texto)");
-      }
+        await (qz as any).print(config, dataToPrint);
+        console.log(
+          "✅ Impresión exitosa con logo y opciones optimizadas para XPRINTER XP-58IIH"
+        );
+        return true;
+      } catch (printError) {
+        console.warn(
+          "⚠️ Fallo en impresión optimizada, intentando con opciones básicas:",
+          printError
+        );
 
-      return true;
+        // Fallback: intentar con opciones básicas
+        const fallbackData = logoDataUrl
+          ? [{ type: "image", data: logoDataUrl }, ticketContent]
+          : [ticketContent];
+
+        try {
+          await (qz as any).print(config, fallbackData);
+          console.log("✅ Impresión exitosa con opciones básicas");
+          return true;
+        } catch (fallbackError) {
+          console.error("❌ Fallo en impresión básica:", fallbackError);
+
+          // Último fallback: solo texto
+          try {
+            await (qz as any).print(config, [ticketContent]);
+            console.log("✅ Impresión exitosa solo texto (último fallback)");
+            return true;
+          } catch (finalError) {
+            console.error("❌ Error crítico de impresión:", finalError);
+            throw new Error(`No se pudo imprimir: ${finalError}`);
+          }
+        }
+      }
     } catch (error) {
-      console.error("Error al imprimir la factura:", error);
+      console.error("❌ Error al imprimir la factura:", error);
       throw error;
     }
   },
