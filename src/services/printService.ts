@@ -1,6 +1,7 @@
 import qz from "qz-tray";
 import { Factura } from "../types/configuration";
 import LogoCaffito from "../assets/LogoCaffito.png";
+import LogoCaffitoBN from "../assets/LogoCaffitoBN.png";
 
 // Extender la definición de tipos de qz-tray
 declare module "qz-tray" {
@@ -232,7 +233,9 @@ export const printService = {
       // Intentar cargar el logo
       let logoDataUrl: string | null = null;
       try {
-        logoDataUrl = await loadImageAsBase64(LogoCaffito as unknown as string);
+        logoDataUrl = await loadImageAsBase64(
+          LogoCaffitoBN as unknown as string
+        );
         if (logoDataUrl) {
           console.log("Logo cargado correctamente para impresión");
         }
@@ -256,32 +259,24 @@ export const printService = {
         copies: printerConfig.copies,
       });
 
-      // Construir datos a imprimir con opciones básicas compatibles
-      const dataToPrint: any[] = [];
+      // Construir datos a imprimir - usar solo strings para compatibilidad
+      const dataToPrint: string[] = [];
 
       if (logoDataUrl) {
-        // Agregar el logo con opciones básicas compatibles
-        dataToPrint.push({
-          type: "image",
-          data: logoDataUrl,
-          // Solo opciones básicas que QZ Tray soporta universalmente
-          width: 350, // Ancho para papel de 58mm
-          height: "auto", // Altura automática
-        });
-        console.log(
-          "Logo agregado con opciones básicas para XPRINTER XP-58IIH"
-        );
+        // Agregar el logo como string base64 directamente
+        dataToPrint.push(logoDataUrl);
+        console.log("Logo agregado como base64 para XPRINTER XP-58IIH");
       }
 
       // Agregar el contenido del ticket
       dataToPrint.push(ticketContent);
 
-      console.log("Enviando trabajo de impresión con opciones básicas...");
+      console.log("Enviando trabajo de impresión con datos simples... 2");
 
-      // Intentar imprimir con opciones básicas
+      // Intentar imprimir con datos simples
       try {
         await (qz as any).print(config, dataToPrint);
-        console.log("✅ Impresión exitosa con logo y opciones básicas");
+        console.log("✅ Impresión exitosa con logo y texto");
         return true;
       } catch (printError) {
         console.warn(
