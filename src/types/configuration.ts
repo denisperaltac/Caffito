@@ -201,6 +201,8 @@ export interface Factura {
     tipoComprobanteId: number;
     tipoDocumentoId: number;
     nroDocumento: string;
+    codigo?: string;
+    cae?: string;
   };
   clienteId: number;
   promocionId?: string;
