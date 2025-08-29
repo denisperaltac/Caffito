@@ -167,9 +167,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     >
                       {getTipoPagoIcon(tipo.nombre)}
                       <span className="text-sm md:text-lg">
-                        {tipo.nombre.toLowerCase().replace(/\s+/g, "") ===
-                        "cuenta corriente proveedor"
-                          ? "Cuenta C. Proveedor"
+                        {tipo.nombre ===
+                        "CUENTA CORRIENTE PROVEEDOR              "
+                          ? "CUENTA C. PROVEEDOR"
                           : tipo.nombre}
                       </span>
                     </button>
