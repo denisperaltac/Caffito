@@ -155,7 +155,6 @@ const formatTicketContent = (
   }
   // Datos AFIP (si existen)
   if (factura.comprobanteId && factura.comprobanteId.cae) {
-    lines.push("--------------------------------");
     lines.push(`CAE: ${factura.comprobanteId.cae}`);
   }
   lines.push(`Cliente: ${factura.clienteId || "Consumidor Final"}`);
