@@ -180,7 +180,6 @@ const formatTicketContent = (
   }
 
   // Totales
-  lines.push("--------------------------------");
   if (factura.descuento > 0 || factura.interes > 0) {
     lines.push(`Subtotal: $${factura.subtotal?.toFixed(2) || "0.00"}`);
   }
