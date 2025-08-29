@@ -59,6 +59,12 @@ const LoginPage: React.FC = () => {
         <form className="mt-8 space-y-2" onSubmit={handleSubmit}>
           <div className="space-y-6">
             <div className="relative pb-3">
+              <label
+                htmlFor="username"
+                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
+              >
+                Usuario
+              </label>
               <input
                 id="username"
                 name="username"
@@ -69,15 +75,15 @@ const LoginPage: React.FC = () => {
                 value={credentials.username}
                 onChange={handleChange}
               />
-              <label
-                htmlFor="username"
-                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
-              >
-                Usuario
-              </label>
             </div>
 
             <div className="relative">
+              <label
+                htmlFor="password"
+                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
+              >
+                Contraseña
+              </label>
               <input
                 id="password"
                 name="password"
@@ -88,12 +94,6 @@ const LoginPage: React.FC = () => {
                 value={credentials.password}
                 onChange={handleChange}
               />
-              <label
-                htmlFor="password"
-                className="absolute left-4 -top-6 text-gray-500 text-md transition-all peer-placeholder-shown:top-3  peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-red-500"
-              >
-                Contraseña
-              </label>
             </div>
           </div>
 

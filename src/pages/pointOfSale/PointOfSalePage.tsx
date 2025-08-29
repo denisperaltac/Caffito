@@ -792,7 +792,7 @@ const PointOfSalePage: React.FC = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 h-[95%]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 h-[100%]">
         {/* Productos */}
         <div className="bg-white shadow-md rounded-lg p-3 flex flex-col h-full">
           <div className="mb-3">
@@ -1066,8 +1066,7 @@ const PointOfSalePage: React.FC = () => {
             <div className="flex justify-between mb-2">
               <span>Descuento:</span>
               <span>{formatCurrency(factura.descuento)}</span>
-            </div>
-            <div className="flex justify-between mb-2">
+
               <span>Interés:</span>
               <span>{formatCurrency(factura.interes)}</span>
             </div>
