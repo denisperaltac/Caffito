@@ -141,8 +141,7 @@ const formatTicketContent = (
   if (!options?.omitTitle) {
     lines.push("Caffito");
   }
-  lines.push("Direccion: Lavalle 773");
-  lines.push("Tel: (3408) 680521");
+  lines.push("Dir:Lavalle 773 - Tel:(3408) 680521");
   lines.push("CUIT: 20-18096191-8");
   lines.push(`Fecha: ${fecha} - ${hora}`);
   // Identificadores de ticket / comprobante
@@ -205,9 +204,7 @@ const formatTicketContent = (
   // Pie
   lines.push("--------------------------------");
   lines.push("¡Gracias por su compra!");
-  lines.push("--------------------------------");
   lines.push(""); // Línea en blanco al final para cortar el ticket
-  lines.push("");
   lines.push("");
   lines.push("");
   lines.push("");

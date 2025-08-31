@@ -994,7 +994,7 @@ const PointOfSalePage: React.FC = () => {
           {/* Renglones */}
           <div
             ref={renglonesTableRef}
-            className="mb-2 flex-1 overflow-auto border border-gray-500 rounded-sm h-[75%] max-h-[600px]"
+            className="mb-2 flex-1 overflow-auto border border-gray-500 rounded-sm h-[80%] max-h-[700px]"
           >
             <table className="w-full overflow-auto">
               <thead className="sticky top-0">
@@ -1103,21 +1103,12 @@ const PointOfSalePage: React.FC = () => {
           </div>
 
           {/* Totales */}
-          <div className="h-[18%] min-h-[120px]">
-            <div className="flex justify-between mb-2 text-lg">
-              <span>Subtotal:</span>
-              <span>{formatCurrency(factura.subtotal)}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span>Descuento:</span>
-              <span>{formatCurrency(factura.descuento)}</span>
-
-              <span>Interés:</span>
-              <span>{formatCurrency(factura.interes)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-xl">
+          <div className="h-[10%] min-h-[120px]">
+            <div className="flex justify-end font-bold text-2xl">
               <span>Total:</span>
-              <span>{formatCurrency(factura.total)}</span>
+              <span style={{ width: "200px", textAlign: "right" }}>
+                {formatCurrency(factura.total)}
+              </span>
             </div>
           </div>
 
