@@ -15,14 +15,15 @@ import {
   FaCog,
   FaEye,
   FaBook,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { Cliente } from "../../types/cliente";
 import { SortField } from "../../types/cliente";
 import { ModalEditClient } from "./ModalEditClient";
 import { ModalDeactivateClient } from "./ModalDeactivateClient";
-import { ModalCuentaCorriente } from "./ModalCuentaCorriente";
 import { ModalViewClient } from "./ModalViewClient";
+import { ModalPagoCuentaCorriente } from "./ModalPagoCuentaCorriente";
 
 interface TableClientsProps {
   loadClientes: () => Promise<void>;
@@ -45,6 +46,7 @@ export const TableClients = ({
   const [openDelete, setOpenDelete] = useState(false);
   const [openCuentaCorriente, setOpenCuentaCorriente] = useState(false);
   const [openView, setOpenView] = useState(false);
+  const [openPagoCuentaCorriente, setOpenPagoCuentaCorriente] = useState(false);
 
   const handleEdit = (cliente: Cliente) => {
     setSelectedClient(cliente);
@@ -59,6 +61,11 @@ export const TableClients = ({
   const handleCuentaCorriente = (cliente: Cliente) => {
     setSelectedClient(cliente);
     setOpenCuentaCorriente(true);
+  };
+
+  const handlePagoCuentaCorriente = (cliente: Cliente) => {
+    setSelectedClient(cliente);
+    setOpenPagoCuentaCorriente(true);
   };
 
   const handleView = (cliente: Cliente) => {
@@ -223,14 +230,14 @@ export const TableClients = ({
                   <Tooltip id={`view-${cliente.id}`} />
 
                   <button
-                    onClick={() => handleCuentaCorriente(cliente)}
+                    onClick={() => handlePagoCuentaCorriente(cliente)}
                     className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
-                    data-tooltip-id={`cc-${cliente.id}`}
-                    data-tooltip-content="Cuenta Corriente"
+                    data-tooltip-id={`pago-cc-${cliente.id}`}
+                    data-tooltip-content="Pago Cuenta Corriente"
                   >
-                    <FaBook className="w-5 h-5" />
+                    <FaMoneyBillWave className="w-5 h-5" />
                   </button>
-                  <Tooltip id={`cc-${cliente.id}`} />
+                  <Tooltip id={`pago-cc-${cliente.id}`} />
 
                   <button
                     onClick={() => handleEdit(cliente)}
@@ -269,15 +276,16 @@ export const TableClients = ({
         onClose={() => setOpenDelete(false)}
         loadClientes={loadClientes}
       />
-      <ModalCuentaCorriente
-        cliente={selectedClient}
-        open={openCuentaCorriente}
-        onClose={() => setOpenCuentaCorriente(false)}
-      />
+
       <ModalViewClient
         cliente={selectedClient}
         open={openView}
         onClose={() => setOpenView(false)}
+      />
+      <ModalPagoCuentaCorriente
+        cliente={selectedClient}
+        open={openPagoCuentaCorriente}
+        onClose={() => setOpenPagoCuentaCorriente(false)}
       />
     </div>
   );

@@ -5,14 +5,12 @@ interface PaginationProps {
   totalPages: number;
   setCurrentPage: (page: number) => void;
   totalItems: number;
-  items: any[];
 }
 
 export const Pagination = ({
   currentPage,
   totalPages,
   setCurrentPage,
-  items,
   totalItems,
 }: PaginationProps) => {
   const handlePageChange = (newPage: number) => {
@@ -104,8 +102,14 @@ export const Pagination = ({
           </span>
         </button>
       </div>
-      <div className="text-center text-sm text-gray-500 mt-2">
-        Mostrando {items?.length} de {totalItems} items
+
+      <div className="mt-6 text-center text-sm text-gray-500">
+        <p>
+          Mostrando {currentPage * 10 + 1} a{" "}
+          {Math.min((currentPage + 1) * 10, totalItems)} de {totalItems}{" "}
+          resultados
+        </p>
+        <p>Total de páginas: {totalPages || 1} | Productos por página: 10</p>
       </div>
     </>
   );

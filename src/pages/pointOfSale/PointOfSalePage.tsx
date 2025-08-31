@@ -119,6 +119,7 @@ const PointOfSalePage: React.FC = () => {
   const [montoPago, setMontoPago] = useState("");
   const [totalPagado, setTotalPagado] = useState(0);
   const [pagos, setPagos] = useState<Pago[]>([]);
+  const [dineroRecibido, setDineroRecibido] = useState("");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [facturaGuardada, setFacturaGuardada] = useState<Factura | null>(null);
 
@@ -467,6 +468,14 @@ const PointOfSalePage: React.FC = () => {
     setTotalPagado((prevTotal) => prevTotal - pago.monto);
   };
 
+  const updateInteres = (interes: number) => {
+    setFactura((prevFactura) => ({
+      ...prevFactura,
+      interes: interes,
+      total: prevFactura.subtotal - prevFactura.descuento + interes,
+    }));
+  };
+
   const handleFinalizar = async () => {
     try {
       setLoadingBtn(true);
@@ -497,6 +506,7 @@ const PointOfSalePage: React.FC = () => {
       setPagos([]);
       setMontoPago("");
       setTipoPagoSeleccionado("");
+      setDineroRecibido("");
       resetComprobanteId();
     } catch (err) {
       setError("Error al guardar la factura");
@@ -518,6 +528,23 @@ const PointOfSalePage: React.FC = () => {
       setFactura(initialFactura);
       setTotalPagado(0);
       setPagos([]);
+      setDineroRecibido("");
+
+      // Limpiar cliente y restaurar Consumidor Final
+      const consumidorFinal = clientes.find(
+        (cliente) => cliente.nombre === "CONSUMIDOR FINAL"
+      );
+      if (consumidorFinal) {
+        setFactura((prevFactura) => ({
+          ...prevFactura,
+          clienteId: consumidorFinal.id,
+        }));
+        setClientSearchTerm(
+          `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
+        );
+      } else {
+        setClientSearchTerm("");
+      }
     } catch (error) {
       console.error("Error al imprimir la factura:", error);
       toast.error("Error al imprimir la factura");
@@ -543,6 +570,23 @@ const PointOfSalePage: React.FC = () => {
       },
       clienteId: 1,
     });
+    setDineroRecibido("");
+
+    // Limpiar cliente y restaurar Consumidor Final
+    const consumidorFinal = clientes.find(
+      (cliente) => cliente.nombre === "CONSUMIDOR FINAL"
+    );
+    if (consumidorFinal) {
+      setFactura((prevFactura) => ({
+        ...prevFactura,
+        clienteId: consumidorFinal.id,
+      }));
+      setClientSearchTerm(
+        `${consumidorFinal.nombre.trim()} ${consumidorFinal.apellido.trim()}`
+      );
+    } else {
+      setClientSearchTerm("");
+    }
   };
 
   const agregarPromocion = (promocion: Promocion) => {
@@ -606,6 +650,7 @@ const PointOfSalePage: React.FC = () => {
       clienteId: 1,
     });
     setClientSearchTerm("");
+    setDineroRecibido("");
     setShowCancelModal(false);
 
     // Restaurar el consumidor final después de cancelar
@@ -1145,6 +1190,10 @@ const PointOfSalePage: React.FC = () => {
         setTipoDocumentoId={setTipoDocumentoId}
         nroDocumento={nroDocumento}
         setNroDocumento={setNroDocumento}
+        onUpdateInteres={updateInteres}
+        dineroRecibido={dineroRecibido}
+        setDineroRecibido={setDineroRecibido}
+        cliente={clientes.find((c) => c.id === factura.clienteId) || null}
       />
 
       {/* Promotion Modal */}

@@ -1,52 +1,154 @@
 import React, { useState, useEffect } from "react";
-import { Label } from "../../types/inventory";
-import { inventoryService } from "./inventoryService";
+import { Producto } from "../../types/inventory";
+import { inventoryService } from "../../services/inventoryService";
+import { Pagination } from "../../components/common/Pagination";
+import { FaFilePdf } from "react-icons/fa";
+import { toast } from "react-hot-toast";
+
+interface EtiquetaProducto {
+  id: number;
+  codigoReferencia: string;
+  nombre: string;
+  categoria: string;
+  marca: string;
+  precioVenta: number;
+  cantidad: number;
+}
 
 const LabelsPage: React.FC = () => {
-  const [labels, setLabels] = useState<Label[]>([]);
+  const [products, setProducts] = useState<Producto[]>([]);
+  const [etiquetas, setEtiquetas] = useState<EtiquetaProducto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedLabel, setSelectedLabel] = useState<Label | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(9);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchLabels();
-  }, []);
+    fetchProducts();
+    fetchProductsCount();
+  }, [currentPage]);
 
-  const fetchLabels = async () => {
+  const fetchProducts = async () => {
     try {
-      const data = await inventoryService.getLabels();
-      setLabels(data);
+      setLoading(true);
+      const data = await inventoryService.getProductsWithPriceChange(
+        currentPage,
+        pageSize
+      );
+      setProducts(data);
     } catch (error) {
-      console.error("Error fetching labels:", error);
+      console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreate = async (labelData: Omit<Label, "id">) => {
+  const fetchProductsCount = async () => {
     try {
-      await inventoryService.createLabel(labelData);
-      fetchLabels();
+      const count = await inventoryService.getProductsCount();
+      setTotalItems(count);
+      setTotalPages(Math.ceil(count / pageSize));
     } catch (error) {
-      console.error("Error creating label:", error);
+      console.error("Error fetching products count:", error);
     }
   };
 
-  const handleUpdate = async (id: string, labelData: Partial<Label>) => {
-    try {
-      await inventoryService.updateLabel(id, labelData);
-      fetchLabels();
-    } catch (error) {
-      console.error("Error updating label:", error);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const agregarProducto = (producto: Producto) => {
+    // Verificar si el producto ya está en las etiquetas
+    const etiquetaExistente = etiquetas.find((et) => et.id === producto.id);
+
+    if (etiquetaExistente) {
+      // Si ya existe, incrementar la cantidad
+      setEtiquetas(
+        etiquetas.map((et) =>
+          et.id === producto.id ? { ...et, cantidad: et.cantidad + 1 } : et
+        )
+      );
+    } else {
+      // Si no existe, agregarlo con cantidad 1
+      const etiquetaProducto: EtiquetaProducto = {
+        id: producto.id,
+        codigoReferencia: producto.codigoReferencia,
+        nombre: producto.nombre,
+        categoria: producto.categoriaId?.nombre || "",
+        marca: producto.marcaId?.nombre || "",
+        precioVenta: producto.productoProveedors?.[0]?.precioVenta || 0,
+        cantidad: 1,
+      };
+
+      setEtiquetas([...etiquetas, etiquetaProducto]);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const incrementarCantidad = (id: number) => {
+    setEtiquetas(
+      etiquetas.map((et) =>
+        et.id === id ? { ...et, cantidad: et.cantidad + 1 } : et
+      )
+    );
+  };
+
+  const decrementarCantidad = (id: number) => {
+    setEtiquetas(
+      etiquetas.map((et) =>
+        et.id === id && et.cantidad > 1
+          ? { ...et, cantidad: et.cantidad - 1 }
+          : et
+      )
+    );
+  };
+
+  const quitarProducto = (id: number) => {
+    setEtiquetas(etiquetas.filter((et) => et.id !== id));
+  };
+
+  const quitarTodos = () => {
+    if (window.confirm("¿Está seguro que desea quitar todas las etiquetas?")) {
+      setEtiquetas([]);
+      toast.success("Todas las etiquetas han sido removidas");
+    }
+  };
+
+  const generarEtiquetas = async (
+    typeExport: "PDF" | "HTML" | "XLS" = "XLS"
+  ) => {
+    if (etiquetas.length === 0) {
+      toast.error("No hay productos seleccionados para generar etiquetas");
+      return;
+    }
+
     try {
-      await inventoryService.deleteLabel(id);
-      fetchLabels();
+      // Convertir etiquetas al formato que espera la API
+      // Crear múltiples entradas según la cantidad de cada producto
+      const etiquetasFormato: Array<{
+        nombre: string;
+        precio: number;
+        codigo: string;
+      }> = [];
+
+      etiquetas.forEach((etiqueta) => {
+        for (let i = 0; i < etiqueta.cantidad; i++) {
+          etiquetasFormato.push({
+            nombre: etiqueta.nombre,
+            precio: etiqueta.precioVenta,
+            codigo: etiqueta.codigoReferencia,
+          });
+        }
+      });
+
+      await inventoryService.generateEtiquetas(etiquetasFormato, typeExport);
+
+      toast.success(`Etiquetas generadas exitosamente en formato PDF`);
     } catch (error) {
-      console.error("Error deleting label:", error);
+      console.error("Error generando etiquetas:", error);
+      toast.error(
+        "Error al generar las etiquetas. Por favor, intente nuevamente."
+      );
     }
   };
 
@@ -59,156 +161,262 @@ const LabelsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Etiquetas</h1>
-        <button
-          onClick={() => {
-            setSelectedLabel(null);
-            setShowModal(true);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Agregar Etiqueta
-        </button>
-      </div>
+    <div className="container mx-auto px-4 py-2">
+      {/* Layout en Columnas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Columna Izquierda - Productos */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Productos Disponibles
+          </h2>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nombre
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Descripción
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Color
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {labels.map((label) => (
-              <tr key={label.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{label.name}</td>
-                <td className="px-6 py-4">{label.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div
-                      className="w-4 h-4 rounded-full mr-2"
-                      style={{ backgroundColor: label.color }}
-                    ></div>
-                    <span>{label.color}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => {
-                      setSelectedLabel(label);
-                      setShowModal(true);
-                    }}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(label.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
-                {selectedLabel ? "Editar Etiqueta" : "Nueva Etiqueta"}
-              </h3>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  const labelData = {
-                    name: formData.get("name") as string,
-                    description: formData.get("description") as string,
-                    color: formData.get("color") as string,
-                    products: selectedLabel?.products || [],
-                  };
-
-                  if (selectedLabel) {
-                    handleUpdate(selectedLabel.id, labelData);
-                  } else {
-                    handleCreate(labelData);
-                  }
-                  setShowModal(false);
-                }}
-                className="mt-4"
-              >
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Código
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nombre
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    defaultValue={selectedLabel?.name}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
+                  </th>
+
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acción
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {products.map((product) => {
+                  const etiquetaExistente = etiquetas.find(
+                    (et) => et.id === product.id
+                  );
+                  const isSelected = !!etiquetaExistente;
+
+                  return (
+                    <tr
+                      key={product.id}
+                      className={`hover:bg-gray-50 transition-opacity ${
+                        isSelected ? "opacity-50" : ""
+                      }`}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono">
+                        {product.codigoReferencia}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        <div>
+                          <div className="font-medium">{product.nombre}</div>
+                          <div className="text-xs text-gray-500">
+                            {product.categoriaId?.nombre || "-"} /{" "}
+                            {product.marcaId?.nombre || "-"}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        $
+                        {product.productoProveedors?.[0]?.precioVenta?.toFixed(
+                          2
+                        ) || "-"}
+                      </td>
+
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        {isSelected ? (
+                          <div className="flex items-center justify-center space-x-1">
+                            <button
+                              className="bg-red-500 hover:bg-red-600 cursor-not-allowed text-white px-2 py-1 rounded text-xs font-medium transition-colors"
+                              title="Incrementar cantidad"
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => agregarProducto(product)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                            title="Agregar a etiquetas"
+                          >
+                            +
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación usando el componente Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              setCurrentPage={setCurrentPage}
+              totalItems={totalItems}
+            />
+          )}
+        </div>
+
+        {/* Columna Derecha - Etiquetas */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Etiquetas a Generar
+          </h2>
+
+          <div className="bg-white shadow-md rounded-lg overflow-hidden max-h-[60vh] overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Código
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Producto
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cantidad
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {etiquetas.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
+                      No hay productos seleccionados
+                    </td>
+                  </tr>
+                ) : (
+                  etiquetas.map((etiqueta) => (
+                    <tr key={etiqueta.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-mono">
+                        {etiqueta.codigoReferencia}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        <div>
+                          <div className="font-medium">{etiqueta.nombre}</div>
+                          <div className="text-xs text-gray-500">
+                            {etiqueta.categoria} / {etiqueta.marca}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        ${etiqueta.precioVenta.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => decrementarCantidad(etiqueta.id)}
+                            disabled={etiqueta.cantidad <= 1}
+                            className={`p-1 rounded ${
+                              etiqueta.cantidad <= 1
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-red-500 hover:text-red-700"
+                            }`}
+                            title="Decrementar cantidad"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M20 12H4"
+                              />
+                            </svg>
+                          </button>
+                          <span className="text-sm font-medium text-gray-900 min-w-[2rem] text-center">
+                            {etiqueta.cantidad}
+                          </span>
+                          <button
+                            onClick={() => incrementarCantidad(etiqueta.id)}
+                            className="p-1 rounded text-green-500 hover:text-green-700"
+                            title="Incrementar cantidad"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                        <button
+                          onClick={() => quitarProducto(etiqueta.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                          title="Quitar producto"
+                        >
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Acciones de Etiquetas */}
+          <div className="flex flex-col space-y-3">
+            <div className="flex flex-row justify-between">
+              <div className="flex flex-col">
+                <div className="text-sm text-gray-600">
+                  Total de etiquetas:{" "}
+                  {etiquetas.reduce((sum, et) => sum + et.cantidad, 0)}
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    name="description"
-                    defaultValue={selectedLabel?.description}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    rows={3}
-                  />
+                <button
+                  onClick={quitarTodos}
+                  disabled={etiquetas.length === 0}
+                  className="bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white px-4 py-2 rounded font-medium transition-colors disabled:cursor-not-allowed"
+                >
+                  Quitar Todos
+                </button>
+              </div>
+
+              <div>
+                <div className="text-sm text-gray-600 font-medium flex flex-col space-x-3">
+                  Exportar Etiquetas:
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Color
-                  </label>
-                  <input
-                    type="color"
-                    name="color"
-                    defaultValue={selectedLabel?.color || "#000000"}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-400"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  >
-                    {selectedLabel ? "Actualizar" : "Crear"}
-                  </button>
-                </div>
-              </form>
+                <button
+                  onClick={() => generarEtiquetas("PDF")}
+                  disabled={etiquetas.length === 0}
+                  className="bg-blue-600 flex flex-row items-center justify-center gap-2 w-full hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                  title="Exportar a PDF"
+                >
+                  <FaFilePdf />
+                  PDF ({etiquetas.reduce((sum, et) => sum + et.cantidad, 0)})
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

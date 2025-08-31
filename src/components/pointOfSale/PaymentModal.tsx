@@ -35,6 +35,15 @@ interface PaymentModalProps {
   setTipoDocumentoId: (id: number) => void;
   nroDocumento: string;
   setNroDocumento: (nro: string) => void;
+  onUpdateInteres: (interes: number) => void;
+  dineroRecibido: string;
+  setDineroRecibido: (dinero: string) => void;
+  cliente?: {
+    id: number;
+    nombre: string;
+    apellido: string;
+    numeroDocumento?: string;
+  } | null;
 }
 
 const getTipoPagoIcon = (nombre: string) => {
@@ -110,14 +119,55 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   setTipoDocumentoId,
   nroDocumento,
   setNroDocumento,
+  onUpdateInteres,
+  dineroRecibido,
+  setDineroRecibido,
+  cliente,
 }) => {
   // Efecto para autocompletar el monto con el valor restante
   useEffect(() => {
-    if (tipoPagoSeleccionado && !montoPago) {
+    if (tipoPagoSeleccionado) {
       const montoRestante = factura.total - totalPagado;
       setMontoPago(montoRestante.toString());
     }
   }, [tipoPagoSeleccionado, factura.total, totalPagado]);
+
+  // Efecto para actualizar el interés cuando cambie el tipo de pago
+  useEffect(() => {
+    if (tipoPagoSeleccionado) {
+      const tipoPago = tiposPago.find((t) => t.id === tipoPagoSeleccionado);
+      if (tipoPago) {
+        const nombreTipoPago = tipoPago.nombre
+          .toLowerCase()
+          .replace(/\s+/g, "");
+        if (nombreTipoPago === "tarjetacredito") {
+          // Aplicar 10% de interés para tarjeta de crédito
+          const interes = factura.subtotal * 0.1;
+          onUpdateInteres(interes);
+        } else {
+          // Quitar interés para otros tipos de pago
+          onUpdateInteres(0);
+        }
+      }
+    }
+  }, [tipoPagoSeleccionado, tiposPago, factura.subtotal, onUpdateInteres]);
+
+  // Función para verificar si un tipo de pago debe estar deshabilitado
+  const isTipoPagoDisabled = (tipoNombre: string) => {
+    const nombreNormalizado = tipoNombre.toLowerCase().replace(/\s+/g, "");
+    const esCuentaCorriente = nombreNormalizado === "cuentacorriente";
+    const esCuentaCorrienteProveedor =
+      nombreNormalizado === "cuentacorrienteproveedor";
+
+    // Deshabilitar cuenta corriente si no hay cliente o es consumidor final
+    if (esCuentaCorriente || esCuentaCorrienteProveedor) {
+      if (!cliente) return true;
+      if (cliente.nombre.toLowerCase().includes("consumidor final"))
+        return true;
+    }
+
+    return false;
+  };
 
   // Ordenar los tipos de pago según el orden especificado
   const tiposPagoOrdenados = [...tiposPago].sort((a, b) => {
@@ -136,44 +186,97 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   if (!isOpen) return null;
 
-  console.log("Tipos de pago ordenados", tiposPagoOrdenados);
+  const isConsumidorFinal =
+    cliente?.nombre === "CONSUMIDOR FINAL                                  ";
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
       <div className="relative top-20 mx-auto p-5 border w-[80%] shadow-lg rounded-md bg-white">
         <div className="mt-3">
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Pagos
+            Tipo Pago
           </h3>
+
+          {/* Información del Cliente */}
+          {cliente && (
+            <div
+              className={`bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 ${
+                isConsumidorFinal ? "bg-red-50 border-red-200" : "bg-blue-50"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                {isConsumidorFinal ? (
+                  <h4 className="text-md font-semibold text-red-600">
+                    Consumidor Final
+                  </h4>
+                ) : (
+                  <>
+                    <div>
+                      <h4 className="text-md font-semibold text-blue-800 mb-1">
+                        Cliente: {cliente.nombre} {cliente.apellido}
+                      </h4>
+                      {cliente.numeroDocumento && (
+                        <p className="text-sm text-blue-600">
+                          DNI: {cliente.numeroDocumento}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Cliente Seleccionado
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
           <div className="mb-4">
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Tipo Pago
-                </label>
-                <div className="grid grid-cols-5 gap-2">
-                  {tiposPagoOrdenados.map((tipo) => (
-                    <button
-                      key={tipo.id}
-                      onClick={() => setTipoPagoSeleccionado(tipo.id)}
-                      className={`flex items-center border-2 border-transparent justify-center px-4 py-2 rounded-lg text-white transition-all duration-200 ${
-                        tipoPagoSeleccionado === tipo.id
-                          ? `${getTipoPagoColor(
-                              tipo.nombre
-                            )} scale-105 shadow-lg border-black`
-                          : `${getTipoPagoColor(
-                              tipo.nombre
-                            )} opacity-70 hover:opacity-100`
-                      }`}
-                    >
-                      {getTipoPagoIcon(tipo.nombre)}
-                      <span className="text-sm md:text-lg">
-                        {tipo.nombre ===
-                        "CUENTA CORRIENTE PROVEEDOR              "
-                          ? "CUENTA C. PROVEEDOR"
-                          : tipo.nombre}
-                      </span>
-                    </button>
-                  ))}
+                <div className="grid grid-cols-5 gap-4">
+                  {tiposPagoOrdenados.map((tipo) => {
+                    const isDisabled = isTipoPagoDisabled(tipo.nombre);
+                    return (
+                      <button
+                        key={tipo.id}
+                        onClick={() =>
+                          !isDisabled && setTipoPagoSeleccionado(tipo.id)
+                        }
+                        disabled={isDisabled}
+                        className={`flex items-center border-2 border-transparent justify-center px-4 py-2 rounded-lg text-white transition-all duration-200 ${
+                          isDisabled
+                            ? "bg-gray-400 cursor-not-allowed opacity-50"
+                            : tipoPagoSeleccionado === tipo.id
+                            ? `${getTipoPagoColor(
+                                tipo.nombre
+                              )} scale-105 shadow-lg border-black`
+                            : `${getTipoPagoColor(
+                                tipo.nombre
+                              )} opacity-70 hover:opacity-100`
+                        }`}
+                        title={
+                          isDisabled
+                            ? "No disponible para Consumidor Final"
+                            : ""
+                        }
+                      >
+                        {getTipoPagoIcon(tipo.nombre)}
+                        <span className="text-sm md:text-lg">
+                          {tipo.nombre ===
+                          "CUENTA CORRIENTE PROVEEDOR              "
+                            ? "CUENTA C. PROVEEDOR"
+                            : tipo.nombre}
+                        </span>
+                        {tipo.nombre.toLowerCase().replace(/\s+/g, "") ===
+                          "tarjetacredito" && (
+                          <span className="ml-1 text-xs bg-white bg-opacity-20 px-1 py-0.5 rounded">
+                            +10%
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <div className="flex flex-row gap-4 w-full">
@@ -241,7 +344,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   {pagos.map((pago, index) => (
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {pago.tipoPagoNombre.trim()}
+                        <div className="flex items-center">
+                          <span>{pago.tipoPagoNombre.trim()}</span>
+                          {pago.tipoPagoNombre
+                            .trim()
+                            .toLowerCase()
+                            .replace(/\s+/g, "") === "tarjetacredito" && (
+                            <span className="ml-2 bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                              +10% interés
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {formatCurrency(pago.monto)}
@@ -260,88 +373,124 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               </table>
             </div>
           )}
-
-          <div className="mt-4">
-            <div className="flex justify-end mb-2">
-              <span className="text-xl">
-                Subtotal: {formatCurrency(factura.subtotal)}
-              </span>
+          <div className="flex flex-row gap-4 justify-between">
+            {/* New Comprobante Fields */}
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Tipo Comprobante
+                </label>
+                <div className="flex flex-col space-y-2">
+                  {tipoComprobantes.map((tipo) => (
+                    <button
+                      key={tipo.id}
+                      onClick={() => setTipoComprobanteId(tipo.id)}
+                      className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all duration-200 ${
+                        tipoComprobanteId === tipo.id
+                          ? "border-blue-500 bg-blue-50 text-blue-700 shadow-lg transform scale-105"
+                          : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                      }`}
+                    >
+                      {tipo.nombre}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Tipo Documento
+                </label>
+                <div className="flex flex-col space-y-2">
+                  {tipoDocumentos.map((tipo) => (
+                    <button
+                      key={tipo.id}
+                      onClick={() => setTipoDocumentoId(tipo.id)}
+                      className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all duration-200 ${
+                        tipoDocumentoId === tipo.id
+                          ? "border-green-500 bg-green-50 text-green-700 shadow-lg transform scale-105"
+                          : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                      }`}
+                    >
+                      {tipo.nombre}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Nro. Documento
+                </label>
+                <input
+                  type="text"
+                  value={nroDocumento}
+                  onChange={(e) => {
+                    console.log("Cambiando nroDocumento a:", e.target.value);
+                    setNroDocumento(e.target.value);
+                  }}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Ingrese el número de documento"
+                />
+              </div>
             </div>
-            <div className="flex justify-end mb-2">
-              <span className="text-xl">
-                Interés: {formatCurrency(factura.interes)}
-              </span>
-            </div>
-            <div className="flex justify-end mb-2">
-              <span className="text-xl">
-                Descuento: -{formatCurrency(factura.descuento)}
-              </span>
-            </div>
-            <div className="flex justify-end mb-4">
-              <span className="text-2xl font-bold">
-                Total: {formatCurrency(factura.total)}
-              </span>
+            <div className="mt-4 w-96">
+              <div className="flex justify-between mb-2">
+                <span className="text-xl">Subtotal:</span>
+                <span className="text-xl">
+                  {formatCurrency(factura.subtotal)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xl">Interés:</span>
+                <span className="text-xl">
+                  {formatCurrency(factura.interes)}
+                </span>
+              </div>
+              {factura.interes > 0 && (
+                <span className="flex text-sm text-purple-600 font-medium justify-end mb-2">
+                  (Tarjeta de Crédito +10%)
+                </span>
+              )}
+              <div className="flex justify-between mb-2">
+                <span className="text-xl">Descuento:</span>
+                <span className="text-xl">
+                  {formatCurrency(factura.descuento)}
+                </span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span className="text-xl">Total:</span>
+                <span className="text-2xl font-bold">
+                  {formatCurrency(factura.total)}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4 mb-2">
+                <div className="text-left">
+                  <div className="text-sm text-gray-600 mb-1">Paga con:</div>
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-lg font-semibold text-gray-600">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={dineroRecibido}
+                      onChange={(e) => setDineroRecibido(e.target.value)}
+                      className="w-32 pl-6 pr-2 py-1 text-lg font-semibold text-right border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-600 mb-1">Vuelto:</div>
+                  <div className="text-lg font-semibold text-green-600">
+                    {parseFloat(dineroRecibido) > factura.total
+                      ? formatCurrency(
+                          parseFloat(dineroRecibido) - factura.total
+                        )
+                      : formatCurrency(0)}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* New Comprobante Fields */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Tipo Comprobante
-              </label>
-              <select
-                value={tipoComprobanteId}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  setTipoComprobanteId(value);
-                }}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {tipoComprobantes.map((tipo) => (
-                  <option key={tipo.id} value={tipo.id}>
-                    {tipo.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Tipo Documento
-              </label>
-              <select
-                value={tipoDocumentoId}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  console.log("Cambiando tipoDocumentoId a:", value);
-                  setTipoDocumentoId(value);
-                }}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {tipoDocumentos.map((tipo) => (
-                  <option key={tipo.id} value={tipo.id}>
-                    {tipo.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Nro. Documento
-              </label>
-              <input
-                type="text"
-                value={nroDocumento}
-                onChange={(e) => {
-                  console.log("Cambiando nroDocumento a:", e.target.value);
-                  setNroDocumento(e.target.value);
-                }}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ingrese el número de documento"
-              />
-            </div>
-          </div>
-
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}

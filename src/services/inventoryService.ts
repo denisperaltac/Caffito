@@ -2,7 +2,6 @@ import {
   Stock,
   StockMovement,
   Producto,
-  Label,
   Supplier,
   Category,
   Brand,
@@ -109,6 +108,136 @@ export const inventoryService = {
   // Products
   async getProducts(): Promise<Producto[]> {
     return mockProducts;
+  },
+
+  async getProductsWithPriceChange(
+    page: number = 0,
+    size: number = 10
+  ): Promise<Producto[]> {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/productos`, {
+        params: {
+          page,
+          size,
+          sort: "cambioPrecio,desc",
+        },
+      });
+
+      // La API devuelve directamente un array, no un objeto con paginación
+      const products = response.data;
+
+      // Limpiar espacios en blanco de los campos
+      const cleanedProducts = products.map((product: any) => ({
+        ...product,
+        codigoReferencia: product.codigoReferencia?.trim() || "",
+        nombre: product.nombre?.trim() || "",
+        descripcion: product.descripcion?.trim() || "",
+        categoriaId: {
+          ...product.categoriaId,
+          nombre: product.categoriaId?.nombre?.trim() || "",
+        },
+        marcaId: {
+          ...product.marcaId,
+          nombre: product.marcaId?.nombre?.trim() || "",
+        },
+      }));
+
+      return cleanedProducts;
+    } catch (error) {
+      console.error("Error fetching products with price change:", error);
+      throw error;
+    }
+  },
+
+  async getProductsCount(): Promise<number> {
+    try {
+      // Intentar obtener el count desde el endpoint específico
+      const response = await axiosInstance.get(`${API_URL}/productos/count`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching products count:", error);
+      // Si falla, intentar obtener desde el header X-Total-Count
+      try {
+        const response = await axiosInstance.get(`${API_URL}/productos`, {
+          params: {
+            page: 0,
+            size: 1,
+            sort: "cambioPrecio,desc",
+          },
+        });
+
+        // Buscar en headers o usar un valor por defecto
+        const totalCount =
+          response.headers["x-total-count"] ||
+          response.headers["X-Total-Count"] ||
+          response.headers["total-count"] ||
+          response.headers["Total-Count"];
+
+        if (totalCount) {
+          return parseInt(totalCount, 10);
+        }
+
+        // Si no hay header, devolver un valor por defecto
+        return 100; // Valor por defecto para paginación
+      } catch (fallbackError) {
+        console.error("Fallback count also failed:", fallbackError);
+        return 100; // Valor por defecto
+      }
+    }
+  },
+
+  async generateEtiquetas(
+    etiquetas: Array<{ nombre: string; precio: number; codigo: string }>,
+    typeExport: "PDF" | "HTML" | "XLS" = "XLS"
+  ): Promise<void> {
+    try {
+      console.log(etiquetas);
+      // Procesar códigos como lo hace erpweb
+      const processedEtiquetas = etiquetas.map((etiqueta) => ({
+        ...etiqueta,
+        codigo:
+          etiqueta.codigo.length !== 13
+            ? "000000000000"
+            : etiqueta.codigo.substring(0, 12),
+      }));
+
+      const response = await axiosInstance.post(
+        `${API_URL}/productos/etiquetas?typeExport=${typeExport}`,
+        processedEtiquetas,
+        {
+          responseType: "blob",
+        }
+      );
+
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Determinar extensión del archivo
+      let extension = "xls";
+      switch (typeExport) {
+        case "PDF":
+          extension = "pdf";
+          break;
+        case "HTML":
+          extension = "html";
+          break;
+        case "XLS":
+        default:
+          extension = "xls";
+          break;
+      }
+
+      link.setAttribute("download", `etiquetas.${extension}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating labels:", error);
+      throw error;
+    }
   },
 
   async getProductById(id: number): Promise<Producto | null> {
@@ -270,52 +399,6 @@ export const inventoryService = {
 
     return newTax;
   },
-
-  // Label management
-  async getLabels(): Promise<Label[]> {
-    // Mock data
-    return [
-      {
-        id: "1",
-        name: "Oferta",
-        description: "Productos en oferta",
-        color: "#FF0000",
-        products: ["1", "2"],
-      },
-      {
-        id: "2",
-        name: "Nuevo",
-        description: "Productos nuevos",
-        color: "#00FF00",
-        products: ["3", "4"],
-      },
-    ];
-  },
-
-  async createLabel(label: Omit<Label, "id">): Promise<Label> {
-    // Mock implementation
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      ...label,
-    };
-  },
-
-  async updateLabel(id: string, labelData: Partial<Label>): Promise<Label> {
-    // Mock implementation
-    return {
-      id,
-      name: labelData.name || "",
-      description: labelData.description || "",
-      color: labelData.color || "#000000",
-      products: labelData.products || [],
-    };
-  },
-
-  async deleteLabel(id: string): Promise<void> {
-    // Mock implementation
-    console.log(`Deleting label with id: ${id}`);
-  },
-
   // Proveedores
   async getProveedors(): Promise<Proveedor[]> {
     try {
