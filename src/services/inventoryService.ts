@@ -112,15 +112,29 @@ export const inventoryService = {
 
   async getProductsWithPriceChange(
     page: number = 0,
-    size: number = 10
+    size: number = 10,
+    fechaInicio?: string,
+    fechaFin?: string
   ): Promise<Producto[]> {
     try {
+      const params: any = {
+        page,
+        size,
+        sort: "cambioPrecio,desc",
+      };
+
+      // Agregar filtros de fecha si están presentes
+      if (fechaInicio) {
+        params[
+          "cambioPrecio.greaterThanOrEqual"
+        ] = `${fechaInicio}T00:00:00.000Z`;
+      }
+      if (fechaFin) {
+        params["cambioPrecio.lessThanOrEqual"] = `${fechaFin}T23:59:59.999Z`;
+      }
+
       const response = await axiosInstance.get(`${API_URL}/productos`, {
-        params: {
-          page,
-          size,
-          sort: "cambioPrecio,desc",
-        },
+        params,
       });
 
       // La API devuelve directamente un array, no un objeto con paginación
@@ -149,21 +163,52 @@ export const inventoryService = {
     }
   },
 
-  async getProductsCount(): Promise<number> {
+  async getProductsCount(
+    fechaInicio?: string,
+    fechaFin?: string
+  ): Promise<number> {
     try {
-      // Intentar obtener el count desde el endpoint específico
-      const response = await axiosInstance.get(`${API_URL}/productos/count`);
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching products count:", error);
-      // Si falla, intentar obtener desde el header X-Total-Count
+      const params: any = {
+        page: 0,
+        size: 1,
+        sort: "cambioPrecio,desc",
+      };
+
+      // Agregar filtros de fecha si están presentes
+      if (fechaInicio) {
+        params[
+          "cambioPrecio.greaterThanOrEqual"
+        ] = `${fechaInicio}T00:00:00.000Z`;
+      }
+      if (fechaFin) {
+        params["cambioPrecio.lessThanOrEqual"] = `${fechaFin}T23:59:59.999Z`;
+      }
+
+      // Intentar obtener el count desde el endpoint específico con filtros
       try {
+        const countResponse = await axiosInstance.get(
+          `${API_URL}/productos/count`,
+          {
+            params: {
+              ...(fechaInicio && {
+                "cambioPrecio.greaterThanOrEqual": `${fechaInicio}T00:00:00.000Z`,
+              }),
+              ...(fechaFin && {
+                "cambioPrecio.lessThanOrEqual": `${fechaFin}T23:59:59.999Z`,
+              }),
+            },
+          }
+        );
+        return countResponse.data;
+      } catch (countError) {
+        console.log(
+          "Count endpoint failed, trying fallback method:",
+          countError
+        );
+
+        // Si falla el endpoint de count, usar el método de fallback con filtros
         const response = await axiosInstance.get(`${API_URL}/productos`, {
-          params: {
-            page: 0,
-            size: 1,
-            sort: "cambioPrecio,desc",
-          },
+          params,
         });
 
         // Buscar en headers o usar un valor por defecto
@@ -179,10 +224,10 @@ export const inventoryService = {
 
         // Si no hay header, devolver un valor por defecto
         return 100; // Valor por defecto para paginación
-      } catch (fallbackError) {
-        console.error("Fallback count also failed:", fallbackError);
-        return 100; // Valor por defecto
       }
+    } catch (error) {
+      console.error("Error fetching products count:", error);
+      return 100; // Valor por defecto
     }
   },
 

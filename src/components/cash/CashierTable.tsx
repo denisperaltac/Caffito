@@ -172,12 +172,12 @@ const CashierTable: React.FC<CashierTableProps> = ({
                 {caja.cierre ? (
                   <span
                     className={`font-medium ${
-                      caja.ingreso - caja.cierre >= 0
+                      caja.cierre - caja.ingreso >= 0
                         ? "text-green-600"
                         : "text-red-600"
                     }`}
                   >
-                    {formatCurrency(caja.ingreso - caja.cierre)}
+                    {formatCurrency(caja.cierre - caja.ingreso)}
                   </span>
                 ) : (
                   "-"
