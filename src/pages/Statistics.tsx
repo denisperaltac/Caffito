@@ -19,6 +19,7 @@ import Loader from "../components/common/Loader";
 import { formatCurrency } from "../utils/formatters";
 import SelectInput from "../components/common/SelectInput";
 import { Button } from "../components/common/Button";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 // Registrar los componentes necesarios de Chart.js
 ChartJS.register(
@@ -542,23 +543,26 @@ const Statistics: React.FC = () => {
               <Button color="blue" text="Hoy" onClick={handleTodayClick} />
               <Button
                 color="gray"
-                text="←"
                 onClick={handlePreviousClick}
                 size="h-[36px] w-[36px]"
-              />
+                padding="px-0 py-0"
+              >
+                <FaArrowLeft />
+              </Button>
+              {/* Texto de fecha actual según el tipo de vista */}
+              <div className="flex items-center">
+                <span className="text-gray-700 font-medium text-lg">
+                  {formatDisplayDate()}
+                </span>
+              </div>
               <Button
                 color="gray"
-                text="→"
                 onClick={handleNextClick}
                 size="h-[36px] w-[36px]"
-              />
-            </div>
-
-            {/* Texto de fecha actual según el tipo de vista */}
-            <div className="flex items-center">
-              <span className="text-gray-700 font-medium text-sm">
-                {formatDisplayDate()}
-              </span>
+                padding="px-0 py-0"
+              >
+                <FaArrowRight size={18} />
+              </Button>
             </div>
           </div>
 
