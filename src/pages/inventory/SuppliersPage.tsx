@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Supplier } from "../../types/inventory";
-import { inventoryService } from "./inventoryService";
+import { inventoryService } from "../../services/inventoryService";
 
 const SuppliersPage: React.FC = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -9,14 +9,24 @@ const SuppliersPage: React.FC = () => {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize] = useState(20);
+  const [totalSuppliers, setTotalSuppliers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [countLoading, setCountLoading] = useState(false);
 
   useEffect(() => {
     fetchSuppliers();
+  }, [currentPage]);
+
+  useEffect(() => {
+    fetchSuppliersCount();
   }, []);
 
   const fetchSuppliers = async () => {
     try {
-      const data = await inventoryService.getSuppliers();
+      setLoading(true);
+      const data = await inventoryService.getSuppliers(currentPage, pageSize);
       setSuppliers(data);
     } catch (error) {
       console.error("Error fetching suppliers:", error);
@@ -25,28 +35,44 @@ const SuppliersPage: React.FC = () => {
     }
   };
 
+  const fetchSuppliersCount = async () => {
+    try {
+      setCountLoading(true);
+      const count = await inventoryService.getSuppliersCount();
+      setTotalSuppliers(count);
+      setTotalPages(Math.ceil(count / pageSize));
+    } catch (error) {
+      console.error("Error fetching suppliers count:", error);
+    } finally {
+      setCountLoading(false);
+    }
+  };
+
   const handleCreate = async (supplierData: Omit<Supplier, "id">) => {
     try {
       await inventoryService.createSupplier(supplierData);
       fetchSuppliers();
+      fetchSuppliersCount();
     } catch (error) {
       console.error("Error creating supplier:", error);
     }
   };
 
-  const handleUpdate = async (id: string, supplierData: Partial<Supplier>) => {
+  const handleUpdate = async (id: number, supplierData: Partial<Supplier>) => {
     try {
       await inventoryService.updateSupplier(id, supplierData);
       fetchSuppliers();
+      fetchSuppliersCount();
     } catch (error) {
       console.error("Error updating supplier:", error);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     try {
       await inventoryService.deleteSupplier(id);
       fetchSuppliers();
+      fetchSuppliersCount();
     } catch (error) {
       console.error("Error deleting supplier:", error);
     }
@@ -80,10 +106,10 @@ const SuppliersPage: React.FC = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nombre
+                ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contacto
+                Nombre
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Teléfono
@@ -92,7 +118,7 @@ const SuppliersPage: React.FC = () => {
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
+                Ubicación
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Acciones
@@ -101,27 +127,38 @@ const SuppliersPage: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {suppliers.map((supplier) => (
-              <tr key={supplier.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{supplier.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {supplier.contact}
+              <tr key={supplier.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {supplier.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {supplier.phone}
+                  <div className="text-sm font-medium text-gray-900">
+                    {supplier.nombreProveedor.trim()}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {supplier.calle.trim() && supplier.numeroCalle.trim()
+                      ? `${supplier.calle.trim()} ${supplier.numeroCalle.trim()}`
+                      : supplier.calle.trim() ||
+                        supplier.numeroCalle.trim() ||
+                        "Sin dirección"}
+                  </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {supplier.email}
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {supplier.telefono.trim() || "-"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      supplier.active
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {supplier.active ? "Activo" : "Inactivo"}
-                  </span>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {supplier.email.trim() || "-"}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {supplier.localidadId.nombre.trim()}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {supplier.localidadId.departamentoId.nombre.trim()},{" "}
+                      {supplier.localidadId.departamentoId.provinciaId.nombre.trim()}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
@@ -146,9 +183,41 @@ const SuppliersPage: React.FC = () => {
         </table>
       </div>
 
+      {/* Paginación mejorada */}
+      <div className="flex justify-between items-center mt-4">
+        <div className="text-sm text-gray-700">
+          Mostrando {suppliers.length} de{" "}
+          {countLoading ? "..." : totalSuppliers} proveedores
+          {totalPages > 0 && !countLoading && (
+            <span className="ml-2 text-gray-500">
+              (Página {currentPage + 1} de {totalPages})
+            </span>
+          )}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+            disabled={currentPage === 0}
+            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Anterior
+          </button>
+          <span className="px-3 py-1 text-sm text-gray-700">
+            Página {currentPage + 1}
+          </span>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage >= totalPages - 1}
+            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
                 {selectedSupplier ? "Editar Proveedor" : "Nuevo Proveedor"}
@@ -158,13 +227,23 @@ const SuppliersPage: React.FC = () => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
                   const supplierData = {
-                    name: formData.get("name") as string,
-                    contact: formData.get("contact") as string,
-                    phone: formData.get("phone") as string,
+                    nombreProveedor: formData.get("nombreProveedor") as string,
+                    calle: formData.get("calle") as string,
+                    numeroCalle: formData.get("numeroCalle") as string,
+                    telefono: formData.get("telefono") as string,
                     email: formData.get("email") as string,
-                    address: formData.get("address") as string,
-                    taxId: formData.get("taxId") as string,
-                    active: formData.get("active") === "true",
+                    localidadId: {
+                      id: parseInt(formData.get("localidadId") as string),
+                      nombre: formData.get("localidadNombre") as string,
+                      departamentoId: {
+                        id: parseInt(formData.get("departamentoId") as string),
+                        nombre: formData.get("departamentoNombre") as string,
+                        provinciaId: {
+                          id: parseInt(formData.get("provinciaId") as string),
+                          nombre: formData.get("provinciaNombre") as string,
+                        },
+                      },
+                    },
                   };
 
                   if (selectedSupplier) {
@@ -176,89 +255,132 @@ const SuppliersPage: React.FC = () => {
                 }}
                 className="mt-4"
               >
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Nombre
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    defaultValue={selectedSupplier?.name}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Nombre del Proveedor *
+                    </label>
+                    <input
+                      type="text"
+                      name="nombreProveedor"
+                      defaultValue={selectedSupplier?.nombreProveedor}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      name="telefono"
+                      defaultValue={selectedSupplier?.telefono}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Calle
+                    </label>
+                    <input
+                      type="text"
+                      name="calle"
+                      defaultValue={selectedSupplier?.calle}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Número de Calle
+                    </label>
+                    <input
+                      type="text"
+                      name="numeroCalle"
+                      defaultValue={selectedSupplier?.numeroCalle}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
+                  <div className="mb-4 md:col-span-2">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      defaultValue={selectedSupplier?.email}
+                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                  </div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Contacto
-                  </label>
-                  <input
-                    type="text"
-                    name="contact"
-                    defaultValue={selectedSupplier?.contact}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    defaultValue={selectedSupplier?.phone}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    defaultValue={selectedSupplier?.email}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Dirección
-                  </label>
-                  <textarea
-                    name="address"
-                    defaultValue={selectedSupplier?.address}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    rows={3}
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    CUIT/CUIL
-                  </label>
-                  <input
-                    type="text"
-                    name="taxId"
-                    defaultValue={selectedSupplier?.taxId}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Estado
-                  </label>
-                  <select
-                    name="active"
-                    defaultValue={selectedSupplier?.active ? "true" : "false"}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    <option value="true">Activo</option>
-                    <option value="false">Inactivo</option>
-                  </select>
+
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="text-md font-semibold text-gray-800 mb-4">
+                    Ubicación
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Provincia *
+                      </label>
+                      <input
+                        type="text"
+                        name="provinciaNombre"
+                        defaultValue={
+                          selectedSupplier?.localidadId?.departamentoId
+                            ?.provinciaId?.nombre
+                        }
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                      <input
+                        type="hidden"
+                        name="provinciaId"
+                        defaultValue={
+                          selectedSupplier?.localidadId?.departamentoId
+                            ?.provinciaId?.id
+                        }
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Departamento *
+                      </label>
+                      <input
+                        type="text"
+                        name="departamentoNombre"
+                        defaultValue={
+                          selectedSupplier?.localidadId?.departamentoId?.nombre
+                        }
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                      <input
+                        type="hidden"
+                        name="departamentoId"
+                        defaultValue={
+                          selectedSupplier?.localidadId?.departamentoId?.id
+                        }
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700 text-sm font-bold mb-2">
+                        Localidad *
+                      </label>
+                      <input
+                        type="text"
+                        name="localidadNombre"
+                        defaultValue={selectedSupplier?.localidadId?.nombre}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        required
+                      />
+                      <input
+                        type="hidden"
+                        name="localidadId"
+                        defaultValue={selectedSupplier?.localidadId?.id}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <button

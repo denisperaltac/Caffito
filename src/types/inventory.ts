@@ -88,14 +88,24 @@ export interface Label {
 }
 
 export interface Supplier {
-  id: string;
-  name: string;
-  contact: string;
-  phone: string;
+  id: number;
+  nombreProveedor: string;
+  calle: string;
+  numeroCalle: string;
   email: string;
-  address: string;
-  taxId: string;
-  active: boolean;
+  telefono: string;
+  localidadId: {
+    id: number;
+    nombre: string;
+    departamentoId: {
+      id: number;
+      nombre: string;
+      provinciaId: {
+        id: number;
+        nombre: string;
+      };
+    };
+  };
 }
 
 export interface Category {

@@ -57,16 +57,21 @@ const ClientsPage: React.FC = () => {
         sort: `${sortField},${sortDirection}`,
       };
 
+      // Parámetros para el conteo (sin page y size)
+      const countParams: Omit<GetClientesParams, "page" | "size"> = {};
+
       if (searchData.nombre) {
         params["nombre.contains"] = searchData.nombre;
+        countParams["nombre.contains"] = searchData.nombre;
       }
       if (searchData.apellido) {
         params["apellido.contains"] = searchData.apellido;
+        countParams["apellido.contains"] = searchData.apellido;
       }
 
       const [clientesData, count] = await Promise.all([
         clientService.getClientes(params),
-        clientService.getCountClientes(),
+        clientService.getCountClientes(countParams),
       ]);
 
       setClientes(clientesData);
@@ -83,8 +88,8 @@ const ClientsPage: React.FC = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoading(true);
     setInputSearch({ ...inputSearch, [name]: value });
+
     // Limpiar el timeout anterior si existe
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -92,7 +97,13 @@ const ClientsPage: React.FC = () => {
 
     // Establecer un nuevo timeout
     searchTimeoutRef.current = setTimeout(() => {
-      setSearchData((prev) => ({ ...prev, [name]: value }));
+      // Resetear página a 0 cuando se aplique el filtro
+      if (currentPage !== 0) {
+        setCurrentPage(0);
+      } else {
+        // Si ya estamos en página 0, solo actualizar los datos de búsqueda
+        setSearchData((prev) => ({ ...prev, [name]: value }));
+      }
     }, 500); // Reducido a 500ms para mejor experiencia de usuario
   };
 
@@ -135,6 +146,29 @@ const ClientsPage: React.FC = () => {
         </div>
       )}
 
+      {/* Indicador de filtros activos */}
+      {(searchData.nombre || searchData.apellido) && (
+        <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
+          <div className="flex items-center justify-between">
+            <span>
+              Filtros activos:
+              {searchData.nombre && ` Nombre: "${searchData.nombre}"`}
+              {searchData.apellido && ` Apellido: "${searchData.apellido}"`}
+            </span>
+            <button
+              onClick={() => {
+                setInputSearch({ nombre: "", apellido: "" });
+                setSearchData({ nombre: "", apellido: "" });
+                setCurrentPage(0);
+              }}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader size="lg" />
@@ -162,7 +196,6 @@ const ClientsPage: React.FC = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
-            items={clientes}
             totalItems={totalItems}
           />
         </>

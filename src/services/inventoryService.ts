@@ -35,19 +35,6 @@ const mockProducts: Producto[] = [
   },
 ];
 
-const mockSuppliers: Supplier[] = [
-  {
-    id: "1",
-    name: "Proveedor 1",
-    contact: "Juan Pérez",
-    phone: "123456789",
-    email: "proveedor1@email.com",
-    address: "Calle 123",
-    taxId: "123456789",
-    active: true,
-  },
-];
-
 const mockCategories: Category[] = [
   {
     id: 1,
@@ -299,37 +286,6 @@ export const inventoryService = {
     return mockProducts[index];
   },
 
-  // Suppliers
-  async getSuppliers(): Promise<Supplier[]> {
-    return mockSuppliers;
-  },
-
-  async createSupplier(supplier: Omit<Supplier, "id">): Promise<Supplier> {
-    const newSupplier = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...supplier,
-    };
-    mockSuppliers.push(newSupplier);
-    return newSupplier;
-  },
-
-  async updateSupplier(
-    id: string,
-    supplierData: Partial<Supplier>
-  ): Promise<Supplier> {
-    const index = mockSuppliers.findIndex((s) => s.id === id);
-    if (index === -1) throw new Error("Supplier not found");
-    const updatedSupplier = { ...mockSuppliers[index], ...supplierData };
-    mockSuppliers[index] = updatedSupplier;
-    return updatedSupplier;
-  },
-
-  async deleteSupplier(id: string): Promise<void> {
-    const index = mockSuppliers.findIndex((s) => s.id === id);
-    if (index === -1) throw new Error("Supplier not found");
-    mockSuppliers.splice(index, 1);
-  },
-
   // Categories
   async getCategories(): Promise<Category[]> {
     try {
@@ -455,6 +411,81 @@ export const inventoryService = {
       return response.data;
     } catch (error) {
       console.error("Error al obtener los proveedores:", error);
+      throw error;
+    }
+  },
+
+  // Funciones para Suppliers (usando la nueva estructura)
+  async getSuppliers(page: number = 0, size: number = 20): Promise<Supplier[]> {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/proveedors`, {
+        params: {
+          page,
+          size,
+          sort: "id,asc",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      throw error;
+    }
+  },
+
+  async getSupplier(id: number): Promise<Supplier> {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/proveedors/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching supplier:", error);
+      throw error;
+    }
+  },
+
+  async createSupplier(supplierData: Omit<Supplier, "id">): Promise<Supplier> {
+    try {
+      const response = await axiosInstance.post(
+        `${API_URL}/proveedors`,
+        supplierData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating supplier:", error);
+      throw error;
+    }
+  },
+
+  async updateSupplier(
+    id: number,
+    supplierData: Partial<Supplier>
+  ): Promise<Supplier> {
+    try {
+      const response = await axiosInstance.put(
+        `${API_URL}/proveedors/${id}`,
+        supplierData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating supplier:", error);
+      throw error;
+    }
+  },
+
+  async deleteSupplier(id: number): Promise<void> {
+    try {
+      await axiosInstance.delete(`${API_URL}/proveedors/${id}`);
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      throw error;
+    }
+  },
+
+  async getSuppliersCount(): Promise<number> {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/proveedors/count`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching suppliers count:", error);
       throw error;
     }
   },
