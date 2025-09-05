@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrash, FaPlus } from "react-icons/fa";
 import { formatCurrency } from "../../utils/formatters";
 import { FaMoneyBillWave, FaCreditCard, FaExchangeAlt } from "react-icons/fa";
@@ -124,13 +124,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   setDineroRecibido,
   cliente,
 }) => {
-  // Efecto para autocompletar el monto con el valor restante
+  // Estado para rastrear si el usuario ha modificado manualmente el monto
+  const [userModifiedAmount, setUserModifiedAmount] = useState(false);
+
+  // Efecto para autocompletar el monto con el valor restante solo si el usuario no lo ha modificado manualmente
   useEffect(() => {
-    if (tipoPagoSeleccionado) {
+    if (tipoPagoSeleccionado && !userModifiedAmount) {
       const montoRestante = factura.total - totalPagado;
       setMontoPago(montoRestante.toString());
     }
-  }, [tipoPagoSeleccionado, factura.total, totalPagado]);
+  }, [tipoPagoSeleccionado, factura.total, totalPagado, userModifiedAmount]);
+
+  // Resetear el flag cuando se cambia el tipo de pago
+  useEffect(() => {
+    setUserModifiedAmount(false);
+  }, [tipoPagoSeleccionado]);
 
   // Efecto para actualizar el interés cuando cambie el tipo de pago
   useEffect(() => {
@@ -287,14 +295,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   <input
                     type="number"
                     value={montoPago}
-                    onChange={(e) => setMontoPago(e.target.value)}
+                    onChange={(e) => {
+                      setMontoPago(e.target.value);
+                      setUserModifiedAmount(true);
+                    }}
                     className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Ingrese el monto"
                   />
                 </div>
                 <div className="flex items-end justify-center">
                   <button
-                    onClick={agregarPago}
+                    onClick={() => {
+                      agregarPago();
+                      setUserModifiedAmount(false);
+                    }}
                     disabled={
                       !tipoPagoSeleccionado ||
                       !montoPago ||

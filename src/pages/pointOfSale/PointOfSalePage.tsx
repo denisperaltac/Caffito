@@ -466,6 +466,12 @@ const PointOfSalePage: React.FC = () => {
     const pago = pagos[index];
     setPagos((prevPagos) => prevPagos.filter((_, i) => i !== index));
     setTotalPagado((prevTotal) => prevTotal - pago.monto);
+
+    // También remover el pago de la factura
+    setFactura((prevFactura) => ({
+      ...prevFactura,
+      pagos: prevFactura.pagos.filter((_, i) => i !== index),
+    }));
   };
 
   const updateInteres = (interes: number) => {

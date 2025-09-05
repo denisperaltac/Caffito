@@ -55,6 +55,7 @@ export interface Producto {
   productoProveedors: ProductoProveedor[];
   impuestoId: number | null;
   pesable: boolean;
+  cambioPrecio?: string;
 }
 
 export interface ProductoOptional {

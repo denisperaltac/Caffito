@@ -23,18 +23,29 @@ const LabelsPage: React.FC = () => {
   const [pageSize] = useState(9);
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
 
   useEffect(() => {
     fetchProducts();
     fetchProductsCount();
-  }, [currentPage]);
+  }, [currentPage, fechaInicio, fechaFin]);
+
+  // Resetear página cuando cambien los filtros
+  useEffect(() => {
+    if (currentPage !== 0) {
+      setCurrentPage(0);
+    }
+  }, [fechaInicio, fechaFin]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const data = await inventoryService.getProductsWithPriceChange(
         currentPage,
-        pageSize
+        pageSize,
+        fechaInicio || undefined,
+        fechaFin || undefined
       );
       setProducts(data);
     } catch (error) {
@@ -46,16 +57,15 @@ const LabelsPage: React.FC = () => {
 
   const fetchProductsCount = async () => {
     try {
-      const count = await inventoryService.getProductsCount();
+      const count = await inventoryService.getProductsCount(
+        fechaInicio || undefined,
+        fechaFin || undefined
+      );
       setTotalItems(count);
       setTotalPages(Math.ceil(count / pageSize));
     } catch (error) {
       console.error("Error fetching products count:", error);
     }
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   const agregarProducto = (producto: Producto) => {
@@ -111,6 +121,47 @@ const LabelsPage: React.FC = () => {
     if (window.confirm("¿Está seguro que desea quitar todas las etiquetas?")) {
       setEtiquetas([]);
       toast.success("Todas las etiquetas han sido removidas");
+    }
+  };
+
+  const formatFechaCambioPrecioCompacta = (fechaCambioPrecio: string) => {
+    if (!fechaCambioPrecio) return "-";
+
+    try {
+      const fecha = new Date(fechaCambioPrecio);
+      const hoy = new Date();
+      const ayer = new Date(hoy);
+      ayer.setDate(hoy.getDate() - 1);
+
+      // Si es hoy, mostrar solo la hora
+      if (fecha.toDateString() === hoy.toDateString()) {
+        return fecha.toLocaleTimeString("es-AR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      }
+
+      // Si es ayer, mostrar "Ayer HH:MM"
+      if (fecha.toDateString() === ayer.toDateString()) {
+        return `Ayer ${fecha.toLocaleTimeString("es-AR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })}`;
+      }
+
+      // Para otras fechas, mostrar DD/MM/YYYY HH:MM
+      return fecha.toLocaleString("es-AR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } catch (error) {
+      return "-";
     }
   };
 
@@ -170,6 +221,34 @@ const LabelsPage: React.FC = () => {
             Productos Disponibles
           </h2>
 
+          {/* Filtros de Fecha */}
+          <div className="bg-white shadow-md rounded-lg p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha Inicio
+                </label>
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fecha Fin
+                </label>
+                <input
+                  type="date"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0">
@@ -183,7 +262,9 @@ const LabelsPage: React.FC = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Precio
                   </th>
-
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cambio de Precio
+                  </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acción
                   </th>
@@ -221,7 +302,15 @@ const LabelsPage: React.FC = () => {
                           2
                         ) || "-"}
                       </td>
-
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium">
+                            {formatFechaCambioPrecioCompacta(
+                              product.cambioPrecio || ""
+                            )}
+                          </span>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         {isSelected ? (
                           <div className="flex items-center justify-center space-x-1">
