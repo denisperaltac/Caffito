@@ -141,7 +141,7 @@ const formatTicketContent = (
   if (!options?.omitTitle) {
     lines.push("Caffito");
   }
-  lines.push("Dir:Lavalle 773 - Tel:(3408) 680521");
+  lines.push("Lavalle 773 - +543408680521");
   lines.push("CUIT: 20-18096191-8");
   lines.push(`Fecha: ${fecha} - ${hora}`);
   // Identificadores de ticket / comprobante
@@ -163,7 +163,7 @@ const formatTicketContent = (
 
   // Detalles de la factura
   if (factura.facturaRenglons && factura.facturaRenglons.length > 0) {
-    lines.push("PRODUCTOS");
+    lines.push("PRODUCTOS:");
     factura.facturaRenglons.forEach((renglon) => {
       lines.push(`${renglon.detalle || ""}`);
       lines.push(
@@ -190,7 +190,7 @@ const formatTicketContent = (
 
   // Pagos
   lines.push("--------------------------------");
-  lines.push("PAGOS");
+  lines.push("PAGOS:");
   if (factura.pagos && factura.pagos.length > 0) {
     factura.pagos.forEach((pago) => {
       lines.push(
