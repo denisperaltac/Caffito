@@ -1,4 +1,5 @@
 import React from "react";
+import { FaPlus } from "react-icons/fa";
 
 interface CustomProductModalProps {
   isOpen: boolean;
@@ -25,11 +26,11 @@ const CustomProductModal: React.FC<CustomProductModalProps> = ({
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
       <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div className="mt-3">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+          <h3 className="text-xl leading-6 text-center font-medium text-gray-900 mb-8">
             Agregar Producto Personalizado
           </h3>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-gray-700 text-base font-bold mb-2">
               Nombre del Producto
             </label>
             <input
@@ -41,7 +42,7 @@ const CustomProductModal: React.FC<CustomProductModalProps> = ({
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-gray-700 text-base font-bold mb-2">
               Precio
             </label>
             <div className="relative">
@@ -62,15 +63,16 @@ const CustomProductModal: React.FC<CustomProductModalProps> = ({
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded"
             >
               Cancelar
             </button>
             <button
               onClick={onAdd}
               disabled={!productName || !productPrice}
-              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-500 flex items-center gap-2 hover:bg-green-600 duration-300 text-white font-semibold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              <FaPlus size={16} />
               Agregar
             </button>
           </div>

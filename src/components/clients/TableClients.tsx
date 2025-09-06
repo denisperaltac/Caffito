@@ -44,7 +44,6 @@ export const TableClients = ({
   const [selectedClient, setSelectedClient] = useState<Cliente | any>(null);
   const [open, setOpen] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const [openCuentaCorriente, setOpenCuentaCorriente] = useState(false);
   const [openView, setOpenView] = useState(false);
   const [openPagoCuentaCorriente, setOpenPagoCuentaCorriente] = useState(false);
 
@@ -56,11 +55,6 @@ export const TableClients = ({
   const handleDelete = async (cliente: Cliente) => {
     setSelectedClient(cliente);
     setOpenDelete(true);
-  };
-
-  const handleCuentaCorriente = (cliente: Cliente) => {
-    setSelectedClient(cliente);
-    setOpenCuentaCorriente(true);
   };
 
   const handlePagoCuentaCorriente = (cliente: Cliente) => {
@@ -94,7 +88,7 @@ export const TableClients = ({
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden w-[95vw] overflow-x-auto">
+    <div className="bg-white shadow-md rounded-lg w-[95vw] h-[80%] max-h-[500px] overflow-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -159,7 +153,7 @@ export const TableClients = ({
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
           {clientes?.map((cliente: Cliente) => (
             <tr key={cliente.id} className="hover:bg-gray-50">
               <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">

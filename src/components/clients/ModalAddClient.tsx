@@ -124,7 +124,7 @@ export const ModalAddClient = ({
       disabledBtn={disabledBtn}
     >
       <div className="flex flex-col w-full h-full gap-4">
-        <h2 className="text-2xl font-bold">Agregar Cliente</h2>
+        <h2 className="text-2xl font-semibold">Agregar Cliente</h2>
         <form className="gap-4 grid lg:grid-cols-2 grid-cols-1 py-4">
           <div>
             <Input

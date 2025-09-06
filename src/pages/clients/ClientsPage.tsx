@@ -9,6 +9,7 @@ import { Pagination } from "../../components/common/Pagination";
 import { TableClients } from "../../components/clients/TableClients";
 import { Button } from "../../components/common/Button";
 import { ModalAddClient } from "../../components/clients/ModalAddClient";
+import { FaPlus } from "react-icons/fa";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -26,6 +27,7 @@ type SortDirection = "asc" | "desc";
 const ClientsPage: React.FC = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
@@ -48,9 +50,22 @@ const ClientsPage: React.FC = () => {
     loadClientes();
   }, [currentPage, sortField, sortDirection, searchData]);
 
+  // Cleanup del timeout al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const loadClientes = async () => {
     try {
-      setLoading(true);
+      // Solo mostrar loading principal si no hay búsqueda activa
+      if (!searchLoading) {
+        setLoading(true);
+      }
+
       const params: GetClientesParams = {
         page: currentPage,
         size: ITEMS_PER_PAGE,
@@ -83,12 +98,16 @@ const ClientsPage: React.FC = () => {
       console.error(err);
     } finally {
       setLoading(false);
+      setSearchLoading(false);
     }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputSearch({ ...inputSearch, [name]: value });
+
+    // Mostrar loader inmediatamente cuando se escribe
+    setSearchLoading(true);
 
     // Limpiar el timeout anterior si existe
     if (searchTimeoutRef.current) {
@@ -132,13 +151,14 @@ const ClientsPage: React.FC = () => {
           />
         </div>
         <Button
-          text="Agregar Cliente"
-          color="blue"
-          size="w-[200px]"
+          color="green"
+          size="w-[250px] gap-2"
           onClick={() => {
             setOpenModal(true);
           }}
-        />
+        >
+          <FaPlus size={16} /> Agregar Cliente
+        </Button>
       </div>
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -169,7 +189,7 @@ const ClientsPage: React.FC = () => {
         </div>
       )}
 
-      {loading ? (
+      {loading || searchLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader size="lg" />
         </div>

@@ -41,14 +41,14 @@ export const Modal = ({
               <Button
                 color="gray"
                 disabled={false}
-                text="Cancel"
+                text="Cancelar"
                 onClick={onClose}
               />
               {onSave && (
                 <Button
                   color={modalDelete ? "red" : "blue"}
                   disabled={disabledBtn}
-                  text={textBtn || "Save"}
+                  text={textBtn || "Guardar"}
                   onClick={onSave}
                 />
               )}

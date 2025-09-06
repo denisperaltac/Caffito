@@ -9,7 +9,7 @@ import {
   FacturaRenglon,
 } from "../../types/configuration";
 import { LuImageOff } from "react-icons/lu";
-import { FaTrash, FaMinus, FaPlus, FaSearch } from "react-icons/fa";
+import { FaTrash, FaMinus, FaPlus, FaSearch, FaCheck } from "react-icons/fa";
 import { createRoot } from "react-dom/client";
 import Loader from "../../components/common/Loader";
 import PaymentModal from "../../components/pointOfSale/PaymentModal";
@@ -833,10 +833,6 @@ const PointOfSalePage: React.FC = () => {
 
   return (
     <div className="container min-w-[95vw] mx-auto px-2 h-[85vh] flex flex-col font-['Poppins']">
-      <div className="flex justify-between items-center mb-3">
-        <h1 className="text-2xl font-bold text-gray-800">Punto de Venta</h1>
-      </div>
-
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3">
           {error}
@@ -847,38 +843,39 @@ const PointOfSalePage: React.FC = () => {
         {/* Productos */}
         <div className="bg-white shadow-md rounded-lg p-3 flex flex-col h-full">
           <div className="mb-3">
-            <div className="flex items-center justify-between space-x-3">
+            <div className="flex items-end justify-between space-x-3">
               <div className="flex-1">
                 <div className="relative">
+                  <p className="text-gray-500 font-semibold">
+                    Buscando por {searchByCode ? "código" : "nombre"}
+                  </p>
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={productSearchTerm}
                     onChange={handleProductSearchChange}
                     onKeyDown={handleProductSearchKeyDown}
-                    placeholder={`Buscar por ${
-                      searchByCode ? "código" : "nombre"
-                    }...`}
+                    placeholder={`...`}
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-['Poppins']"
                   />
                 </div>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex items-end justify-end space-x-2">
                 <button
                   onClick={() => setSearchByCode(!searchByCode)}
-                  className={`px-3 py-2 rounded ${
+                  className={`px-3 py-2 rounded duration-300 ${
                     searchByCode
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
+                      ? "bg-blue-500 hover:bg-blue-600  text-white"
+                      : "bg-gray-200 hover:bg-gray-300 text-gray-800"
                   }`}
                 >
-                  {searchByCode ? "Buscar por nombre" : "Buscar por código"}
+                  {searchByCode ? "Buscar por nombre?" : "Buscar por código?"}
                 </button>
                 <button
                   onClick={() =>
                     setViewMode(viewMode === "cards" ? "list" : "cards")
                   }
-                  className="px-3 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300"
+                  className="px-3 py-2.5 rounded bg-gray-200 text-gray-800 hover:bg-gray-300"
                 >
                   {viewMode === "cards" ? (
                     <svg
@@ -1000,19 +997,19 @@ const PointOfSalePage: React.FC = () => {
           {/* Renglones */}
           <div
             ref={renglonesTableRef}
-            className="mb-2 flex-1 overflow-auto border border-gray-500 rounded-sm h-[80%] max-h-[700px]"
+            className="mb-2 flex-1 overflow-auto border border-gray-500 rounded-sm h-[80%] max-h-[400px]"
           >
             <table className="w-full overflow-auto">
-              <thead className="sticky top-0">
+              <thead className="sticky top-0 shadow-lg">
                 <tr>
-                  <th className="text-center  text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                  <th className="text-center text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
                     ID
                   </th>
                   <th className="text-left text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
                     Producto
                   </th>
-                  <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
-                    Cantidad/Peso
+                  <th className="text-center text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
+                    Cant./Peso
                   </th>
                   <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
                     Precio
@@ -1020,19 +1017,24 @@ const PointOfSalePage: React.FC = () => {
                   <th className="text-right text-base font-bold text-gray-500 uppercase tracking-wider bg-gray-100">
                     Subtotal
                   </th>
-                  <th className="bg-gray-100"></th>
                 </tr>
               </thead>
               <tbody>
                 {factura.facturaRenglons.map((renglon, index) => (
                   <tr key={renglon.id}>
-                    <td className="py-2 font-bold text-center ">{index + 1}</td>
-                    <td className="py-2">{renglon.detalle}</td>
-                    <td className="text-right py-2">
+                    <td className="py-2 font-bold text-center">{index + 1}</td>
+                    <td className="py-2 text-gray-700">{renglon.detalle}</td>
+                    <td className="text-center py-2">
                       {renglon.peso ? (
                         <span>{renglon.peso} kg</span>
                       ) : (
-                        <div className="flex items-center justify-end space-x-2">
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => removeRenglon(index)}
+                            className="p-1 rounded text-red-500 hover:text-red-700 hover:scale-125 duration-300"
+                          >
+                            <FaTrash size={16} />
+                          </button>
                           <button
                             onClick={() => {
                               if (renglon.cantidad > 1) {
@@ -1081,26 +1083,18 @@ const PointOfSalePage: React.FC = () => {
                                   factura.interes,
                               });
                             }}
-                            className="p-1 rounded text-blue-500 hover:text-blue-700"
+                            className="p-1 rounded text-blue-500 hover:text-blue-700 hover:scale-125 duration-300"
                           >
-                            <FaPlus size={14} />
+                            <FaPlus size={16} />
                           </button>
                         </div>
                       )}
                     </td>
-                    <td className="text-right py-2">
+                    <td className="text-right text-sm text-gray-500 py-2">
                       {formatCurrency(renglon.precioVenta)}
                     </td>
-                    <td className="text-right py-2">
+                    <td className="text-right py-2 font-semibold">
                       {formatCurrency(renglon.precioVenta * renglon.cantidad)}
-                    </td>
-                    <td className="text-right py-2">
-                      <button
-                        onClick={() => removeRenglon(index)}
-                        className="p-1 rounded text-red-500 hover:text-red-700"
-                      >
-                        <FaTrash size={16} />
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -1109,8 +1103,8 @@ const PointOfSalePage: React.FC = () => {
           </div>
 
           {/* Totales */}
-          <div className="h-[10%] min-h-[120px]">
-            <div className="flex justify-end font-bold text-2xl">
+          <div className="h-[10%] min-h-[60px]">
+            <div className="flex justify-end font-semibold text-2xl">
               <span>Total:</span>
               <span style={{ width: "200px", textAlign: "right" }}>
                 {formatCurrency(factura.total)}
@@ -1120,23 +1114,26 @@ const PointOfSalePage: React.FC = () => {
 
           <div className="flex justify-end space-x-3">
             <button
-              onClick={() => setShowCustomProductModal(true)}
-              className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+              onClick={() => setShowCancelModal(true)}
+              className="bg-red-500 hover:bg-red-600 gap-2 duration-300 text-white px-4 py-2 rounded flex items-center space-x-2"
             >
-              Agregar Producto
+              <FaTrash size={16} /> Cancelar
             </button>
             <button
-              onClick={() => setShowCancelModal(true)}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+              onClick={() => {
+                setCustomProductName("Varios");
+                setShowCustomProductModal(true);
+              }}
+              className="bg-green-500 hover:bg-green-600 gap-2 duration-300 text-white px-4 py-2 rounded flex items-center space-x-2"
             >
-              Cancelar
+              <FaPlus size={16} /> Agregar Producto
             </button>
             <button
               onClick={() => setShowPaymentModal(true)}
               disabled={factura.facturaRenglons.length === 0}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-500 hover:bg-blue-600 gap-2 duration-300 text-white px-4 py-2 rounded flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Finalizar
+              <FaCheck size={16} /> Finalizar
             </button>
           </div>
         </div>

@@ -103,13 +103,12 @@ export const Pagination = ({
         </button>
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-500">
+      <div className="mt-2 text-center text-sm text-gray-500">
         <p>
           Mostrando {currentPage * 10 + 1} a{" "}
           {Math.min((currentPage + 1) * 10, totalItems)} de {totalItems}{" "}
           resultados
         </p>
-        <p>Total de páginas: {totalPages || 1} | Productos por página: 10</p>
       </div>
     </>
   );
