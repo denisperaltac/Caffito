@@ -27,7 +27,8 @@ import { authService } from "./services/authService";
 import CashierClosuresPage from "./pages/cash/CashierClosuresPage";
 import ClientsPage from "./pages/clients/ClientsPage";
 import ExpensesPage from "./pages/expenses/ExpensesPage";
-import Statistics from "./pages/Statistics";
+import Stadistics from "./pages/stadistics/Stadistics";
+import ProductStatistics from "./pages/stadistics/ProductStatistics";
 import { Home } from "./pages/Home";
 
 // Componente para proteger rutas
@@ -203,7 +204,15 @@ const AppContent: React.FC = () => {
             path="/estadisticas"
             element={
               <PrivateRoute>
-                <Statistics />
+                <Stadistics />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/estadisticas/productos"
+            element={
+              <PrivateRoute>
+                <ProductStatistics />
               </PrivateRoute>
             }
           />

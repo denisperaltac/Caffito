@@ -238,11 +238,9 @@ const CashierClosuresPage: React.FC = () => {
               onClick={() => setShowOpenModal(true)}
             />
           ) : (
-            <Button
-              color="red"
-              text="Cerrar Caja"
-              onClick={() => setShowCloseModal(true)}
-            />
+            <Button color="blue" onClick={() => setShowCloseModal(true)}>
+              Cerrar Caja
+            </Button>
           )}
         </div>
       </div>

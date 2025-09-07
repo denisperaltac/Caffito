@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  FaBoxes,
-  FaTags,
-  FaTruck,
-  FaLayerGroup,
-  FaTag,
-  FaPercentage,
-} from "react-icons/fa";
-import { FaBoxesStacked, FaTruckRampBox } from "react-icons/fa6";
-
-const InventarioMenu: React.FC<{
+import { FaChartBar } from "react-icons/fa";
+import { MdOutlineProductionQuantityLimits } from "react-icons/md";
+MdOutlineProductionQuantityLimits;
+import { TbReportMoney } from "react-icons/tb";
+interface EstadisticasMenuProps {
   getNavItemClass: (path: string) => string;
   showText?: boolean;
-  setIsMobileMenuOpen?: (isOpen: boolean) => void;
-}> = ({ getNavItemClass, showText, setIsMobileMenuOpen }) => {
+  setIsMobileMenuOpen?: (open: boolean) => void;
+}
+
+const EstadisticasMenu: React.FC<EstadisticasMenuProps> = ({
+  getNavItemClass,
+  showText = false,
+  setIsMobileMenuOpen,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -40,33 +40,26 @@ const InventarioMenu: React.FC<{
 
   const menuItems = [
     {
-      path: "/inventario/gestion-stock",
-      label: "Gestión de Stock",
-      icon: FaTruckRampBox,
+      path: "/estadisticas",
+      label: "Costos",
+      icon: TbReportMoney,
     },
-    // {
-    //   path: "/inventario/movimiento-stock",
-    //   label: "Movimiento Stock",
-    //   icon: FaExchangeAlt,
-    // },
-    { path: "/inventario/productos", label: "Productos", icon: FaBoxesStacked },
-    { path: "/inventario/etiquetas", label: "Etiquetas", icon: FaTags },
-    { path: "/inventario/proveedor", label: "Proveedor", icon: FaTruck },
-    { path: "/inventario/categorias", label: "Categorías", icon: FaLayerGroup },
-    { path: "/inventario/marcas", label: "Marcas", icon: FaTag },
-    { path: "/inventario/rubro", label: "Rubro", icon: FaLayerGroup },
-    { path: "/inventario/impuesto", label: "Impuesto", icon: FaPercentage },
+    {
+      path: "/estadisticas/productos",
+      label: "Productos",
+      icon: MdOutlineProductionQuantityLimits,
+    },
   ];
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={getNavItemClass("/inventario")}
+        className={getNavItemClass("/estadisticas")}
       >
-        <FaBoxes className="w-5 h-5" />
-        <span className="hidden xl:inline">Inventario</span>
-        {showText && <span>Inventario</span>}
+        <FaChartBar className="w-5 h-5" />
+        <span className="hidden xl:inline">Estadísticas</span>
+        {showText && <span>Estadísticas</span>}
         <svg
           className={`w-4 h-4 transition-transform ${
             isOpen ? "transform rotate-180" : ""
@@ -95,7 +88,7 @@ const InventarioMenu: React.FC<{
                 to={item.path}
                 className={`flex items-center gap-2 px-4 py-2 text-sm ${
                   isActive
-                    ? "bg-indigo-100 text-indigo-700 font-medium"
+                    ? "bg-teal-100 text-teal-700 font-medium"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
                 onClick={() => {
@@ -114,4 +107,4 @@ const InventarioMenu: React.FC<{
   );
 };
 
-export default InventarioMenu;
+export default EstadisticasMenu;

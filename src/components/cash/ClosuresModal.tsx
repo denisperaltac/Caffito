@@ -6,6 +6,8 @@ import { formatCurrency } from "../../utils/formatters";
 import { FaDollarSign } from "react-icons/fa";
 import { CierreCajaItem } from "../../services/cajaService";
 import { Button } from "../common/Button";
+import Loader from "../common/Loader";
+import { toast } from "react-hot-toast";
 
 interface ClosuresModalProps {
   closingAmount: number;
@@ -72,6 +74,7 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
   const [inputErrors, setInputErrors] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const sum = paymentTypes.reduce((acc, curr) => acc + (curr.amount || 0), 0);
@@ -91,14 +94,23 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
     setInputErrors(errors);
   };
 
-  const handleCloseCajaSubmit = () => {
-    const cierreItems: CierreCajaItem[] = paymentTypes.map((type) => ({
-      ingresoEfectivo: type.amount,
-      tipoPagoNombre: type.nombre.padEnd(40, " "),
-      tipoPagoId: type.tipoPagoId,
-    }));
+  const handleCloseCajaSubmit = async () => {
+    try {
+      setLoading(true);
+      const cierreItems: CierreCajaItem[] = paymentTypes.map((type) => ({
+        ingresoEfectivo: type.amount,
+        tipoPagoNombre: type.nombre.padEnd(40, " "),
+        tipoPagoId: type.tipoPagoId,
+      }));
 
-    handleCloseCaja(cierreItems);
+      await handleCloseCaja(cierreItems);
+      toast.success("Caja cerrada exitosamente");
+    } catch (error) {
+      toast.error("Error al cerrar la caja");
+      console.error("Error al cerrar la caja:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const hasErrors = Object.values(inputErrors).some((error) => error);
@@ -185,10 +197,11 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
           />
           <Button
             color="blue"
-            disabled={hasErrors || !allInputsFilled}
-            text="Cerrar Caja"
+            disabled={hasErrors || !allInputsFilled || loading}
             onClick={handleCloseCajaSubmit}
-          />
+          >
+            {loading ? <Loader size="sm" /> : "Cerrar Caja"}
+          </Button>
         </div>
       </div>
     </div>

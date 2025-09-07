@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import InventarioMenu from "./InventarioMenu";
+import EstadisticasMenu from "./EstadisticasMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
 import {
@@ -9,7 +10,6 @@ import {
   FaCog,
   FaUsers,
   FaMoneyBillWave,
-  FaChartBar,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
@@ -81,13 +81,8 @@ const Navigation: React.FC = () => {
                   <FaMoneyBillWave className="w-5 h-5" />
                   <span className="hidden xl:inline">Gastos</span>
                 </Link>
-                <Link
-                  to="/estadisticas"
-                  className={getNavItemClass("/estadisticas")}
-                >
-                  <FaChartBar className="w-5 h-5" />
-                  <span className="hidden xl:inline">Estadísticas</span>
-                </Link>
+
+                <EstadisticasMenu getNavItemClass={getNavItemClass} />
               </div>
 
               {/* Desktop Account Menu */}
@@ -174,14 +169,12 @@ const Navigation: React.FC = () => {
               <FaMoneyBillWave className="w-5 h-5" />
               <span>Gastos</span>
             </Link>
-            <Link
-              to="/estadisticas"
-              className={getNavItemClass("/estadisticas")}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaChartBar className="w-5 h-5" />
-              <span>Estadísticas</span>
-            </Link>
+
+            <EstadisticasMenu
+              getNavItemClass={getNavItemClass}
+              showText
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
             <Link
               to="/configuracion"
               className={getNavItemClass("/configuracion")}

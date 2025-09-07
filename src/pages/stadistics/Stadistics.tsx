@@ -14,11 +14,11 @@ import {
   statisticsService,
   IncomeSummaryData,
   ExpenseSummaryData,
-} from "../services/statisticsService";
-import Loader from "../components/common/Loader";
-import { formatCurrency } from "../utils/formatters";
-import SelectInput from "../components/common/SelectInput";
-import { Button } from "../components/common/Button";
+} from "../../services/statisticsService";
+import Loader from "../../components/common/Loader";
+import { formatCurrency } from "../../utils/formatters";
+import SelectInput from "../../components/common/SelectInput";
+import { Button } from "../../components/common/Button";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 // Registrar los componentes necesarios de Chart.js
@@ -35,7 +35,7 @@ ChartJS.register(
 type TabType = "balance" | "ingresos" | "gastos";
 type ViewType = "day" | "week" | "month" | "year";
 
-const Statistics: React.FC = () => {
+const Stadistics: React.FC = () => {
   const [incomeData, setIncomeData] = useState<IncomeSummaryData | null>(null);
   const [expenseData, setExpenseData] = useState<ExpenseSummaryData | null>(
     null
@@ -128,12 +128,7 @@ const Statistics: React.FC = () => {
   };
 
   useEffect(() => {
-    // Cargar datos iniciales al montar el componente
-    fetchData();
-  }, []); // Solo se ejecuta al montar el componente
-
-  useEffect(() => {
-    // Actualizar datos cuando cambien las fechas
+    // Cargar datos iniciales y actualizar cuando cambien las fechas
     fetchData();
   }, [
     viewType,
@@ -624,7 +619,7 @@ const Statistics: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-lg mb-8 h-full">
+      <div className="bg-white rounded-lg shadow-lg mb-8 h-[70%]">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
             <button
@@ -661,7 +656,7 @@ const Statistics: React.FC = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="p-6 min-h-full">
+        <div className="p-6 overflow-y-auto min-h-[85%]">
           {/* Balance Tab */}
           {activeTab === "balance" && (
             <div
@@ -939,4 +934,4 @@ const Statistics: React.FC = () => {
   );
 };
 
-export default Statistics;
+export default Stadistics;
