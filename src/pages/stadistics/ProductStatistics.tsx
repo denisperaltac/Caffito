@@ -90,9 +90,6 @@ const ProductStatistics: React.FC = () => {
       "-" +
       String(new Date().getMonth() + 1).padStart(2, "0")
   );
-  const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString()
-  );
   const [selectedYearForView, setSelectedYearForView] = useState(
     new Date().getFullYear().toString()
   );
@@ -170,7 +167,6 @@ const ProductStatistics: React.FC = () => {
     selectedDate,
     selectedWeek,
     selectedMonth,
-    selectedYear,
     selectedYearForView,
     selectedCategory,
     orderBy,
@@ -198,7 +194,6 @@ const ProductStatistics: React.FC = () => {
   };
 
   const navigateDate = (direction: "prev" | "next") => {
-    const currentDate = new Date();
     let newDate: Date;
 
     switch (viewType) {
@@ -263,10 +258,6 @@ const ProductStatistics: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <Loader />;
-  }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -311,7 +302,7 @@ const ProductStatistics: React.FC = () => {
                     <Button
                       key={type}
                       onClick={() => handleViewTypeChange(type)}
-                      variant={viewType === type ? "primary" : "secondary"}
+                      color={viewType === type ? "purple" : "gray"}
                       size="sm"
                     >
                       {type === "day" && "Día"}
@@ -326,7 +317,7 @@ const ProductStatistics: React.FC = () => {
               <div className="flex items-center gap-4">
                 <Button
                   onClick={() => navigateDate("prev")}
-                  variant="secondary"
+                  color="gray"
                   size="sm"
                 >
                   <FaArrowLeft className="w-4 h-4" />
@@ -336,7 +327,7 @@ const ProductStatistics: React.FC = () => {
                 </span>
                 <Button
                   onClick={() => navigateDate("next")}
-                  variant="secondary"
+                  color="gray"
                   size="sm"
                 >
                   <FaArrowRight className="w-4 h-4" />
@@ -480,64 +471,74 @@ const ProductStatistics: React.FC = () => {
               </h3>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      #
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Producto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Categoría
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cantidad Vendida
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ingreso Generado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Precio Promedio
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {productData?.productosMasVendidos.map((producto, index) => (
-                    <tr
-                      key={producto.productoId}
-                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {index + 1}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {producto.productoNombre}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            Código: {producto.productoCodigo}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {producto.categoriaNombre}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {producto.cantidadVendida.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(producto.ingresoGenerado)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(producto.precioPromedio)}
-                      </td>
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <Loader />
+                </div>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        #
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Producto
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Categoría
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Cantidad Vendida
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ingreso Generado
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Precio Promedio
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {productData?.productosMasVendidos.map(
+                      (producto, index) => (
+                        <tr
+                          key={producto.productoId}
+                          className={
+                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          }
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {index + 1}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {producto.productoNombre}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                Código: {producto.productoCodigo}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {producto.categoriaNombre}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {producto.cantidadVendida.toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatCurrency(producto.ingresoGenerado)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatCurrency(producto.precioPromedio)}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
@@ -547,7 +548,11 @@ const ProductStatistics: React.FC = () => {
               <h3 className="text-xl font-semibold mb-4 text-purple-800">
                 Resumen por Categoría
               </h3>
-              {productData && (
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <Loader />
+                </div>
+              ) : productData ? (
                 <div className="h-64">
                   <Pie
                     data={{
@@ -597,6 +602,10 @@ const ProductStatistics: React.FC = () => {
                     }}
                   />
                 </div>
+              ) : (
+                <div className="flex justify-center items-center h-64 text-gray-500">
+                  No hay datos disponibles
+                </div>
               )}
             </div>
 
@@ -604,33 +613,43 @@ const ProductStatistics: React.FC = () => {
               <h3 className="text-xl font-semibold mb-4 text-purple-800">
                 Top Categorías
               </h3>
-              <div className="space-y-3">
-                {productData?.productosPorCategoria
-                  .slice(0, 5)
-                  .map((categoria) => (
-                    <div
-                      key={categoria.categoriaId}
-                      className="flex justify-between items-center p-3 bg-white rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {categoria.categoriaNombre}
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <Loader />
+                </div>
+              ) : productData ? (
+                <div className="space-y-3">
+                  {productData.productosPorCategoria
+                    .slice(0, 5)
+                    .map((categoria) => (
+                      <div
+                        key={categoria.categoriaId}
+                        className="flex justify-between items-center p-3 bg-white rounded-lg"
+                      >
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {categoria.categoriaNombre}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {categoria.cantidadProductos} productos
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {categoria.cantidadProductos} productos
+                        <div className="text-right">
+                          <div className="font-semibold text-purple-600">
+                            {formatCurrency(categoria.totalIngreso)}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {categoria.totalVendido.toLocaleString()} unidades
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-purple-600">
-                          {formatCurrency(categoria.totalIngreso)}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {categoria.totalVendido.toLocaleString()} unidades
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="flex justify-center items-center h-64 text-gray-500">
+                  No hay datos disponibles
+                </div>
+              )}
             </div>
           </div>
         </div>
