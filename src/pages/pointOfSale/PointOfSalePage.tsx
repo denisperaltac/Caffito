@@ -1026,7 +1026,15 @@ const PointOfSalePage: React.FC = () => {
                     <td className="py-2 text-gray-700">{renglon.detalle}</td>
                     <td className="text-center py-2">
                       {renglon.peso ? (
-                        <span>{renglon.peso} kg</span>
+                        <div className="flex items-center justify-center space-x-2">
+                          <button
+                            onClick={() => removeRenglon(index)}
+                            className="p-1 rounded text-red-500 hover:text-red-700 hover:scale-125 duration-300"
+                          >
+                            <FaTrash size={16} />
+                          </button>
+                          <span>{renglon.peso} kg</span>
+                        </div>
                       ) : (
                         <div className="flex items-center justify-center space-x-2">
                           <button
