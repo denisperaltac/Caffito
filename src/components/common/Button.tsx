@@ -6,6 +6,7 @@ interface BottomProps {
   size?: string;
   children?: React.ReactNode;
   padding?: string;
+  style?: string;
 }
 
 type colorBottom =
@@ -28,6 +29,7 @@ export const Button = ({
   size,
   children,
   padding,
+  style,
 }: BottomProps) => {
   const calculateColor = () => {
     switch (color) {
@@ -57,7 +59,7 @@ export const Button = ({
     <button
       className={`${calculateColor()} ${size} text-white ${
         padding || "px-4 py-2"
-      } text-center flex items-center justify-center rounded hover:shadow-lg disabled:opacity-50 duration-300`}
+      } text-center flex items-center justify-center rounded hover:shadow-lg disabled:opacity-50 duration-300 ${style}`}
       disabled={disabled}
       onClick={onClick}
     >

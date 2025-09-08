@@ -1,6 +1,7 @@
 import { Producto } from "../../types/inventory";
 import { CategoriaFormat } from "../common/CategoriaFormat";
 import { Button } from "../common/Button";
+import { HiOutlinePencilAlt, HiOutlineTrash } from "react-icons/hi";
 
 interface TableProductsManagementProps {
   productos: Producto[];
@@ -17,9 +18,6 @@ export const TableProductsManagement = ({
     <table className="min-w-full transition-opacity-300 divide-y divide-gray-200 ">
       <thead>
         <tr>
-          <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-            ID
-          </th>
           <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
             Código Referencia
           </th>
@@ -33,18 +31,21 @@ export const TableProductsManagement = ({
             Marca
           </th>
           <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-            Cantidad
+            Cant.
           </th>
-          <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3 text-right text-xssm font-medium text-gray-500 uppercase tracking-wider">
             ($) Costo
           </th>
-          <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3 text-right text-xssm font-medium text-gray-500 uppercase tracking-wider">
+            (%)
+          </th>
+          <th className="px-6 py-3 text-right text-xssm font-medium text-gray-500 uppercase tracking-wider">
             ($) Venta
           </th>
-          <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+          {/* <th className="px-6 py-3 text-right text-xssm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
             ($) May.
-          </th>
-          <th className="px-6 py-3 text-left text-xssm font-medium text-gray-500 uppercase tracking-wider">
+          </th> */}
+          <th className="px-6 py-3 text-center text-xssm font-medium text-gray-500 uppercase tracking-wider">
             Acciones
           </th>
         </tr>
@@ -60,14 +61,14 @@ export const TableProductsManagement = ({
 
           return (
             <tr key={producto.id} className="hover:bg-gray-50">
-              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
-                {producto.id}
-              </td>
               <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900">
                 {producto.codigoReferencia.trim()}
               </td>
               <td className="px-6 py-3">
-                <div className="text-sm font-medium text-gray-900">
+                <div
+                  className="text-sm font-medium text-blue-800 underline duration-300 cursor-pointer hover:text-blue-500"
+                  onClick={() => handleEdit(producto)}
+                >
                   {producto.nombre.trim()}
                 </div>
                 <div className="text-sm text-gray-500">
@@ -92,36 +93,56 @@ export const TableProductsManagement = ({
               <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                 {producto.cantidad}
               </td>
-              <td className="px-6 py-3 font-bold whitespace-nowrap text-base text-gray-900">
+              <td className="px-6 py-3 font-semibold whitespace-nowrap text-right text-base text-gray-900">
                 {proveedorActivo?.precioCosto.toLocaleString("es-AR", {
                   style: "currency",
                   currency: "ARS",
                 })}
               </td>
-              <td className="px-6 py-3 font-bold whitespace-nowrap text-base text-gray-900">
+              <td className="px-6 py-3 whitespace-nowrap text-right text-base text-gray-600">
+                {proveedorActivo?.precioCosto > 0 &&
+                proveedorActivo?.precioVenta > 0
+                  ? Number(
+                      (
+                        (proveedorActivo?.precioVenta /
+                          proveedorActivo?.precioCosto -
+                          1) *
+                        100
+                      ).toFixed(2)
+                    )
+                  : proveedorActivo?.porcentajeGanancia}
+                %
+              </td>
+              <td className="px-6 py-3 font-semibold whitespace-nowrap text-right text-base text-gray-900">
                 {proveedorActivo?.precioVenta.toLocaleString("es-AR", {
                   style: "currency",
                   currency: "ARS",
                 })}
               </td>
-              <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
+              {/* <td className="px-6 py-3 whitespace-nowrap text-right text-sm text-gray-900 hidden md:table-cell">
                 {proveedorActivo?.precioMayorista.toLocaleString("es-AR", {
                   style: "currency",
                   currency: "ARS",
                 })}
-              </td>
-              <td className="px-6 py-3 whitespace-nowrap text-sm font-medium">
-                <div className="flex gap-2">
+              </td> */}
+              <td className="px-6 py-3 whitespace-nowrap text-sm justify-center items-center font-medium">
+                <div className="flex justify-center items-center gap-6">
                   <Button
                     color="blue"
-                    text="Editar"
                     onClick={() => handleEdit(producto)}
-                  />
+                    padding={"px-2 py-1"}
+                    style={"hover:scale-110"}
+                  >
+                    <HiOutlinePencilAlt size={20} />
+                  </Button>
                   <Button
                     color="red"
-                    text="Eliminar"
                     onClick={() => handleDelete(producto.id)}
-                  />
+                    padding={"px-2 py-1"}
+                    style={"hover:scale-110"}
+                  >
+                    <HiOutlineTrash size={20} />
+                  </Button>
                 </div>
               </td>
             </tr>

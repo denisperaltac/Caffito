@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import Loader from "../common/Loader";
 import { Producto } from "../../types/inventory";
 
 interface EditProductProps {
@@ -19,6 +20,17 @@ export const EditProduct = ({
   setCantidadAjuste,
   setShowEditModal,
 }: EditProductProps) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSaving(true);
+      await Promise.resolve(handleSaveEdit(e));
+    } finally {
+      setIsSaving(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
       <div className="relative top-20 mx-auto p-5 border w-3/4 shadow-lg rounded-md bg-white">
@@ -26,7 +38,7 @@ export const EditProduct = ({
           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
             Editar Producto
           </h3>
-          <form onSubmit={handleSaveEdit}>
+          <form onSubmit={onSubmit}>
             <div className="grid grid-cols-2 gap-6">
               {/* Columna Izquierda */}
               <div>
@@ -256,14 +268,24 @@ export const EditProduct = ({
                     <input
                       type="number"
                       step="0.01"
-                      value={
-                        editingProducto.productoProveedors.find(
-                          (pp) => pp.activo
-                        )?.porcentajeGanancia ||
-                        editingProducto.productoProveedors[0]
-                          ?.porcentajeGanancia ||
-                        ""
-                      }
+                      value={(() => {
+                        const proveedorActivo =
+                          editingProducto.productoProveedors.find(
+                            (pp) => pp.activo
+                          ) || editingProducto.productoProveedors[0];
+                        if (!proveedorActivo) return "";
+                        const costo = proveedorActivo.precioCosto;
+                        const venta = proveedorActivo.precioVenta;
+                        if (costo > 0 && venta > 0) {
+                          return Number(((venta / costo - 1) * 100).toFixed(2));
+                        }
+                        return (
+                          proveedorActivo.porcentajeGanancia !== undefined &&
+                          proveedorActivo.porcentajeGanancia !== null
+                            ? proveedorActivo.porcentajeGanancia
+                            : ""
+                        ) as any;
+                      })()}
                       onChange={(e) => {
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
@@ -318,11 +340,15 @@ export const EditProduct = ({
                       if (proveedorActivo) {
                         const nuevoPrecioVenta = Number(e.target.value);
                         const precioCosto = proveedorActivo.precioCosto;
-                        const nuevoPorcentaje = Number(
-                          ((nuevoPrecioVenta / precioCosto - 1) * 100).toFixed(
-                            2
-                          )
-                        );
+                        const nuevoPorcentaje =
+                          precioCosto > 0
+                            ? Number(
+                                (
+                                  (nuevoPrecioVenta / precioCosto - 1) *
+                                  100
+                                ).toFixed(2)
+                              )
+                            : 0;
 
                         setEditingProducto({
                           ...editingProducto,
@@ -393,9 +419,17 @@ export const EditProduct = ({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                disabled={isSaving}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Guardar
+                {isSaving ? (
+                  <span className="flex items-center gap-2">
+                    <Loader size="sm" />
+                    Guardando...
+                  </span>
+                ) : (
+                  "Guardar"
+                )}
               </button>
             </div>
           </form>
