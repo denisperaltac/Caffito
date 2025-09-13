@@ -84,15 +84,15 @@ const getTipoPagoIcon = (nombre: string) => {
 const getTipoPagoColor = (nombre: string) => {
   switch (nombre.toLowerCase().replace(/\s+/g, "")) {
     case "efectivo":
-      return "bg-green-500 hover:bg-green-600";
+      return "bg-green-500 duration-300 hover:bg-green-600 hover:shadow-xl";
     case "tarjetadebito":
-      return "bg-blue-500 hover:bg-blue-600";
+      return "bg-blue-500 duration-300 hover:bg-blue-600 hover:shadow-xl";
     case "tarjetacredito":
-      return "bg-purple-500 hover:bg-purple-600";
+      return "bg-purple-500 duration-300 hover:bg-purple-600 hover:shadow-xl";
     case "cuentacorriente":
-      return "bg-red-500 hover:bg-red-600";
+      return "bg-red-500 duration-300 hover:bg-red-600 hover:shadow-xl";
     default:
-      return "bg-gray-500 hover:bg-gray-600";
+      return "bg-yellow-600 duration-300 hover:bg-yellow-700 hover:shadow-xl";
   }
 };
 
@@ -252,7 +252,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                           !isDisabled && setTipoPagoSeleccionado(tipo.id)
                         }
                         disabled={isDisabled}
-                        className={`flex items-center border-2 border-transparent justify-center px-4 py-2 rounded-lg text-white transition-all duration-200 ${
+                        className={`flex items-center border-4 justify-center px-4 py-2 rounded-lg text-white transition-all duration-200 ${
                           isDisabled
                             ? "bg-gray-400 cursor-not-allowed opacity-50"
                             : tipoPagoSeleccionado === tipo.id
@@ -261,7 +261,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                               )} scale-105 shadow-lg border-black`
                             : `${getTipoPagoColor(
                                 tipo.nombre
-                              )} opacity-70 hover:opacity-100`
+                              )} opacity-70 border-transparent hover:opacity-100 `
                         }`}
                         title={
                           isDisabled
@@ -447,15 +447,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               </div>
             </div>
             <div className="mt-4 w-96">
-              <div className="flex justify-between mb-2">
-                <span className="text-xl">Subtotal:</span>
-                <span className="text-xl">
+              <div className="flex justify-between">
+                <span className="text-lg text-gray-600">Subtotal:</span>
+                <span className="text-lg text-gray-600">
                   {formatCurrency(factura.subtotal)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-xl">Interés:</span>
-                <span className="text-xl">
+                <span className="text-lg text-gray-600">Interés:</span>
+                <span className="text-lg text-gray-600">
                   {formatCurrency(factura.interes)}
                 </span>
               </div>
@@ -465,14 +465,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 </span>
               )}
               <div className="flex justify-between mb-2">
-                <span className="text-xl">Descuento:</span>
-                <span className="text-xl">
+                <span className="text-lg text-gray-600">Descuento:</span>
+                <span className="text-lg text-gray-600">
                   {formatCurrency(factura.descuento)}
                 </span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="text-xl">Total:</span>
-                <span className="text-2xl font-bold">
+                <span className="text-2xl">Total:</span>
+                <span className="text-2xl font-semibold">
                   {formatCurrency(factura.total)}
                 </span>
               </div>

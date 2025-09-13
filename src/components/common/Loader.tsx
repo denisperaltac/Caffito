@@ -1,7 +1,7 @@
 import React from "react";
 
 interface LoaderProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   className?: string;
   color?: "red" | "blue" | "green" | "yellow" | "purple" | "orange";
 }
@@ -15,7 +15,8 @@ const Loader: React.FC<LoaderProps> = ({
     sm: "w-4 h-4",
     md: "w-6 h-6",
     lg: "w-10 h-10",
-    xl: "w-16 h-16",
+    xl: "w-12 h-12",
+    "2xl": "w-16 h-16",
   };
 
   const colorClasses = {

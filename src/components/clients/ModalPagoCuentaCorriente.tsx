@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import Loader from "../common/Loader";
 import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
+import InvoiceDetailsModal from "../cash/InvoiceDetailsModal";
 
 interface ModalPagoCuentaCorrienteProps {
   cliente: Cliente | null;
@@ -41,6 +42,9 @@ export const ModalPagoCuentaCorriente: React.FC<
   const [loadingSaldo, setLoadingSaldo] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [selectedFacturaId, setSelectedFacturaId] = useState<number | null>(
+    null
+  );
   const itemsPerPage = 8;
 
   useEffect(() => {
@@ -183,6 +187,16 @@ export const ModalPagoCuentaCorriente: React.FC<
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleFacturaClick = (facturaId: number) => {
+    setSelectedFacturaId(facturaId);
+  };
+
+  const extractFacturaId = (detalle: string): number | null => {
+    // Buscar patrones como "VENTA 123" o "FACTURA 456"
+    const match = detalle.match(/(VENTA|FACTURA)\s+(\d+)/i);
+    return match ? parseInt(match[2]) : null;
   };
 
   if (!open || !cliente) return null;
@@ -385,7 +399,24 @@ export const ModalPagoCuentaCorriente: React.FC<
                               {movimiento.fechaHora}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-900">
-                              {movimiento.detalle}
+                              {(() => {
+                                const facturaId = extractFacturaId(
+                                  movimiento.detalle
+                                );
+                                if (facturaId) {
+                                  return (
+                                    <button
+                                      onClick={() =>
+                                        handleFacturaClick(facturaId)
+                                      }
+                                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                                    >
+                                      {movimiento.detalle}
+                                    </button>
+                                  );
+                                }
+                                return movimiento.detalle;
+                              })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
                               {movimiento.debe > 0
@@ -451,6 +482,14 @@ export const ModalPagoCuentaCorriente: React.FC<
           </div>
         </div>
       </div>
+
+      {/* Modal de detalles de factura */}
+      {selectedFacturaId && (
+        <InvoiceDetailsModal
+          facturaId={selectedFacturaId}
+          onClose={() => setSelectedFacturaId(null)}
+        />
+      )}
     </div>
   );
 };

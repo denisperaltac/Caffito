@@ -101,7 +101,7 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-4xl h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl w-8/12 max-w-full h-[90vh] overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b max-h-14">
           <h2 className="text-xl font-semibold text-gray-800">
             Factura {factura.id}

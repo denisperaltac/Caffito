@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-} from "react-icons/fa";
+import { FaTimes, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 import { Caja } from "../../services/cajaService";
@@ -282,7 +275,6 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                 <Pagination
                   currentPage={currentPage}
                   totalItems={totalItems}
-                  items={movimientos}
                   setCurrentPage={handlePageChange}
                   totalPages={Math.ceil(totalItems / ITEMS_PER_PAGE)}
                 />
