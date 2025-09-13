@@ -10,6 +10,8 @@ import {
 } from "../types/inventory";
 import axiosInstance from "../config/axiosConfig";
 import { API_URL } from "../constants/api";
+import jsPDF from "jspdf";
+import JsBarcode from "jsbarcode";
 
 // Mock data for demonstration
 const mockProducts: Producto[] = [
@@ -212,79 +214,260 @@ export const inventoryService = {
       precio: number;
       codigo: string;
       marca?: string;
-    }>,
-    typeExport: "PDF" | "HTML" | "XLS" = "XLS"
+    }>
   ): Promise<void> {
     try {
-      console.log(etiquetas);
-      // Enviar códigos originales sin procesar - el backend se encarga del procesamiento
-      const processedEtiquetas = etiquetas.map((etiqueta) => {
-        const codigoOriginal = etiqueta.codigo
-          ? etiqueta.codigo.trim()
-          : "0000000000000";
-
-        console.log(
-          `Enviando código original: "${codigoOriginal}" (${codigoOriginal.length} dígitos)`
-        );
-
-        // Simular el procesamiento que hace el backend para debuggear
-        let codigoProcesado = codigoOriginal;
-        if (codigoProcesado.length !== 13) {
-          codigoProcesado = "000000000000";
-        } else {
-          codigoProcesado = codigoProcesado.substring(0, 12);
-        }
-
-        console.log(
-          `Backend procesará: "${codigoProcesado}" (${codigoProcesado.length} dígitos)`
-        );
-        console.log(`Substring(0,1): "${codigoProcesado.substring(0, 1)}"`);
-        console.log(`Substring(1,6): "${codigoProcesado.substring(1, 6)}"`);
-        console.log(`Substring(6,12): "${codigoProcesado.substring(6, 12)}"`);
-
-        return {
-          ...etiqueta,
-          codigo: codigoProcesado, // Enviar el código ya procesado de 12 dígitos
-          nombre: etiqueta.nombre.trim(),
-          precio: Number(etiqueta.precio),
-          marca: etiqueta.marca ? etiqueta.marca.trim() : "",
-        };
+      // Crear nuevo documento PDF
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
       });
 
-      const response = await axiosInstance.post(
-        `${API_URL}/productos/etiquetas-v2?typeExport=${typeExport}`,
-        processedEtiquetas,
-        {
-          responseType: "blob",
+      // Configuración de la etiqueta
+      const labelWidth = 66; // mm
+      const labelHeight = 40; // mm
+      const margin = 6; // mm
+      const labelsPerRow = 3;
+      const labelsPerPage = 18; // 3x6 para máximo aprovechamiento del espacio
+
+      let currentPage = 0;
+      let labelIndex = 0;
+
+      etiquetas.forEach((etiqueta) => {
+        // Si necesitamos una nueva página
+        if (labelIndex > 0 && labelIndex % labelsPerPage === 0) {
+          doc.addPage();
+          currentPage++;
         }
-      );
 
-      // Crear URL del blob y descargar
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
+        // Calcular posición en la página actual
+        const positionInPage = labelIndex % labelsPerPage;
+        const row = Math.floor(positionInPage / labelsPerRow);
+        const col = positionInPage % labelsPerRow;
 
-      // Determinar extensión del archivo
-      let extension = "xls";
-      switch (typeExport) {
-        case "PDF":
-          extension = "pdf";
-          break;
-        case "HTML":
-          extension = "html";
-          break;
-        case "XLS":
-        default:
-          extension = "xls";
-          break;
-      }
+        const x = margin + col * (labelWidth + 1); // Espacio mínimo entre etiquetas
+        const y = margin + row * (labelHeight + 6); // Espacio mínimo entre filas
 
-      link.setAttribute("download", `etiquetas.${extension}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+        // Dibujar borde de la etiqueta
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.1);
+        doc.rect(x, y, labelWidth, labelHeight);
+
+        // Nombre del producto con manejo de texto largo
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+
+        const maxWidth = labelWidth - 2; // Ancho disponible para el texto
+        const maxCharsPerLine = Math.floor(maxWidth / 2.8); // Aproximadamente 2.5mm por carácter con fuente 7
+        const maxCharsFirstLine = Math.floor(maxCharsPerLine * 1); // Primera línea más corta (70% del máximo)
+
+        let productName = etiqueta.nombre.trim();
+        let lines = [];
+
+        // Función para dividir texto en palabras con límites diferentes por línea
+        const splitTextIntoLines = (
+          text: string,
+          maxCharsFirst: number,
+          maxCharsSecond: number
+        ): string[] => {
+          const words = text.split(" ");
+          const lines: string[] = [];
+          let currentLine = "";
+          let isFirstLine = true;
+
+          for (const word of words) {
+            const currentMaxChars = isFirstLine
+              ? maxCharsFirst
+              : maxCharsSecond;
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+            if (testLine.length <= currentMaxChars) {
+              currentLine = testLine;
+            } else {
+              if (currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+                isFirstLine = false; // Cambiar a segunda línea
+              } else {
+                // Palabra individual muy larga
+                if (word.length > currentMaxChars) {
+                  lines.push(word.substring(0, currentMaxChars - 3) + "...");
+                } else {
+                  lines.push(word);
+                }
+                isFirstLine = false; // Cambiar a segunda línea
+              }
+            }
+          }
+
+          if (currentLine) {
+            lines.push(currentLine);
+          }
+
+          return lines;
+        };
+
+        // Dividir el texto en líneas
+        lines = splitTextIntoLines(
+          productName,
+          maxCharsFirstLine,
+          maxCharsPerLine
+        );
+
+        // Limitar a máximo 2 líneas
+        if (lines.length > 2) {
+          lines = lines.slice(0, 2);
+          // Si la segunda línea es muy larga, cortarla y agregar puntos suspensivos
+          if (lines[1] && lines[1].length > maxCharsPerLine) {
+            lines[1] = lines[1].substring(0, maxCharsPerLine - 3) + "...";
+          }
+        }
+
+        let lineHeight = 4; // Altura entre líneas
+
+        // Dibujar las líneas
+        lines.forEach((line, index) => {
+          doc.text(line, x + 2, y + 5 + index * lineHeight);
+        });
+
+        // Marca del producto
+        if (etiqueta.marca && etiqueta.marca.trim()) {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(102, 102, 102); // Gris oscuro
+
+          // Posicionar la marca después del nombre (que puede ocupar hasta 2 líneas)
+          const marcaY = y + 4.5 + lines.length * lineHeight + 1;
+          doc.text(etiqueta.marca, x + 2, marcaY);
+          doc.setTextColor(0, 0, 0); // Volver a negro
+        }
+
+        // Precio
+        doc.setFontSize(32);
+        doc.setFont("helvetica", "bold");
+        let lineHeightPrecio = 5;
+        if (lines.length === 1) {
+          lineHeightPrecio = 8;
+        }
+        // Calcular posición del precio basada en el contenido anterior
+        let precioY = y + 10 + lines.length * lineHeightPrecio + 1;
+        if (etiqueta.marca && etiqueta.marca.trim()) {
+          precioY += 3; // Espacio adicional si hay marca
+        }
+
+        // Formatear precio: si tiene más de 5 dígitos enteros, no mostrar decimales
+        const parteEntera = Math.floor(etiqueta.precio);
+        const precioFormateado =
+          parteEntera.toString().length > 5
+            ? `$${parteEntera}`
+            : `$${etiqueta.precio.toFixed(2)}`;
+
+        doc.text(precioFormateado, x + labelWidth / 2, precioY, {
+          align: "center",
+        });
+
+        // Generar código de barras
+        const canvas = document.createElement("canvas");
+
+        // Función para generar un código válido según la longitud
+        const generateValidCode = (code: string): string => {
+          const cleanCode = code.trim().replace(/\D/g, ""); // Solo números
+
+          if (cleanCode.length === 13) {
+            return cleanCode; // Ya es EAN13 válido
+          } else if (cleanCode.length === 12) {
+            // Calcular dígito de control para EAN13 (algoritmo correcto)
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+              const digit = parseInt(cleanCode[i]);
+              sum += digit * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            return cleanCode + checkDigit;
+          } else if (cleanCode.length === 10) {
+            // Convertir UPC-A a EAN13 agregando 3 ceros al inicio
+            const paddedCode = "000" + cleanCode;
+            // Calcular dígito de control
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+              const digit = parseInt(paddedCode[i]);
+              sum += digit * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            return paddedCode + checkDigit;
+          } else if (cleanCode.length < 10) {
+            // Rellenar con ceros a la izquierda hasta 10 dígitos y convertir
+            const paddedCode = cleanCode.padStart(10, "0");
+            const eanCode = "000" + paddedCode;
+            // Calcular dígito de control
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+              const digit = parseInt(eanCode[i]);
+              sum += digit * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            return eanCode + checkDigit;
+          } else {
+            // Si es más largo, tomar los primeros 12 dígitos y calcular check digit
+            const truncatedCode = cleanCode.substring(0, 12);
+            let sum = 0;
+            for (let i = 0; i < 12; i++) {
+              const digit = parseInt(truncatedCode[i]);
+              sum += digit * (i % 2 === 0 ? 1 : 3);
+            }
+            const checkDigit = (10 - (sum % 10)) % 10;
+            return truncatedCode + checkDigit;
+          }
+        };
+
+        const validCode = generateValidCode(etiqueta.codigo);
+
+        // Intentar generar código de barras con diferentes formatos
+        try {
+          JsBarcode(canvas, validCode, {
+            format: "EAN13",
+            width: 1,
+            height: 40,
+            displayValue: false,
+          });
+        } catch (error) {
+          // Si EAN13 falla, intentar con CODE128 que es más flexible
+          console.warn(
+            `EAN13 falló para código ${validCode}, usando CODE128:`,
+            error
+          );
+          JsBarcode(canvas, etiqueta.codigo, {
+            format: "CODE128",
+            width: 1,
+            height: 40,
+            displayValue: false,
+          });
+        }
+
+        // Calcular posición del código de barras al final de la etiqueta
+        let barcodeY = precioY + 3; // Espacio después del precio
+
+        // Agregar código de barras al PDF
+        const barcodeDataURL = canvas.toDataURL("image/png");
+        doc.addImage(barcodeDataURL, "PNG", x + 2, barcodeY, labelWidth - 4, 8);
+
+        // Números del código de barras
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        const codeText = validCode; // Usar el código válido generado
+        const numbersY = barcodeY + 11; // Posición después del código de barras
+        doc.text(codeText.substring(0, 1), x + 8, numbersY);
+        doc.text(codeText.substring(1, 6), x + 18, numbersY);
+        doc.text(codeText.substring(6, 12), x + 36, numbersY);
+
+        labelIndex++;
+      });
+
+      // Descargar el PDF
+      doc.save("etiquetas.pdf");
     } catch (error) {
+      console.error("Error generando etiquetas:", error);
       throw error;
     }
   },

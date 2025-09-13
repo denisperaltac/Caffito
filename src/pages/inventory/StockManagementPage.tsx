@@ -105,6 +105,7 @@ const StockManagementPage: React.FC = () => {
     // Asegurarse de que el proveedor activo tenga el porcentaje de ganancia calculado
     const productoConPorcentaje = {
       ...producto,
+      nombre: producto.nombre?.trimEnd() || "", // Quitar espacios en blanco al final del nombre
       productoProveedors: producto.productoProveedors.map((pp) => ({
         ...pp,
         porcentajeGanancia: pp.activo
@@ -233,7 +234,6 @@ const StockManagementPage: React.FC = () => {
           totalPages={totalPages}
           setCurrentPage={setCurrentPage}
           totalItems={totalCount}
-          items={productos}
         />
       )}
 
