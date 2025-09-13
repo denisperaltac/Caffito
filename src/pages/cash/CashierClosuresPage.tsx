@@ -130,6 +130,12 @@ const CashierClosuresPage: React.FC = () => {
     }
   };
 
+  // ✅ Función para actualizar la caja cuando se abre el modal
+  const handleOpenCloseModal = async () => {
+    await checkCurrentCaja(); // Actualizar caja antes de abrir el modal
+    setShowCloseModal(true);
+  };
+
   const renderPagination = () => {
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
     const pages = [];
@@ -238,7 +244,7 @@ const CashierClosuresPage: React.FC = () => {
               onClick={() => setShowOpenModal(true)}
             />
           ) : (
-            <Button color="blue" onClick={() => setShowCloseModal(true)}>
+            <Button color="blue" onClick={handleOpenCloseModal}>
               Cerrar Caja
             </Button>
           )}

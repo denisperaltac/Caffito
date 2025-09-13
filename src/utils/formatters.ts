@@ -1,5 +1,5 @@
 export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-AR", {
+  const formatted = new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     minimumFractionDigits: 2,
@@ -8,6 +8,13 @@ export const formatCurrency = (value: number): string => {
     .format(value)
     .replace("ARS", "")
     .trim();
+
+  // ✅ Mover el signo negativo después del símbolo de peso
+  if (formatted.startsWith("-$")) {
+    return formatted.replace("-$", "$ -");
+  }
+
+  return formatted;
 };
 
 export const formatDate = (date: Date | string): string => {

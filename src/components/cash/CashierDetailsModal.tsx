@@ -8,6 +8,7 @@ import {
 import { FaRegRectangleList } from "react-icons/fa6";
 import { LuTruck } from "react-icons/lu";
 import { Caja } from "../../services/cajaService";
+import { formatCurrency } from "../../utils/formatters";
 
 interface CashierDetailsModalProps {
   caja: Caja;
@@ -28,14 +29,6 @@ const formatDate = (dateString: string | null) => {
       minute: "2-digit",
     }),
   };
-};
-
-const formatCurrency = (amount: number | null) => {
-  if (amount === null) return "-";
-  return amount?.toLocaleString("es-AR", {
-    style: "currency",
-    currency: "ARS",
-  });
 };
 
 const getTipoPagoIcon = (nombre: string) => {
@@ -64,7 +57,7 @@ const getTipoPagoColor = (nombre: string) => {
     case "cuentacorriente":
       return "bg-red-100 text-red-800";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-yellow-100 text-gray-800";
   }
 };
 
@@ -131,7 +124,7 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
             </div>
             <div>
               <p className="text-sm text-gray-500">Cierre</p>
-              <p className="font-medium">{formatCurrency(caja.cierre)}</p>
+              <p className="font-medium">{formatCurrency(caja.cierre || 0)}</p>
             </div>
           </div>
 
@@ -143,7 +136,7 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
                     Tipo Pago
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ingreso
+                    Ingreso sistema
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ingreso declarado
@@ -153,7 +146,7 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white divide-y divide-gray-300">
                 {caja.flujoCajas.map((flujo) => (
                   <tr key={flujo.id}>
                     <td className="px-6 py-2 whitespace-nowrap text-sm">
@@ -175,29 +168,29 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
                     <td className="px-6 py-2 whitespace-nowrap text-sm">
                       <span
                         className={`font-medium ${
-                          flujo.diferencia >= 0
+                          flujo.diferencia <= 0
                             ? "text-green-600"
                             : "text-red-600"
                         }`}
                       >
-                        {formatCurrency(flujo.diferencia)}
+                        {formatCurrency(flujo.diferencia * -1)}
                       </span>
                     </td>
                   </tr>
                 ))}
-                <tr className="bg-gray-50">
-                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                <tr className="bg-gray-300">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
                     Total
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
                     {formatCurrency(totalIngreso)}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
                     {formatCurrency(totalIngresoDeclarado)}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-sm">
+                  <td className="px-6 py-2 whitespace-nowrap text-md">
                     <span
-                      className={`font-bold ${
+                      className={`font-semibold ${
                         totalDiferencia >= 0 ? "text-green-600" : "text-red-600"
                       }`}
                     >

@@ -74,22 +74,10 @@ export const inventoryService = {
     return [];
   },
 
-  async updateStock(stock: Partial<Stock>): Promise<Stock> {
-    // Mock implementation
-    return {} as Stock;
-  },
-
   // Stock Movements
   async getStockMovements(): Promise<StockMovement[]> {
     // Mock implementation
     return [];
-  },
-
-  async createStockMovement(
-    movement: Omit<StockMovement, "id">
-  ): Promise<StockMovement> {
-    // Mock implementation
-    return {} as StockMovement;
   },
 
   // Products
@@ -219,22 +207,52 @@ export const inventoryService = {
   },
 
   async generateEtiquetas(
-    etiquetas: Array<{ nombre: string; precio: number; codigo: string }>,
+    etiquetas: Array<{
+      nombre: string;
+      precio: number;
+      codigo: string;
+      marca?: string;
+    }>,
     typeExport: "PDF" | "HTML" | "XLS" = "XLS"
   ): Promise<void> {
     try {
       console.log(etiquetas);
-      // Procesar códigos como lo hace erpweb
-      const processedEtiquetas = etiquetas.map((etiqueta) => ({
-        ...etiqueta,
-        codigo:
-          etiqueta.codigo.length !== 13
-            ? "000000000000"
-            : etiqueta.codigo.substring(0, 12),
-      }));
+      // Enviar códigos originales sin procesar - el backend se encarga del procesamiento
+      const processedEtiquetas = etiquetas.map((etiqueta) => {
+        const codigoOriginal = etiqueta.codigo
+          ? etiqueta.codigo.trim()
+          : "0000000000000";
+
+        console.log(
+          `Enviando código original: "${codigoOriginal}" (${codigoOriginal.length} dígitos)`
+        );
+
+        // Simular el procesamiento que hace el backend para debuggear
+        let codigoProcesado = codigoOriginal;
+        if (codigoProcesado.length !== 13) {
+          codigoProcesado = "000000000000";
+        } else {
+          codigoProcesado = codigoProcesado.substring(0, 12);
+        }
+
+        console.log(
+          `Backend procesará: "${codigoProcesado}" (${codigoProcesado.length} dígitos)`
+        );
+        console.log(`Substring(0,1): "${codigoProcesado.substring(0, 1)}"`);
+        console.log(`Substring(1,6): "${codigoProcesado.substring(1, 6)}"`);
+        console.log(`Substring(6,12): "${codigoProcesado.substring(6, 12)}"`);
+
+        return {
+          ...etiqueta,
+          codigo: codigoProcesado, // Enviar el código ya procesado de 12 dígitos
+          nombre: etiqueta.nombre.trim(),
+          precio: Number(etiqueta.precio),
+          marca: etiqueta.marca ? etiqueta.marca.trim() : "",
+        };
+      });
 
       const response = await axiosInstance.post(
-        `${API_URL}/productos/etiquetas?typeExport=${typeExport}`,
+        `${API_URL}/productos/etiquetas-v2?typeExport=${typeExport}`,
         processedEtiquetas,
         {
           responseType: "blob",
@@ -267,7 +285,6 @@ export const inventoryService = {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error generating labels:", error);
       throw error;
     }
   },

@@ -4,6 +4,7 @@ import { inventoryService } from "../../services/inventoryService";
 import { Pagination } from "../../components/common/Pagination";
 import { FaFilePdf } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import Loader from "../../components/common/Loader";
 
 interface EtiquetaProducto {
   id: number;
@@ -25,6 +26,7 @@ const LabelsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFin, setFechaFin] = useState("");
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -173,6 +175,19 @@ const LabelsPage: React.FC = () => {
       return;
     }
 
+    setGeneratingPDF(true);
+
+    // Mostrar toast con loader
+    const toastId = toast.loading(
+      `Generando PDF con ${etiquetas.reduce(
+        (sum, et) => sum + et.cantidad,
+        0
+      )} etiquetas...`,
+      {
+        duration: Infinity, // No se cierra automáticamente
+      }
+    );
+
     try {
       // Convertir etiquetas al formato que espera la API
       // Crear múltiples entradas según la cantidad de cada producto
@@ -180,6 +195,7 @@ const LabelsPage: React.FC = () => {
         nombre: string;
         precio: number;
         codigo: string;
+        marca: string;
       }> = [];
 
       etiquetas.forEach((etiqueta) => {
@@ -188,25 +204,32 @@ const LabelsPage: React.FC = () => {
             nombre: etiqueta.nombre,
             precio: etiqueta.precioVenta,
             codigo: etiqueta.codigoReferencia,
+            marca: etiqueta.marca,
           });
         }
       });
 
       await inventoryService.generateEtiquetas(etiquetasFormato, typeExport);
 
+      // Cerrar el toast de loading y mostrar éxito
+      toast.dismiss(toastId);
       toast.success(`Etiquetas generadas exitosamente en formato PDF`);
     } catch (error) {
       console.error("Error generando etiquetas:", error);
+      // Cerrar el toast de loading primero
+      toast.dismiss(toastId);
       toast.error(
         "Error al generar las etiquetas. Por favor, intente nuevamente."
       );
+    } finally {
+      setGeneratingPDF(false);
     }
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <Loader size="xl" />
       </div>
     );
   }
@@ -494,12 +517,22 @@ const LabelsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => generarEtiquetas("PDF")}
-                  disabled={etiquetas.length === 0}
+                  disabled={etiquetas.length === 0 || generatingPDF}
                   className="bg-blue-600 flex flex-row items-center justify-center gap-2 w-full hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                  title="Exportar a PDF"
+                  title={generatingPDF ? "Generando PDF..." : "Exportar a PDF"}
                 >
-                  <FaFilePdf />
-                  PDF ({etiquetas.reduce((sum, et) => sum + et.cantidad, 0)})
+                  {generatingPDF ? (
+                    <>
+                      <Loader size="sm" />
+                      Generando...
+                    </>
+                  ) : (
+                    <>
+                      <FaFilePdf />
+                      PDF ({etiquetas.reduce((sum, et) => sum + et.cantidad, 0)}
+                      )
+                    </>
+                  )}
                 </button>
               </div>
             </div>

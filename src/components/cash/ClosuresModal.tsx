@@ -51,7 +51,7 @@ const getTipoPagoColor = (nombre: string) => {
     case "cuentacorriente":
       return "bg-red-500 hover:bg-red-600";
     default:
-      return "bg-gray-500 hover:bg-gray-600";
+      return "bg-yellow-500 hover:bg-yellow-600";
   }
 };
 
@@ -122,6 +122,7 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
 
   if (!showCloseModal) return null;
 
+  console.log(totalAmount - currentCaja?.ingreso);
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-[600px]">
@@ -171,15 +172,15 @@ const ClosuresModal: React.FC<ClosuresModalProps> = ({
         </div>
 
         <div className="border-t pt-4 mb-6 flex flex-col justify-end w-full items-end text-2xl">
-          <p className="text-2xl text-black font-bold">
+          <p className="text-2xl text-black font-semibold">
             Total: {formatCurrency(totalAmount)}
           </p>
           <p className="text-base text-gray-500">
             Esperado: {formatCurrency(currentCaja?.ingreso || 0)}
           </p>
           <p
-            className={`text-base ${
-              totalAmount - (currentCaja?.ingreso || 0) > 0
+            className={`text-lg font-semibold ${
+              (totalAmount - currentCaja?.ingreso || 0) > -2000
                 ? "text-green-500"
                 : "text-red-500"
             }`}

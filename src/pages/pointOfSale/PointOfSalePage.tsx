@@ -485,11 +485,7 @@ const PointOfSalePage: React.FC = () => {
   const handleFinalizar = async () => {
     try {
       setLoadingBtn(true);
-      console.log("Valores actuales:", {
-        tipoComprobanteId,
-        tipoDocumentoId,
-        nroDocumento,
-      });
+      setError(null); // Limpiar errores previos
 
       const facturaConComprobante = {
         ...factura,
@@ -514,9 +510,29 @@ const PointOfSalePage: React.FC = () => {
       setTipoPagoSeleccionado("");
       setDineroRecibido("");
       resetComprobanteId();
-    } catch (err) {
-      setError("Error al guardar la factura");
+    } catch (err: any) {
+      setLoadingBtn(false); // ✅ Importante: reactivar el botón
       console.error(err);
+
+      // Determinar el mensaje de error específico
+      let errorMessage =
+        "Error al guardar la factura. Intenta nuevamente o cambia a tipo de comprobante ticket.";
+
+      // Verificar si es un error relacionado con AFIP
+      if (
+        errorMessage.includes("AFIP") ||
+        errorMessage.includes("CAE") ||
+        errorMessage.includes("Caja no iniciada") ||
+        errorMessage.includes("rechazada")
+      ) {
+        errorMessage =
+          "Error con AFIP: " +
+          errorMessage +
+          ". Intenta nuevamente o cambia a tipo de comprobante ticket.";
+      }
+
+      setError(errorMessage);
+      toast.error(errorMessage); // ✅ Mostrar toast con el error
     }
   };
 
@@ -551,9 +567,14 @@ const PointOfSalePage: React.FC = () => {
       } else {
         setClientSearchTerm("");
       }
-    } catch (error) {
+    } catch (error: any) {
+      setLoadingBtn(false);
       console.error("Error al imprimir la factura:", error);
-      toast.error("Error al imprimir la factura");
+
+      let errorMessage =
+        "Error al imprimir la factura, puedes intentar nuevamente.";
+
+      toast.error(errorMessage);
     }
   };
 
@@ -834,8 +855,15 @@ const PointOfSalePage: React.FC = () => {
   return (
     <div className="container min-w-[95vw] mx-auto px-2 h-[85vh] flex flex-col font-['Poppins']">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3">
-          {error}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3 flex justify-between items-center">
+          <span className="flex-1">{error}</span>
+          <button
+            onClick={() => setError(null)}
+            className="ml-3 text-red-700 hover:text-red-900 font-bold text-lg"
+            title="Cerrar mensaje de error"
+          >
+            ×
+          </button>
         </div>
       )}
 
