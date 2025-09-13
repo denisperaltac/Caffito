@@ -167,9 +167,7 @@ const LabelsPage: React.FC = () => {
     }
   };
 
-  const generarEtiquetas = async (
-    typeExport: "PDF" | "HTML" | "XLS" = "XLS"
-  ) => {
+  const generarEtiquetas = async () => {
     if (etiquetas.length === 0) {
       toast.error("No hay productos seleccionados para generar etiquetas");
       return;
@@ -179,18 +177,17 @@ const LabelsPage: React.FC = () => {
 
     // Mostrar toast con loader
     const toastId = toast.loading(
-      `Generando PDF con ${etiquetas.reduce(
+      `Generando PDF desde frontend con ${etiquetas.reduce(
         (sum, et) => sum + et.cantidad,
         0
       )} etiquetas...`,
       {
-        duration: Infinity, // No se cierra automáticamente
+        duration: Infinity,
       }
     );
 
     try {
-      // Convertir etiquetas al formato que espera la API
-      // Crear múltiples entradas según la cantidad de cada producto
+      // Convertir etiquetas al formato que espera la función frontend
       const etiquetasFormato: Array<{
         nombre: string;
         precio: number;
@@ -209,11 +206,11 @@ const LabelsPage: React.FC = () => {
         }
       });
 
-      await inventoryService.generateEtiquetas(etiquetasFormato, typeExport);
+      await inventoryService.generateEtiquetas(etiquetasFormato);
 
       // Cerrar el toast de loading y mostrar éxito
       toast.dismiss(toastId);
-      toast.success(`Etiquetas generadas exitosamente en formato PDF`);
+      toast.success(`Etiquetas generadas exitosamente`);
     } catch (error) {
       console.error("Error generando etiquetas:", error);
       // Cerrar el toast de loading primero
@@ -513,27 +510,53 @@ const LabelsPage: React.FC = () => {
 
               <div>
                 <div className="text-sm text-gray-600 font-medium flex flex-col space-x-3">
-                  Exportar Etiquetas:
+                  Generar Etiquetas:
                 </div>
-                <button
-                  onClick={() => generarEtiquetas("PDF")}
-                  disabled={etiquetas.length === 0 || generatingPDF}
-                  className="bg-blue-600 flex flex-row items-center justify-center gap-2 w-full hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:cursor-not-allowed"
-                  title={generatingPDF ? "Generando PDF..." : "Exportar a PDF"}
-                >
-                  {generatingPDF ? (
-                    <>
-                      <Loader size="sm" />
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <FaFilePdf />
-                      PDF ({etiquetas.reduce((sum, et) => sum + et.cantidad, 0)}
-                      )
-                    </>
-                  )}
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => generarEtiquetas()}
+                    disabled={etiquetas.length === 0 || generatingPDF}
+                    className="bg-green-600 flex flex-row items-center justify-center gap-2 w-full hover:bg-green-700 disabled:bg-gray-300 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                    title={generatingPDF ? "Generando PDF..." : "Generar a PDF"}
+                  >
+                    {generatingPDF ? (
+                      <>
+                        <Loader size="sm" />
+                        Generando...
+                      </>
+                    ) : (
+                      <>
+                        <FaFilePdf />
+                        PDF (
+                        {etiquetas.reduce((sum, et) => sum + et.cantidad, 0)})
+                      </>
+                    )}
+                  </button>
+
+                  {/* <button
+                    onClick={() => generarEtiquetas("PDF")}
+                    disabled={etiquetas.length === 0 || generatingPDF}
+                    className="bg-blue-600 flex flex-row items-center justify-center gap-2 w-full hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:cursor-not-allowed"
+                    title={
+                      generatingPDF
+                        ? "Generando PDF..."
+                        : "Exportar a PDF (Backend)"
+                    }
+                  >
+                    {generatingPDF ? (
+                      <>
+                        <Loader size="sm" />
+                        Generando...
+                      </>
+                    ) : (
+                      <>
+                        <FaFilePdf />
+                        PDF Backend (
+                        {etiquetas.reduce((sum, et) => sum + et.cantidad, 0)})
+                      </>
+                    )}
+                  </button> */}
+                </div>
               </div>
             </div>
           </div>

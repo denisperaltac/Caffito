@@ -49,14 +49,31 @@ export const EditProduct = ({
                   <input
                     type="text"
                     value={editingProducto.nombre}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Limitar a máximo 50 caracteres
+                      if (value.length > 50) {
+                        value = value.substring(0, 50);
+                      }
                       setEditingProducto({
                         ...editingProducto,
-                        nombre: e.target.value,
-                      })
-                    }
+                        nombre: value,
+                      });
+                    }}
+                    onBlur={(e) => {
+                      // Solo quitar espacios al final cuando el usuario termine de escribir
+                      let value = e.target.value.trimEnd();
+                      setEditingProducto({
+                        ...editingProducto,
+                        nombre: value,
+                      });
+                    }}
+                    maxLength={50}
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <div className="text-xs text-gray-500 mt-1">
+                    {editingProducto.nombre.length}/50 caracteres
+                  </div>
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">
