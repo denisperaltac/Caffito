@@ -23,6 +23,8 @@ export interface ProductoProveedor {
   precioVenta: number;
   precioMayorista: number;
   porcentajeGanancia: number;
+  cantidad: number;
+  pesototal: number | null;
   puntoDeVentaId: number;
   puntoDeVentaNombre: string;
   proveedor: {

@@ -18,6 +18,7 @@ interface CajaRenglon {
   tipoPagoId: number;
   tipoMovimientoNombre: string;
   tipoPagoNombre: string;
+  fechaCreacion?: string | null;
 }
 
 interface CashierMovementsModalProps {
@@ -31,6 +32,19 @@ const formatCurrency = (amount: number) => {
   return amount?.toLocaleString("es-AR", {
     style: "currency",
     currency: "ARS",
+  });
+};
+
+const formatDateTime = (iso?: string | null) => {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString("es-AR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -164,6 +178,9 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                         {getSortIcon("id")}
                       </div>
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100">
+                      <div className="flex items-center">Fecha / Hora</div>
+                    </th>
                     <th
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort("ingreso")}
@@ -234,6 +251,9 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                     <tr key={movimiento.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {movimiento.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDateTime(movimiento.fechaCreacion)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(movimiento.ingreso)}

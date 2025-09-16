@@ -8,6 +8,7 @@ interface GetProductosParams {
   nombre?: string;
   categoriaId?: string;
   codigoReferencia?: string;
+  sort?: string[];
 }
 
 export interface ProductsResponse {
@@ -30,18 +31,37 @@ export const productService = {
         nombre,
         categoriaId,
         codigoReferencia,
+        sort,
       } = params;
+
+      const requestParams: any = {
+        page,
+        size,
+        "nombre.contains": nombre,
+        categoriaId,
+        "codigoReferencia.contains": codigoReferencia,
+      };
+
+      // Construir la URL manualmente para controlar el formato de los parámetros sort
+      const baseParams = new URLSearchParams();
+
+      // Agregar parámetros básicos
+      baseParams.append("page", page.toString());
+      baseParams.append("size", size.toString());
+      if (nombre) baseParams.append("nombre.contains", nombre);
+      if (categoriaId) baseParams.append("categoriaId", categoriaId);
+      if (codigoReferencia)
+        baseParams.append("codigoReferencia.contains", codigoReferencia);
+
+      // Agregar parámetros de sort
+      if (sort && sort.length > 0) {
+        sort.forEach((sortParam) => {
+          baseParams.append("sort", sortParam);
+        });
+      }
+
       const response = await axiosInstance.get<Producto[]>(
-        `${API_URL}/productos`,
-        {
-          params: {
-            page,
-            size,
-            "nombre.contains": nombre,
-            categoriaId,
-            "codigoReferencia.contains": codigoReferencia,
-          },
-        }
+        `${API_URL}/productos?${baseParams.toString()}`
       );
       return response.data;
     } catch (error) {
