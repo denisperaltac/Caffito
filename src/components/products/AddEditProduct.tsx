@@ -490,6 +490,56 @@ export const AddEditProduct = ({
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
+                <div className="mb-4 flex gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                      {editingProduct.pesable ? "Peso" : "Cantidad"}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={
+                        editingProduct.pesable
+                          ? editingProduct.productoProveedors[0]?.peso || ""
+                          : editingProduct.productoProveedors[0]?.cantidad || ""
+                      }
+                      onChange={(e) => {
+                        const nuevoPesoOCantidad = Number(e.target.value);
+                        setEditingProduct({
+                          ...editingProduct,
+                          productoProveedors: [
+                            {
+                              ...editingProduct.productoProveedors[0],
+                              peso: editingProduct.pesable
+                                ? nuevoPesoOCantidad
+                                : null,
+                              cantidad: editingProduct.pesable
+                                ? 0
+                                : nuevoPesoOCantidad,
+                            },
+                          ],
+                        });
+                      }}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <label className="flex items-end space-x-2 h-16">
+                    <input
+                      type="checkbox"
+                      checked={editingProduct.pesable || false}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          pesable: e.target.checked,
+                        })
+                      }
+                      className="form-checkbox h-8 w-8 text-blue-600"
+                    />
+                    <span className="text-gray-700 text-md font-bold cursor-pointer">
+                      Producto Pesable
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -585,24 +635,6 @@ export const AddEditProduct = ({
                         </option>
                       ))}
                     </select>
-                  </div>
-                  <div className="mb-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={editingProduct.pesable || false}
-                        onChange={(e) =>
-                          setEditingProduct({
-                            ...editingProduct,
-                            pesable: e.target.checked,
-                          })
-                        }
-                        className="form-checkbox h-5 w-5 text-blue-600"
-                      />
-                      <span className="text-gray-700 text-sm font-bold">
-                        Producto Pesable
-                      </span>
-                    </label>
                   </div>
                 </div>
               </div>

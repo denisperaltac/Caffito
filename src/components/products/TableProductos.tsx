@@ -1,12 +1,15 @@
 import Loader from "../common/Loader";
 import { Producto } from "../../types/inventory";
 import { Button } from "../common/Button";
+import { SortableHeader } from "../common/SortableHeader";
 
 interface ProductsTableProps {
   products: Producto[];
   isSearching: boolean;
   handleEdit: (product: Producto) => void;
   handleDelete: (id: number) => void;
+  currentSort: { field: string; direction: "asc" | "desc" } | null;
+  onSort: (field: string) => void;
 }
 
 export const TableProductos = ({
@@ -14,6 +17,8 @@ export const TableProductos = ({
   isSearching,
   handleEdit,
   handleDelete,
+  currentSort,
+  onSort,
 }: ProductsTableProps) => {
   return (
     <div className="bg-white rounded-lg overflow-auto h-[55vh]">
@@ -26,24 +31,52 @@ export const TableProductos = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                <SortableHeader
+                  sortKey="id"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                  className="hidden md:table-cell"
+                >
                   ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="codigoReferencia"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                >
                   Código Referencia
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="nombre"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                >
                   Nombre
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="categoriaId"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                  className="hidden md:table-cell"
+                >
                   Categoría
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="marcaId"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                  className="hidden md:table-cell"
+                >
                   Marca
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                </SortableHeader>
+                <SortableHeader
+                  sortKey="cantidad"
+                  currentSort={currentSort}
+                  onSort={onSort}
+                  className="hidden md:table-cell"
+                >
                   Cantidad
-                </th>
+                </SortableHeader>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   ($) Costo
                 </th>
