@@ -299,7 +299,7 @@ const CuentasCorrientes = () => {
                       {getSortIcon("ingreso")}
                     </div>
                   </th>
-                  <th
+                  {/* <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("egreso")}
                   >
@@ -326,7 +326,7 @@ const CuentasCorrientes = () => {
                       Tipo Movimiento
                       {getSortIcon("tipoMovimientoNombre")}
                     </div>
-                  </th>
+                  </th> */}
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("facturaId")}
@@ -359,26 +359,26 @@ const CuentasCorrientes = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {movimientos?.map((movimiento) => (
                   <tr key={movimiento.id} className="hover:bg-gray-50">
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {/* <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                         {movimiento.id}
                       </td> */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {formatDateTime(movimiento.fechaCreacion)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(movimiento.ingreso)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {/* <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(movimiento.egreso)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {movimiento.descripcion?.trim()}
                     </td>
 
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {movimiento.tipoMovimientoNombre?.trim()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    </td> */}
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {movimiento.facturaId ? (
                         <button
                           onClick={() =>
@@ -392,10 +392,10 @@ const CuentasCorrientes = () => {
                         "-"
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {movimiento.clienteNombre?.trim() || "-"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900">
                       {movimiento.tipoPagoNombre ? (
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-white text-xs font-medium transition-colors duration-200 ${getTipoPagoColor(

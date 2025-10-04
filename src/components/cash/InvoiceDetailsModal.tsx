@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import {
+  FaTimes,
+  FaMoneyBillWave,
+  FaCreditCard,
+  FaExchangeAlt,
+} from "react-icons/fa";
+import { FaRegRectangleList } from "react-icons/fa6";
+import { LuTruck } from "react-icons/lu";
 import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 
@@ -67,6 +74,39 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const normalizePaymentName = (nombre?: string) =>
+  (nombre || "").toLowerCase().replace(/\s+/g, "");
+
+const getTipoPagoIcon = (nombre?: string) => {
+  switch (normalizePaymentName(nombre)) {
+    case "efectivo":
+      return <FaMoneyBillWave />;
+    case "tarjetadebito":
+      return <FaCreditCard />;
+    case "tarjetacredito":
+      return <FaExchangeAlt />;
+    case "cuentacorriente":
+      return <FaRegRectangleList />;
+    default:
+      return <LuTruck />;
+  }
+};
+
+const getTipoPagoColor = (nombre?: string) => {
+  switch (normalizePaymentName(nombre)) {
+    case "efectivo":
+      return "bg-green-500 hover:bg-green-600";
+    case "tarjetadebito":
+      return "bg-blue-500 hover:bg-blue-600";
+    case "tarjetacredito":
+      return "bg-purple-500 hover:bg-purple-600";
+    case "cuentacorriente":
+      return "bg-red-500 hover:bg-red-600";
+    default:
+      return "bg-yellow-500 hover:bg-yellow-600";
+  }
+};
+
 const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
   facturaId,
   onClose,
@@ -101,7 +141,7 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-8/12 max-w-full h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-full h-[90vh] overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b max-h-14">
           <h2 className="text-xl font-semibold text-gray-800">
             Factura {factura.id}
@@ -129,7 +169,7 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">Fecha Creación</p>
                   <p className="font-medium">
@@ -137,20 +177,42 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Punto De Venta</p>
-                  <p className="font-medium">{factura.puntoDeVentaNombre}</p>
-                </div>
-                <div>
                   <p className="text-sm text-gray-500">Cliente</p>
                   <p className="font-medium">{factura.clienteNombreApellido}</p>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-500">Tipos de Pago</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {factura.pagos.map((pago) => (
+                      <span
+                        key={pago.id}
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-white text-xs font-medium transition-colors duration-200 ${getTipoPagoColor(
+                          pago.tipoPagoNombre
+                        )}`}
+                      >
+                        <span className="mr-1">
+                          {getTipoPagoIcon(pago.tipoPagoNombre)}
+                        </span>
+                        <span>{pago.tipoPagoNombre.trim()}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {/* <div>
+                  <p className="text-sm text-gray-500">Punto De Venta</p>
+                  <p className="font-medium">{factura.puntoDeVentaNombre}</p>
+                </div>
+               
                 <div>
                   <p className="text-sm text-gray-500">Promoción</p>
                   <p className="font-medium">
                     {factura.promocionNombre || "-"}
                   </p>
-                </div>
+                </div> */}
               </div>
+
+              {/* Línea separadora */}
+              <hr className="border-gray-200" />
 
               <div>
                 <h3 className="text-lg font-semibold mb-2">Detalle</h3>
@@ -204,6 +266,9 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                 </table>
               </div>
 
+              {/* Línea separadora */}
+              <hr className="border-gray-200" />
+
               <div>
                 <h3 className="text-lg font-semibold mb-2">Pagos</h3>
                 <table className="min-w-full divide-y divide-gray-200">
@@ -238,7 +303,10 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                 </table>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-right">
+              {/* Línea separadora */}
+              <hr className="border-gray-200" />
+
+              <div className="grid grid-cols-4 gap-4 text-right">
                 <div>
                   <p className="text-sm text-gray-500">Subtotal</p>
                   <p className="font-medium">
