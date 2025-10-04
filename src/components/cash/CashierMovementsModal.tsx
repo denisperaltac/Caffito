@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { FaTimes, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import {
+  FaTimes,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaMoneyBillWave,
+  FaCreditCard,
+  FaExchangeAlt,
+} from "react-icons/fa";
+import { FaRegRectangleList } from "react-icons/fa6";
+import { LuTruck } from "react-icons/lu";
 import axiosInstance from "../../config/axiosConfig";
 import { API_URL } from "../../constants/api";
 import { Caja } from "../../services/cajaService";
@@ -48,6 +58,39 @@ const formatDateTime = (iso?: string | null) => {
   });
 };
 
+const normalizePaymentName = (nombre?: string) =>
+  (nombre || "").toLowerCase().replace(/\s+/g, "");
+
+const getTipoPagoIcon = (nombre?: string) => {
+  switch (normalizePaymentName(nombre)) {
+    case "efectivo":
+      return <FaMoneyBillWave />;
+    case "tarjetadebito":
+      return <FaCreditCard />;
+    case "tarjetacredito":
+      return <FaExchangeAlt />;
+    case "cuentacorriente":
+      return <FaRegRectangleList />;
+    default:
+      return <LuTruck />;
+  }
+};
+
+const getTipoPagoColor = (nombre?: string) => {
+  switch (normalizePaymentName(nombre)) {
+    case "efectivo":
+      return "bg-green-500 hover:bg-green-600";
+    case "tarjetadebito":
+      return "bg-blue-500 hover:bg-blue-600";
+    case "tarjetacredito":
+      return "bg-purple-500 hover:bg-purple-600";
+    case "cuentacorriente":
+      return "bg-red-500 hover:bg-red-600";
+    default:
+      return "bg-yellow-500 hover:bg-yellow-600";
+  }
+};
+
 interface SortConfig {
   key: string;
   direction: "asc" | "desc";
@@ -79,7 +122,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
       setLoading(true);
       const [movimientosResponse, countResponse] = await Promise.all([
         axiosInstance.get<CajaRenglon[]>(
-          `${API_URL}/caja-renglons?page=${currentPage}&size=${ITEMS_PER_PAGE}&cajaId.equals=${caja.id}&sort=${sortConfig.key},${sortConfig.direction}`
+          `${API_URL}/caja-renglons?page=${currentPage}&size=${ITEMS_PER_PAGE}&cajaId.equals=${caja.id}&sort=${sortConfig.key},${sortConfig.direction}&sort=id`
         ),
         axiosInstance.get<number>(
           `${API_URL}/caja-renglons/count?cajaId.equals=${caja.id}`
@@ -138,7 +181,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-11/12 max-w-6xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
             Movimientos de Caja #{caja.id}
@@ -159,7 +202,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
           </div>
         )}
 
-        <div className="p-4 overflow-auto h-[calc(90vh-12rem)]">
+        <div className="p-4 overflow-auto h-[90%]">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <Loader size="lg" />
@@ -169,7 +212,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th
+                    {/* <th
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort("id")}
                     >
@@ -177,7 +220,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                         ID
                         {getSortIcon("id")}
                       </div>
-                    </th>
+                    </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hover:bg-gray-100">
                       <div className="flex items-center">Fecha / Hora</div>
                     </th>
@@ -208,15 +251,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                         {getSortIcon("descripcion")}
                       </div>
                     </th>
-                    <th
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort("cajaId")}
-                    >
-                      <div className="flex items-center">
-                        Caja
-                        {getSortIcon("cajaId")}
-                      </div>
-                    </th>
+
                     <th
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort("tipoMovimientoNombre")}
@@ -249,9 +284,9 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                 <tbody className="bg-white divide-y divide-gray-200">
                   {movimientos?.map((movimiento) => (
                     <tr key={movimiento.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {movimiento.id}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDateTime(movimiento.fechaCreacion)}
                       </td>
@@ -264,9 +299,7 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {movimiento.descripcion?.trim()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {movimiento.cajaId}
-                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {movimiento.tipoMovimientoNombre?.trim()}
                       </td>
@@ -285,7 +318,20 @@ const CashierMovementsModal: React.FC<CashierMovementsModalProps> = ({
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {movimiento.tipoPagoNombre?.trim()}
+                        {movimiento.tipoPagoNombre ? (
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-white text-xs font-medium transition-colors duration-200 ${getTipoPagoColor(
+                              movimiento.tipoPagoNombre
+                            )}`}
+                          >
+                            <span className="mr-1">
+                              {getTipoPagoIcon(movimiento.tipoPagoNombre)}
+                            </span>
+                            <span>{movimiento.tipoPagoNombre.trim()}</span>
+                          </span>
+                        ) : (
+                          "-"
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import InventarioMenu from "./InventarioMenu";
 import EstadisticasMenu from "./EstadisticasMenu";
+import ClientesMenu from "./ClientesMenu";
 import AccountMenu from "./AccountMenu";
 import logo from "../assets/LogoCaffito.png";
 import {
   FaHome,
   FaShoppingCart,
   FaCog,
-  FaUsers,
   FaMoneyBillWave,
   FaBars,
   FaTimes,
@@ -73,10 +73,8 @@ const Navigation: React.FC = () => {
                   <FaShoppingCart className="w-5 h-5" />
                   <span className="hidden xl:inline">Ventas</span>
                 </Link>
-                <Link to="/clientes" className={getNavItemClass("/clientes")}>
-                  <FaUsers className="w-5 h-5" />
-                  <span className="hidden xl:inline">Clientes</span>
-                </Link>
+
+                <ClientesMenu getNavItemClass={getNavItemClass} />
                 <Link to="/gastos" className={getNavItemClass("/gastos")}>
                   <FaMoneyBillWave className="w-5 h-5" />
                   <span className="hidden xl:inline">Gastos</span>
@@ -153,14 +151,12 @@ const Navigation: React.FC = () => {
               <FaShoppingCart className="w-5 h-5" />
               <span>Ventas</span>
             </Link>
-            <Link
-              to="/clientes"
-              className={getNavItemClass("/clientes")}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <FaUsers className="w-5 h-5" />
-              <span>Clientes</span>
-            </Link>
+
+            <ClientesMenu
+              getNavItemClass={getNavItemClass}
+              showText
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
             <Link
               to="/gastos"
               className={getNavItemClass("/gastos")}

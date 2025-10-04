@@ -30,6 +30,7 @@ import ExpensesPage from "./pages/expenses/ExpensesPage";
 import Stadistics from "./pages/stadistics/Stadistics";
 import ProductStatistics from "./pages/stadistics/ProductStatistics";
 import { Home } from "./pages/Home";
+import CuentasCorrientes from "./components/clients/CuentasCorrientes";
 
 // Componente para proteger rutas
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -189,6 +190,14 @@ const AppContent: React.FC = () => {
             element={
               <PrivateRoute>
                 <ClientsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/clientes/cuentas-corrientes"
+            element={
+              <PrivateRoute>
+                <CuentasCorrientes />
               </PrivateRoute>
             }
           />
