@@ -14,7 +14,6 @@ import {
   FaToggleOn,
   FaCog,
   FaEye,
-  FaBook,
   FaMoneyBillWave,
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
@@ -156,23 +155,23 @@ export const TableClients = ({
         <tbody className="bg-white divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
           {clientes?.map((cliente: Cliente) => (
             <tr key={cliente.id} className="hover:bg-gray-50">
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 {cliente.id}
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 {cliente.nombre.trim()}
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 {cliente.apellido.trim()}
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 {cliente.tipoDocumentoNombre
                   ? `${cliente.tipoDocumentoNombre} - ${
                       cliente.numeroDocumento?.trim() || "-"
                     }`
                   : cliente.numeroDocumento?.trim() || "-"}
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center space-x-4">
                   <div
                     className="flex items-center space-x-1 md:gap-2"
@@ -204,14 +203,14 @@ export const TableClients = ({
                   <Tooltip id={`empleado-${cliente.id}`} />
                 </div>
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-1 whitespace-nowrap text-sm text-gray-900">
                 {cliente.activo ? (
                   <FaCheck className="w-5 h-5 text-green-600" />
                 ) : (
                   <FaTimes className="w-5 h-5 text-red-600" />
                 )}
               </td>
-              <td className="px-6 py-2 lg:py-3 whitespace-nowrap text-right text-sm font-medium">
+              <td className="px-6 py-1 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end space-x-2">
                   <button
                     onClick={() => handleView(cliente)}

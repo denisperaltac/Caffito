@@ -45,7 +45,7 @@ export const Pagination = ({
 
   return (
     <>
-      <div className="flex items-center justify-center space-x-2 mt-4">
+      <div className="flex items-center justify-center space-x-2 mt-2">
         <button
           onClick={() => handlePageChange(0)}
           disabled={currentPage === 0}
@@ -103,7 +103,7 @@ export const Pagination = ({
         </button>
       </div>
 
-      <div className="mt-2 text-center text-sm text-gray-500">
+      <div className="mt-0 text-center text-sm text-gray-500">
         <p>
           Mostrando {currentPage * 10 + 1} a{" "}
           {Math.min((currentPage + 1) * 10, totalItems)} de {totalItems}{" "}
