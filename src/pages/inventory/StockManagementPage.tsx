@@ -119,16 +119,18 @@ const StockManagementPage: React.FC = () => {
     setCantidadAjuste(0);
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm("¿Está seguro que desea eliminar este producto?")) {
-      try {
-        await productService.deleteProduct(id);
-        // Recargar la página actual después de eliminar
-        loadProductos();
-      } catch (err) {
-        setError("Error al eliminar el producto");
-        console.error(err);
-      }
+  const handleDelete = async (id: number, productName?: string) => {
+    try {
+      await productService.deleteProduct(id);
+      // Recargar la página actual después de eliminar
+      loadProductos();
+      toast.success(
+        `Producto "${productName || "eliminado"}" eliminado correctamente`,
+        { duration: 5000 }
+      );
+    } catch (err) {
+      toast.error("Error al eliminar el producto", { duration: 5000 });
+      console.error(err);
     }
   };
 
@@ -136,6 +138,14 @@ const StockManagementPage: React.FC = () => {
     e.preventDefault();
     if (!editingProducto) return;
     console.log("editingProducto", editingProducto);
+
+    // Capturar precio original de la lista de productos cargados
+    const productoOriginal = productos.find((p) => p.id === editingProducto.id);
+    const proveedorOriginal =
+      productoOriginal?.productoProveedors.find((pp) => pp.activo) ||
+      productoOriginal?.productoProveedors[0];
+    const precioAnterior = proveedorOriginal?.precioVenta || 0;
+
     try {
       // Asegurarse de que el proveedor activo tenga un porcentaje de ganancia
       const productoConPorcentaje = {
@@ -152,7 +162,17 @@ const StockManagementPage: React.FC = () => {
         cantidadAjuste
       );
 
-      toast.success("Producto actualizado correctamente");
+      // Capturar precio nuevo para el toast
+      const precioNuevo =
+        productoConPorcentaje.productoProveedors.find((pp) => pp.activo)
+          ?.precioVenta ||
+        productoConPorcentaje.productoProveedors[0]?.precioVenta ||
+        0;
+
+      toast.success(
+        `Producto "${editingProducto.nombre}" actualizado correctamente\nPrecio: $${precioAnterior} => $${precioNuevo}`,
+        { duration: 5000 }
+      );
 
       loadProductos();
 
@@ -160,7 +180,7 @@ const StockManagementPage: React.FC = () => {
       setEditingProducto(null);
       setCantidadAjuste(0);
     } catch (err) {
-      setError("Error al actualizar el producto");
+      toast.error("Error al actualizar el producto", { duration: 5000 });
       console.error(err);
     }
   };
@@ -186,7 +206,7 @@ const StockManagementPage: React.FC = () => {
       )}
 
       {/* Filtros */}
-      <div className="mb-6">
+      <div className="mb-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative">
             <input

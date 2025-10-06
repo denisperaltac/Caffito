@@ -21,6 +21,7 @@ export const EditProduct = ({
   setShowEditModal,
 }: EditProductProps) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [manualPercentage, setManualPercentage] = useState<string>("");
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +215,7 @@ export const EditProduct = ({
                     <button
                       type="button"
                       onClick={() => {
+                        setManualPercentage("");
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
@@ -250,6 +252,7 @@ export const EditProduct = ({
                     <button
                       type="button"
                       onClick={() => {
+                        setManualPercentage("");
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
@@ -285,30 +288,36 @@ export const EditProduct = ({
                     <input
                       type="number"
                       step="0.01"
-                      value={(() => {
-                        const proveedorActivo =
-                          editingProducto.productoProveedors.find(
-                            (pp) => pp.activo
-                          ) || editingProducto.productoProveedors[0];
-                        if (!proveedorActivo) return "";
-                        const costo = proveedorActivo.precioCosto;
-                        const venta = proveedorActivo.precioVenta;
-                        if (costo > 0 && venta > 0) {
-                          return Number(((venta / costo - 1) * 100).toFixed(2));
-                        }
-                        return (
-                          proveedorActivo.porcentajeGanancia !== undefined &&
-                          proveedorActivo.porcentajeGanancia !== null
-                            ? proveedorActivo.porcentajeGanancia
-                            : ""
-                        ) as any;
-                      })()}
+                      value={
+                        manualPercentage ||
+                        (() => {
+                          const proveedorActivo =
+                            editingProducto.productoProveedors.find(
+                              (pp) => pp.activo
+                            ) || editingProducto.productoProveedors[0];
+                          if (!proveedorActivo) return "";
+                          const costo = proveedorActivo.precioCosto;
+                          const venta = proveedorActivo.precioVenta;
+                          if (costo > 0 && venta > 0) {
+                            return Number(
+                              ((venta / costo - 1) * 100).toFixed(2)
+                            );
+                          }
+                          return (
+                            proveedorActivo.porcentajeGanancia !== undefined &&
+                            proveedorActivo.porcentajeGanancia !== null
+                              ? proveedorActivo.porcentajeGanancia
+                              : ""
+                          ) as any;
+                        })()
+                      }
                       onChange={(e) => {
+                        setManualPercentage(e.target.value);
                         const proveedorActivo =
                           editingProducto.productoProveedors.find(
                             (pp) => pp.activo
                           ) || editingProducto.productoProveedors[0];
-                        if (proveedorActivo) {
+                        if (proveedorActivo && e.target.value !== "") {
                           const nuevoPorcentaje = Number(e.target.value);
                           const precioCosto = proveedorActivo.precioCosto;
                           const nuevoPrecioVenta = Number(
@@ -331,6 +340,9 @@ export const EditProduct = ({
                               ),
                           });
                         }
+                      }}
+                      onBlur={() => {
+                        setManualPercentage("");
                       }}
                       className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
