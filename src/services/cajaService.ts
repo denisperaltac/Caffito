@@ -113,4 +113,41 @@ export const cajaService = {
       throw error;
     }
   },
+
+  updateCaja: async (caja: Caja): Promise<Caja> => {
+    try {
+      const response = await axiosInstance.put<Caja>(`${API_URL}/cajas`, caja);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar la caja:", error);
+      throw error;
+    }
+  },
+
+  getTiposPago: async (): Promise<{ id: number; nombre: string }[]> => {
+    try {
+      const response = await axiosInstance.get<
+        { id: number; nombre: string }[]
+      >(`${API_URL}/tipo-pagos`);
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener tipos de pago:", error);
+      throw error;
+    }
+  },
+
+  updateFlujoCaja: async (flujoCaja: FlujoCaja): Promise<FlujoCaja> => {
+    try {
+      console.log("Sending to API:", flujoCaja);
+      const response = await axiosInstance.put<FlujoCaja>(
+        `${API_URL}/flujo-cajas`,
+        flujoCaja
+      );
+      console.log("API Response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar flujo de caja:", error);
+      throw error;
+    }
+  },
 };

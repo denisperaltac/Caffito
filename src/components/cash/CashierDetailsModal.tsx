@@ -178,23 +178,23 @@ const CashierDetailsModal: React.FC<CashierDetailsModalProps> = ({
                     </td>
                   </tr>
                 ))}
-                <tr className="bg-gray-300">
-                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
+                <tr className="bg-gray-200">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-semibold text-gray-900">
                     Total
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-semibold text-gray-900">
                     {formatCurrency(totalIngreso)}
                   </td>
-                  <td className="px-6 py-2 whitespace-nowrap text-md font-bold text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-md font-semibold text-gray-900">
                     {formatCurrency(totalIngresoDeclarado)}
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-md">
                     <span
                       className={`font-semibold ${
-                        totalDiferencia >= 0 ? "text-green-600" : "text-red-600"
+                        totalDiferencia <= 0 ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {formatCurrency(totalDiferencia)}
+                      {formatCurrency(totalDiferencia * -1)}
                     </span>
                   </td>
                 </tr>

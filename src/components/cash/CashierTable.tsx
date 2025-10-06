@@ -5,6 +5,7 @@ import {
   FaEye,
   FaExchangeAlt,
   FaTrash,
+  FaEdit,
 } from "react-icons/fa";
 import { Tooltip } from "react-tooltip";
 import { Caja } from "../../services/cajaService";
@@ -15,6 +16,7 @@ interface CashierTableProps {
   onView: (caja: Caja) => void;
   onMovements: (caja: Caja) => void;
   onDelete: (caja: Caja) => void;
+  onEdit: (caja: Caja) => void;
 }
 
 const formatDate = (dateString: string | null) => {
@@ -33,11 +35,28 @@ const formatDate = (dateString: string | null) => {
   };
 };
 
+const formatDateWithDayName = (dateString: string | null) => {
+  if (!dateString) return { date: "-", time: "-" };
+  const date = new Date(dateString);
+  return {
+    date: date.toLocaleDateString("es-AR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+    time: date.toLocaleTimeString("es-AR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
+};
+
 const getShift = (dateString: string | null) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
   const hour = date.getHours();
-  return hour < 12 ? "M" : "T";
+  return hour < 14 ? "M" : "T";
 };
 
 const formatCurrency = (amount: number | null) => {
@@ -53,6 +72,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
   onView,
   onMovements,
   onDelete,
+  onEdit,
 }) => {
   return (
     <div className="min-w-[95vw]">
@@ -63,17 +83,13 @@ const CashierTable: React.FC<CashierTableProps> = ({
               User
             </th>
             <th className="px-4 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-              Ubicación
+              Info
             </th>
-            <th className="px-4 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-              Estado
-            </th>
+
             <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-              Fecha inicio
+              Fecha inicio / cierre
             </th>
-            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-              Fecha cierre
-            </th>
+
             <th className="px-4 py-2 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
               Turno
             </th>
@@ -101,62 +117,88 @@ const CashierTable: React.FC<CashierTableProps> = ({
                 {caja.userLogin}
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                <div
-                  data-tooltip-id={`punto-venta-${caja.id}`}
-                  data-tooltip-content={caja.puntoDeVentaNombre}
-                  className="flex items-center justify-center"
-                >
-                  <span className="text-gray-500 hover:text-gray-700 cursor-help">
-                    <FaStore className="w-6 h-6" />
-                  </span>
-                </div>
-                <Tooltip id={`punto-venta-${caja.id}`} />
-              </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                <div
-                  data-tooltip-id={`estado-${caja.id}`}
-                  data-tooltip-content={
-                    caja.enproceso ? "En proceso" : "Cerrado"
-                  }
-                  className="flex items-center justify-center"
-                >
-                  {caja.enproceso ? (
-                    <span className="cursor-help">
-                      <Loader size="md" />
+                <div className="flex items-center justify-center gap-2">
+                  <div
+                    data-tooltip-id={`punto-venta-${caja.id}`}
+                    data-tooltip-content={caja.puntoDeVentaNombre}
+                    className="flex items-center justify-center"
+                  >
+                    <span className="text-gray-500 hover:text-gray-700 cursor-help">
+                      <FaStore className="w-6 h-6" />
                     </span>
-                  ) : (
-                    <span className="text-green-500 hover:text-green-600 cursor-help">
-                      <FaCheckCircle size={24} />
-                    </span>
-                  )}
+                  </div>
+                  <Tooltip id={`punto-venta-${caja.id}`} />
+                  <div
+                    data-tooltip-id={`estado-${caja.id}`}
+                    data-tooltip-content={
+                      caja.enproceso ? "En proceso" : "Cerrado"
+                    }
+                    className="flex items-center justify-center"
+                  >
+                    {caja.enproceso ? (
+                      <span className="cursor-help">
+                        <Loader size="md" />
+                      </span>
+                    ) : (
+                      <span className="text-green-500 hover:text-green-600 cursor-help">
+                        <FaCheckCircle size={24} />
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <Tooltip id={`estado-${caja.id}`} />
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                <div className="flex flex-col">
-                  <span>{formatDate(caja.fecha).date}</span>
-                  <span className="text-gray-500 text-sm">
-                    {formatDate(caja.fecha).time}
-                  </span>
+
+              <td className="px-4 py-2 whitespace-nowrap uppercase text-sm text-gray-900">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    {formatDate(caja.fecha).date ===
+                    formatDate(caja.fechaCierre).date ? (
+                      // Same day - show with day name
+                      <>
+                        <span>{formatDateWithDayName(caja.fecha).date}</span>
+                        <span className="text-gray-500 text-sm gap-2">
+                          {formatDate(caja.fecha).time} -{" "}
+                          {formatDate(caja.fechaCierre).time}
+                        </span>
+                      </>
+                    ) : (
+                      // Different days - show closure date with day name
+                      <>
+                        <span>
+                          {
+                            formatDateWithDayName(
+                              caja.fechaCierre || caja.fecha
+                            ).date
+                          }
+                        </span>
+                        <span className="text-gray-500 text-sm gap-2">
+                          {caja.fechaCierre && (
+                            <>{formatDate(caja.fecha).date} </>
+                          )}
+                          {formatDate(caja.fecha).time}
+                          {caja.fechaCierre && (
+                            <>
+                              - {formatDate(caja.fechaCierre).date}{" "}
+                              {formatDate(caja.fechaCierre).time}
+                            </>
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </td>
-              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                <div className="flex flex-col">
-                  <span>{formatDate(caja.fechaCierre).date}</span>
-                  <span className="text-gray-500 text-sm">
-                    {formatDate(caja.fechaCierre).time}
-                  </span>
-                </div>
-              </td>
+
               <td className="px-4 py-3 whitespace-nowrap text-sm flex text-center justify-center text-gray-900">
                 <div
                   className={`font-medium text-white flex items-center justify-center p-2 w-8 h-8 rounded-md ${
-                    getShift(caja.fecha) === "M"
+                    getShift(caja.fechaCierre || caja.fecha) === "M"
                       ? "bg-sky-600"
                       : "bg-orange-600"
                   }`}
                 >
-                  {getShift(caja.fecha)}
+                  {getShift(caja.fechaCierre || caja.fecha)}
                 </div>
               </td>
               <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -171,7 +213,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
               <td className="px-4 py-2 whitespace-nowrap text-sm">
                 {caja.cierre ? (
                   <span
-                    className={`font-medium ${
+                    className={`font-semibold ${
                       caja.cierre - caja.ingreso >= 0
                         ? "text-green-600"
                         : "text-red-600"
@@ -205,7 +247,19 @@ const CashierTable: React.FC<CashierTableProps> = ({
                   </button>
                   <Tooltip id={`mov-${caja.id}`} />
 
-                  <button
+                  {/* {!caja.enproceso && (
+                    <button
+                      onClick={() => onEdit(caja)}
+                      className="p-2 text-orange-600 hover:text-orange-800 hover:bg-orange-50 rounded-md transition-colors"
+                      data-tooltip-id={`edit-${caja.id}`}
+                      data-tooltip-content="Editar cierre"
+                    >
+                      <FaEdit className="w-6 h-6" />
+                    </button>
+                  )} */}
+                  {!caja.enproceso && <Tooltip id={`edit-${caja.id}`} />}
+
+                  {/* <button
                     onClick={() => onDelete(caja)}
                     className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
                     data-tooltip-id={`delete-${caja.id}`}
@@ -213,7 +267,7 @@ const CashierTable: React.FC<CashierTableProps> = ({
                   >
                     <FaTrash className="w-6 h-6" />
                   </button>
-                  <Tooltip id={`delete-${caja.id}`} />
+                  <Tooltip id={`delete-${caja.id}`} /> */}
                 </div>
               </td>
             </tr>

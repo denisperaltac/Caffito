@@ -6,6 +6,7 @@ import { API_URL } from "../../constants/api";
 import CashierDetailsModal from "../../components/cash/CashierDetailsModal";
 import CashierMovementsModal from "../../components/cash/CashierMovementsModal";
 import CashierTable from "../../components/cash/CashierTable";
+import EditCashierModal from "../../components/cash/EditCashierModal";
 import Loader from "../../components/common/Loader";
 import ClosuresModal from "../../components/cash/ClosuresModal";
 import { Button } from "../../components/common/Button";
@@ -21,6 +22,7 @@ const CashierClosuresPage: React.FC = () => {
   const [selectedCaja, setSelectedCaja] = useState<Caja | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showMovementsModal, setShowMovementsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [currentCaja, setCurrentCaja] = useState<Caja | null>(null);
   const [showOpenModal, setShowOpenModal] = useState(false);
   const [showCloseModal, setShowCloseModal] = useState(false);
@@ -83,6 +85,18 @@ const CashierClosuresPage: React.FC = () => {
   const handleMovements = (caja: Caja) => {
     setSelectedCaja(caja);
     setShowMovementsModal(true);
+  };
+
+  const handleEdit = (caja: Caja) => {
+    setSelectedCaja(caja);
+    setShowEditModal(true);
+  };
+
+  const handleEditSave = async (updatedCaja: Caja) => {
+    // Update the caja in the list
+    setCajas(cajas.map((c) => (c.id === updatedCaja.id ? updatedCaja : c)));
+    setShowEditModal(false);
+    setSelectedCaja(null);
   };
 
   const handleDelete = async (caja: Caja) => {
@@ -263,6 +277,7 @@ const CashierClosuresPage: React.FC = () => {
           onView={handleView}
           onMovements={handleMovements}
           onDelete={handleDelete}
+          onEdit={handleEdit}
         />
       </div>
 
@@ -282,6 +297,15 @@ const CashierClosuresPage: React.FC = () => {
         <CashierMovementsModal
           caja={selectedCaja}
           onClose={() => setShowMovementsModal(false)}
+        />
+      )}
+
+      {showEditModal && selectedCaja && (
+        <EditCashierModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          caja={selectedCaja}
+          onSave={handleEditSave}
         />
       )}
 
